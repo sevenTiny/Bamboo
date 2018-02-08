@@ -7,7 +7,9 @@
   <ItemGroup>
     <Folder Include="Configuration\" />
     <Folder Include="Logging\" />
-    <Folder Include="Storage\" />
+    <Folder Include="Cache\" />
+    <Folder Include="Validation\" />
+    <Folder Include="Bankinate\" />
   </ItemGroup>
 
 </Project>

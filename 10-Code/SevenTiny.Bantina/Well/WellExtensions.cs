@@ -14,7 +14,7 @@
  *********************************************************/
 using System;
 
-namespace SevenTiny.Bantina.IOC
+namespace SevenTiny.Bantina.Well
 {
     /// <summary>
     /// Well Extensions,use for register service more sample
@@ -29,7 +29,7 @@ namespace SevenTiny.Bantina.IOC
         /// <returns></returns>
         public static IWell RegisterService<T>(this IWell well) where T : class
         {
-            well.Register(new Lazy<T>().Value);
+            well.Register(new Lazy<T>(true).Value);//thread safe
             return well;
         }
 
@@ -55,7 +55,7 @@ namespace SevenTiny.Bantina.IOC
         /// <returns></returns>
         public static IWell RegisterService<T>(this IWell well,Func<T> func) where T : class
         {
-            well.Register(new Lazy<T>(func).Value);
+            well.Register(new Lazy<T>(func, true).Value);//thread safe
             return well;
         }
     }

@@ -16,7 +16,7 @@ using SevenTiny.Bantina.Extensions;
 using System;
 using System.Collections.Generic;
 
-namespace SevenTiny.Bantina.IOC
+namespace SevenTiny.Bantina.Well
 {
     /// <summary>
     /// Well register use this
@@ -35,13 +35,7 @@ namespace SevenTiny.Bantina.IOC
 
         #region Singleton
         private static readonly Well _instance = new Well();
-        public static Well Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
+        public static Well Instance=> _instance;
         #endregion
 
         #region Register

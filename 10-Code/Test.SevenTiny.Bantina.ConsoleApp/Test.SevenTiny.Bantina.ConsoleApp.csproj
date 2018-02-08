@@ -5,4 +5,9 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
+    <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
+  </ItemGroup>
+
 </Project>

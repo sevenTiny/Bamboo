@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: sevenTiny
  * Address: Earth
- * Create: 2017-12-03 21:21:02
- * Update: 2017-12-03 21:21:02
+ * Create: 2017-12-03 22:42:07
+ * Update: 2017-12-03 22:42:07
  * E-mail: dong@qixiao.me | wd8622088@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -12,21 +12,15 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-
-namespace SevenTiny.Bantina.IOC
+namespace SevenTiny.Bantina.Well
 {
-    /// <summary>
-    /// object inject type when well starting
-    /// </summary>
-    public enum InjectType
+    public interface IWell
     {
-        /// <summary>
-        /// inject when well start
-        /// </summary>
-        Initialize = 0,
-        /// <summary>
-        /// lazy load when resolve
-        /// </summary>
-        LazyLoad = 1
+        void Register<TEntity>(TEntity entity) where TEntity : class;
+        TEntity Resolve<TEntity>() where TEntity : class;
+    }
+    public interface IWell<T> where T : class
+    {
+
     }
 }
