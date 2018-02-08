@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
     <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
   </ItemGroup>
