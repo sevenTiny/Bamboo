@@ -15,7 +15,6 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
             Console.WriteLine("Hello World!");
 
-
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
         }
