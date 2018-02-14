@@ -4,7 +4,7 @@
  * Author: sevenTiny
  * Address: Earth
  * Create: 2017-12-03 21:12:20
- * Update: 2017-12-03 21:12:20
+ * Modify: 2018-2-13 21:10:58
  * E-mail: dong@qixiao.me | wd8622088@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -32,6 +32,20 @@ namespace SevenTiny.Bantina.Extensions
                 dictionary[key] = value;
             else
                 dictionary.Add(key, value);
+        }
+        /// <summary>
+        /// Safe get,if key exist,return value. if not return default(TValue).
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue SafeGet<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+        {
+            if (dictionary.ContainsKey(key))
+                return dictionary[key];
+            return default(TValue);
         }
     }
 }
