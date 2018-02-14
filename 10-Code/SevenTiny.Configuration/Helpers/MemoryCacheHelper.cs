@@ -14,7 +14,7 @@
  *********************************************************/
 using Microsoft.Extensions.Caching.Memory;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Configuration.Helpers
 {
     public class MemoryCacheHelper
     {

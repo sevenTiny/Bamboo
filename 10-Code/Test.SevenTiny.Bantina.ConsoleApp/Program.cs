@@ -16,7 +16,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             //bankinate要改成restful风格接口和实现
             for (int i = 0; i < 10; i++)
             {
-                Console.WriteLine(Test.Get("li"));
+                Console.WriteLine(TestConfig.Get("li"));
             }
             
 
