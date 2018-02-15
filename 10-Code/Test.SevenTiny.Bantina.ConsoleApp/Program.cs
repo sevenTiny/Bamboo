@@ -2,6 +2,7 @@
 using System;
 using Test.SevenTiny.Bantina.Model;
 using static Newtonsoft.Json.JsonConvert;
+using _content = SevenTiny.Bantina.Internationalization.InternationalContext;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
@@ -12,19 +13,16 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             //School school = new School();
             //Console.WriteLine(SerializeObject(school));
 
-            //bankinate要改成restful风格接口和实现
-            var timespan = StopwatchHelper.Caculate(() =>
-            {
-                for (int i = 0; i < 100; i++)
-                {
-                    Console.WriteLine(TestConfig.Get("li"));
-                }
-            });
-            Console.WriteLine(timespan.TotalMilliseconds);
-
-
-
-
+            //var timespan = StopwatchHelper.Caculate(() =>
+            //{
+            //    for (int i = 0; i < 100; i++)
+            //    {
+            //        Console.WriteLine(TestConfig.Get("li"));
+            //    }
+            //});
+            //Console.WriteLine(timespan.TotalMilliseconds);
+            var result = _content.Content(1001);
+            Console.WriteLine(result);
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();

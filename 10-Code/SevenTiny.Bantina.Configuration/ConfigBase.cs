@@ -143,7 +143,7 @@ namespace SevenTiny.Bantina.Configuration
         /// <summary>
         /// modify time expired time
         /// </summary>
-        private static TimeSpan modifyTimeExpiredTime = TimeSpan.FromMinutes(3);
+        private static TimeSpan modifyTimeExpiredTime = TimeSpan.FromMinutes(10);
         /// <summary>
         /// modify cache code
         /// </summary>
