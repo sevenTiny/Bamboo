@@ -21,7 +21,6 @@ namespace SevenTiny.Bantina.Configuration
     public class ConfigClassAttribute : Attribute
     {
         public string Name { get; set; }
-        public string ConnectionString { get; set; }
 
         public static string GetName(Type type)
         {
@@ -32,19 +31,6 @@ namespace SevenTiny.Bantina.Configuration
                 if (!string.IsNullOrEmpty(name))
                 {
                     return name;
-                }
-            }
-            return default(string);
-        }
-        public static string GetConnectionString(Type type)
-        {
-            var configAttr = type.GetCustomAttributes(typeof(ConfigClassAttribute), true).FirstOrDefault();
-            if (configAttr != null)
-            {
-                string connectionString = (configAttr as ConfigClassAttribute).ConnectionString;
-                if (!string.IsNullOrEmpty(connectionString))
-                {
-                    return connectionString;
                 }
             }
             return default(string);

@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
-    [ConfigClass(Name ="Test",ConnectionString = "server=101.201.66.247;Port=39901;database=SevenTinyConfig;uid=root;pwd=CYj(9yyz*8;Allow User Variables=true;")]
+    [ConfigClass(Name ="Test")]
     public class TestConfig : ConfigBase<TestConfig>
     {
         [ConfigProperty(Name ="key")]
