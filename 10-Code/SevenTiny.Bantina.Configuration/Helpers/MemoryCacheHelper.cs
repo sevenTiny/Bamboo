@@ -14,7 +14,7 @@
  *********************************************************/
 using Microsoft.Extensions.Caching.Memory;
 
-namespace SevenTiny.Configuration.Helpers
+namespace SevenTiny.Bantina.Configuration.Helpers
 {
     public class MemoryCacheHelper
     {

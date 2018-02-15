@@ -1,4 +1,4 @@
-﻿using SevenTiny.Configuration;
+﻿using SevenTiny.Bantina.Configuration;
 using System.Linq;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp

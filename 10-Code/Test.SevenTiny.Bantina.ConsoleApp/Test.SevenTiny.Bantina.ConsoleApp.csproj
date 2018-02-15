@@ -10,8 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SevenTiny.Bantina.Cache\SevenTiny.Bantina.Cache.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
-    <ProjectReference Include="..\SevenTiny.Configuration\SevenTiny.Configuration.csproj" />
     <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
   </ItemGroup>
 

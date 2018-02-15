@@ -1,8 +1,6 @@
 ﻿using System;
 using Test.SevenTiny.Bantina.Model;
 using static Newtonsoft.Json.JsonConvert;
-using SevenTiny.Configuration;
-using Microsoft.Extensions.Configuration;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {

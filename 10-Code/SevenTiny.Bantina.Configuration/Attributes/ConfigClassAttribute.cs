@@ -15,7 +15,7 @@
 using System;
 using System.Linq;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Bantina.Configuration
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
     public class ConfigClassAttribute : Attribute

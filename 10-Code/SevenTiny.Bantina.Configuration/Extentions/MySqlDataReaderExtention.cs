@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace SevenTiny.Configuration.Extentions
+namespace SevenTiny.Bantina.Configuration.Extentions
 {
     public static class MySqlDataReaderExtention
     {

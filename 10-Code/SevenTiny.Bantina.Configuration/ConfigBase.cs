@@ -13,13 +13,13 @@
  * Thx , Best Regards ~
  *********************************************************/
 using MySql.Data.MySqlClient;
-using SevenTiny.Configuration.Extentions;
-using SevenTiny.Configuration.Helpers;
+using SevenTiny.Bantina.Configuration.Extentions;
+using SevenTiny.Bantina.Configuration.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Bantina.Configuration
 {
     public abstract class ConfigBase<T> where T : class
     {

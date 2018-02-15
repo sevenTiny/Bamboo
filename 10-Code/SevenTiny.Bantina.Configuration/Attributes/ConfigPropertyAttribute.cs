@@ -16,7 +16,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Bantina.Configuration
 {
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
     public class ConfigPropertyAttribute : Attribute
