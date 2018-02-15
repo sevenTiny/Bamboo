@@ -13,8 +13,9 @@
  * Thx , Best Regards ~
  *********************************************************/
 using Microsoft.Extensions.Caching.Memory;
+using System;
 
-namespace SevenTiny.Configuration.Helpers
+namespace SevenTiny.Bantina.Configuration.Helpers
 {
     public class MemoryCacheHelper
     {
@@ -23,6 +24,11 @@ namespace SevenTiny.Configuration.Helpers
         public static bool Put<TKey,TValue>(TKey key, TValue value)
         {
             _cache.Set(key, value);
+            return true;
+        }
+        public static bool Put<TKey, TValue>(TKey key, TValue value,TimeSpan expiredTimeMinutes)
+        {
+            _cache.Set(key, value, expiredTimeMinutes);
             return true;
         }
         public static TValue Get<TKey,TValue>(TKey key)

@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: 7tiny
  * Address: Earth
- * Create: 2018-02-14 20:00:37
- * Modify: 2018-02-14 20:00:37
+ * Create: 2018-02-14 20:00:43
+ * Modify: 2018-02-14 20:00:43
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -14,21 +14,20 @@
  *********************************************************/
 using System;
 using System.Linq;
-using System.Reflection;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Bantina.Configuration
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
-    public class ConfigPropertyAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+    public class ConfigClassAttribute : Attribute
     {
         public string Name { get; set; }
 
-        public static string GetName(PropertyInfo property)
+        public static string GetName(Type type)
         {
-            var attr = property.GetCustomAttributes(typeof(ConfigPropertyAttribute), true).FirstOrDefault();
-            if (attr != null)
+            var configAttr = type.GetCustomAttributes(typeof(ConfigClassAttribute), true).FirstOrDefault();
+            if (configAttr != null)
             {
-                string name = (attr as ConfigPropertyAttribute).Name;
+                string name = (configAttr as ConfigClassAttribute).Name;
                 if (!string.IsNullOrEmpty(name))
                 {
                     return name;

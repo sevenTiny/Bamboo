@@ -12,14 +12,16 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
-using SevenTiny.Configuration.Extentions;
-using SevenTiny.Configuration.Helpers;
+using SevenTiny.Bantina.Configuration.Extensions;
+using SevenTiny.Bantina.Configuration.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
-namespace SevenTiny.Configuration
+namespace SevenTiny.Bantina.Configuration
 {
     public abstract class ConfigBase<T> where T : class
     {
@@ -64,16 +66,13 @@ namespace SevenTiny.Configuration
         }
 
         /// <summary>
-        /// GetConnection Method:Must be override!
-        /// </summary>
-        /// <returns></returns>
-        public virtual string GetConnectionString() => throw new NotImplementedException("GetConnection must be override and provide connection string!");
-
-        /// <summary>
         /// Configs List
         /// </summary>
         protected static IEnumerable<T> Configs => GetConfigs();
 
+        /// <summary>
+        /// Connection string
+        /// </summary>
         private static string ConnectionString
         {
             get
@@ -83,42 +82,47 @@ namespace SevenTiny.Configuration
                 {
                     return _connectionString;
                 }
-                //get connection string from attribute
-                _connectionString = ConfigClassAttribute.GetConnectionString(tType);
-                if (!string.IsNullOrEmpty(_connectionString))
+                //get connection string from config file
+                string baseDirectory = AppContext.BaseDirectory;
+                IConfiguration config = new ConfigurationBuilder()
+                .SetBasePath(baseDirectory)//current base directory
+                .AddJsonFile("appsettings.json", false, true)
+                .Build();
+
+                string connectionString = config.GetConnectionString("SevenTinyConfig");
+
+                if (!string.IsNullOrEmpty(connectionString))
                 {
-                    return _connectionString;
+                    return _connectionString = connectionString;
                 }
-                //get connnection string from 'GetConnectionString' method
-                _connectionString = tType.GetMethod("GetConnectionString").Invoke(System.Activator.CreateInstance<T>(), null).ToString();
-                return _connectionString;
+
+                throw new FileNotFoundException($"'appsettings.json' not find in {baseDirectory}, if existed,maybe'SevenTinyConfig' node has not exist in the 'appsettings.json'.");
             }
         }
 
+        private static int configCacheKey = $"SevenTinyConfig-{_tableName}".GetHashCode();
+        private static int versionCacheKey = $"SevenTinyConfig-Version-{_tableName}".GetHashCode();
         /// <summary>
         /// Get Configs
         /// </summary>
         /// <returns></returns>
         private static IEnumerable<T> GetConfigs()
         {
-            int cacheConfigCode = $"SevenTinyConfig-{_tableName}".GetHashCode();
-            int cacheVersionCode = $"SevenTinyConfigVersion-{_tableName}".GetHashCode();
-
             //modifyTime reagard as config version
             DateTime configDbVersion = ModifyTime;
             //if memory cache exist
-            if (MemoryCacheHelper.Exist(cacheVersionCode) && MemoryCacheHelper.Exist(cacheVersionCode))
+            if (MemoryCacheHelper.Exist(versionCacheKey) && MemoryCacheHelper.Exist(versionCacheKey))
             {
                 //if cache version >= db version,cache is available.
-                if (Convert.ToDateTime(MemoryCacheHelper.Get<int, DateTime>(cacheVersionCode)) >= configDbVersion)
+                if (Convert.ToDateTime(MemoryCacheHelper.Get<int, DateTime>(versionCacheKey)) >= configDbVersion)
                 {
-                    return MemoryCacheHelper.Get<int, IEnumerable<T>>(cacheConfigCode);
+                    return MemoryCacheHelper.Get<int, IEnumerable<T>>(configCacheKey);
                 }
             }
             //if memory cache not exist
             var dbConfig = GetConfigsFromDb();
-            MemoryCacheHelper.Put(cacheConfigCode, dbConfig);
-            MemoryCacheHelper.Put(cacheVersionCode, configDbVersion);
+            MemoryCacheHelper.Put(configCacheKey, dbConfig);
+            MemoryCacheHelper.Put(versionCacheKey, configDbVersion);
             return dbConfig;
         }
 
@@ -137,6 +141,14 @@ namespace SevenTiny.Configuration
         }
 
         /// <summary>
+        /// modify time expired time
+        /// </summary>
+        private static TimeSpan modifyTimeExpiredTime = TimeSpan.FromMinutes(10);
+        /// <summary>
+        /// modify cache code
+        /// </summary>
+        private static int modifyTimeCacheKey = $"SevenTinyConfigModifyTime".GetHashCode();
+        /// <summary>
         /// Query modifyTime of config table,means config version
         /// </summary>
         /// <returns></returns>
@@ -144,19 +156,38 @@ namespace SevenTiny.Configuration
         {
             get
             {
+                //get from cache
+                if (MemoryCacheHelper.Exist(modifyTimeCacheKey))
+                {
+                    var modifyTimeCacheValue = MemoryCacheHelper.Get<int, DateTime>(modifyTimeCacheKey);
+                    if (modifyTimeCacheValue != null)
+                    {
+                        return modifyTimeCacheValue;
+                    }
+                }
+                //get from db
                 using (var conn = new MySqlConnection(ConnectionString))
                 {
                     using (var cmd = new MySqlCommand())
                     {
                         string sql = $"select UPDATE_TIME from information_schema.TABLES where TABLE_SCHEMA='{TABLE_SCHEMA}' and information_schema.TABLES.TABLE_NAME='{_tableName}';";
                         SqlCommandPrepare(conn, cmd, sql);
-                        var result = cmd.ExecuteScalar();
-                        return Convert.ToDateTime(result);
+                        var result = Convert.ToDateTime(cmd.ExecuteScalar());
+                        //sotrage into cache
+                        MemoryCacheHelper.Put(modifyTimeCacheKey,result,modifyTimeExpiredTime);
+                        return result;
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// sql prepare command
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="cmd"></param>
+        /// <param name="commandText"></param>
+        /// <param name="parameters"></param>
         private static void SqlCommandPrepare(MySqlConnection conn, MySqlCommand cmd, string commandText, params MySqlParameter[] parameters)
         {
             if (conn.State == System.Data.ConnectionState.Closed)
