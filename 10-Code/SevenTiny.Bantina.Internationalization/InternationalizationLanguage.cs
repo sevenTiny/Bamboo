@@ -14,7 +14,7 @@
  *********************************************************/
 namespace SevenTiny.Bantina.Internationalization
 {
-    public enum InternationalizationLanguageEnum
+    public enum InternationalizationLanguage
     {
         english = 1,
         chinese = 2

@@ -4,4 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
+  </ItemGroup>
+
 </Project>
