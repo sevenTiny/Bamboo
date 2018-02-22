@@ -21,29 +21,29 @@ namespace SevenTiny.Bantina.Internationalization.Configs
     [ConfigClass(Name = "Internationalization_Chinese")]
     public class Internationalization_Chinese_Config : ConfigBase<Internationalization_Chinese_Config>
     {
-        public int Code { get; set; }
+        public int ID { get; set; }
+        public string Code { get; set; }
         public string Content { get; set; }
         public string Description { get; set; }
 
-        private static Dictionary<int, string> dictionary;
+        private static Dictionary<int, Internationalization_Chinese_Config> dictionary;
 
         private static void Initial()
         {
-            dictionary = new Dictionary<int, string>();
+            dictionary = new Dictionary<int, Internationalization_Chinese_Config>();
             foreach (var item in Configs)
             {
-                dictionary.AddOrUpdate(item.Code, item.Content);
+                dictionary.AddOrUpdate(item.ID, item);
             }
         }
-
-        public static string Get(int code)
+        public static Internationalization_Chinese_Config Get(int id)
         {
-            if (dictionary != null && dictionary.ContainsKey(code))
+            if (dictionary != null && dictionary.ContainsKey(id))
             {
-                return dictionary[code];
+                return dictionary[id];
             }
             Initial();
-            return dictionary.SafeGet(code);
+            return dictionary.SafeGet(id);
         }
     }
 }

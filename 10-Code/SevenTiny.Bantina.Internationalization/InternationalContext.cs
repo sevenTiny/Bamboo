@@ -25,9 +25,9 @@ namespace SevenTiny.Bantina.Internationalization
             switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
             {
                 case (int)InternationalizationLanguage.english:
-                    return Internationalization_English_Config.Get(code);
+                    return Internationalization_English_Config.Get(code).Content;
                 case (int)InternationalizationLanguage.chinese:
-                    return Internationalization_Chinese_Config.Get(code);
+                    return Internationalization_Chinese_Config.Get(code).Content;
                 default:
                     return default(string);
             }

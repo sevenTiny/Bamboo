@@ -17,7 +17,7 @@ using System;
 
 namespace SevenTiny.Bantina
 {
-    public class MemoryCacheHelper
+    public static class MemoryCacheHelper
     {
         private static IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
