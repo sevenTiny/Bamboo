@@ -60,6 +60,11 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
         /// <param name="message"></param>
         private static void ToFile(string message)
         {
+            if (!string.IsNullOrEmpty(_LoggingConfig.Directory))
+            {
+                SavePath = _LoggingConfig.Directory;
+                FilePath = Path.Combine(SavePath, $"{DateTime.Now.Date.ToString("yyyyMMdd")}.log");
+            }
             if (!Directory.Exists(SavePath))
             {
                 Directory.CreateDirectory(SavePath);
