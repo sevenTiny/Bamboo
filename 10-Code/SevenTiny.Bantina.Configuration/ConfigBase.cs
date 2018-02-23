@@ -15,7 +15,6 @@
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using SevenTiny.Bantina.Configuration.Extensions;
-using SevenTiny.Bantina.Configuration.Helpers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -174,7 +173,7 @@ namespace SevenTiny.Bantina.Configuration
                         SqlCommandPrepare(conn, cmd, sql);
                         var result = Convert.ToDateTime(cmd.ExecuteScalar());
                         //sotrage into cache
-                        MemoryCacheHelper.Put(modifyTimeCacheKey,result,modifyTimeExpiredTime);
+                        MemoryCacheHelper.Put(modifyTimeCacheKey, result, modifyTimeExpiredTime);
                         return result;
                     }
                 }

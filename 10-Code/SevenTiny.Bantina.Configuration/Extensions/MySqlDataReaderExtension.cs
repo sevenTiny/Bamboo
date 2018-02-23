@@ -24,33 +24,46 @@ namespace SevenTiny.Bantina.Configuration.Extensions
     {
         public static IList<T> ToList<T>(this MySqlDataReader reader) where T : class
         {
-            Type typeT = typeof(T);
-            IList<T> list = new List<T>();
-            PropertyInfo[] propertyInfos = typeT.GetProperties();
-            using (reader)
+            try
             {
-                while (reader.Read())
+                Type typeT = typeof(T);
+                IList<T> list = new List<T>();
+                PropertyInfo[] propertyInfos = typeT.GetProperties();
+                using (reader)
                 {
-                    T model = System.Activator.CreateInstance<T>();
-                    foreach (PropertyInfo propertyInfo in propertyInfos)
+                    while (reader.Read())
                     {
-                        object readerValue = reader[GetPropertyInfoStorageName(propertyInfo)];
-                        if (readerValue != System.DBNull.Value)
+                        T model = System.Activator.CreateInstance<T>();
+                        foreach (PropertyInfo propertyInfo in propertyInfos)
                         {
-                            if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
-                                propertyInfo.SetValue(model, Convert.ChangeType(readerValue, new NullableConverter(propertyInfo.PropertyType).UnderlyingType), null);
-                            else
-                                propertyInfo.SetValue(model, Convert.ChangeType(readerValue, propertyInfo.PropertyType), null);
+                            try
+                            {
+                                object readerValue = reader[GetPropertyInfoStorageName(propertyInfo)];
+                                if (readerValue != System.DBNull.Value)
+                                {
+                                    if (propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
+                                        propertyInfo.SetValue(model, Convert.ChangeType(readerValue, new NullableConverter(propertyInfo.PropertyType).UnderlyingType), null);
+                                    else
+                                        propertyInfo.SetValue(model, Convert.ChangeType(readerValue, propertyInfo.PropertyType), null);
+                                }
+                                else
+                                {
+                                    propertyInfo.SetValue(model, null, null);
+                                }
+
+                            }
+                            catch (Exception)
+                            { }
                         }
-                        else
-                        {
-                            propertyInfo.SetValue(model, null, null);
-                        }
+                        list.Add(model);
                     }
-                    list.Add(model);
                 }
+                return list;
             }
-            return list;
+            catch (Exception)
+            {
+                return new List<T>();
+            }
         }
 
         /// <summary>

@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: 7tiny
  * Address: Earth
- * Create: 2018-02-15 22:13:49
- * Modify: 2018-02-15 22:13:49
+ * Create: 2018-02-18 20:03:17
+ * Modify: 2018-02-18 20:03:17
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -12,11 +12,18 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-namespace SevenTiny.Bantina.Internationalization
+using System;
+
+namespace SevenTiny.Bantina.Logging
 {
-    public enum InternationalizationLanguageEnum
+    public interface ILog
     {
-        english = 1,
-        chinese = 2
+        void Info(string message);
+        void Debug(string message);
+        void Warn(string message);
+        void Error(string message);
+        void Error(Exception exception);
+        void Fatal(string message);
+        void Fatal(Exception exception);
     }
 }
