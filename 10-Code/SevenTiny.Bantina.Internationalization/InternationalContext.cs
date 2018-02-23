@@ -18,19 +18,71 @@ using System;
 
 namespace SevenTiny.Bantina.Internationalization
 {
-    public static class InternationalContext
+    public sealed class InternationalContext
     {
-        public static string Content(int code)
+        public int ID { get; set; }
+        public string Code { get; set; }
+        public string Content { get; set; }
+        public string Description { get; set; }
+
+        /// <summary>
+        /// English is default
+        /// </summary>
+        private static InternationalContext NotFound => new InternationalContext
         {
-            switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
+            ID = 101,
+            Code = "System.Error.ConfigNotFound",
+            Content = "International config not found.",
+            Description = "Config not found or node of id is not exist."
+        };
+
+        private static dynamic Get(int id)
+        {
+            try
             {
-                case (int)InternationalizationLanguage.english:
-                    return Internationalization_English_Config.Get(code).Content;
-                case (int)InternationalizationLanguage.chinese:
-                    return Internationalization_Chinese_Config.Get(code).Content;
-                default:
-                    return default(string);
+                switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
+                {
+                    case (int)InternationalizationLanguage.english:
+                        return Internationalization_English_Config.Get(id);
+                    case (int)InternationalizationLanguage.chinese:
+                        return Internationalization_Chinese_Config.Get(id);
+                    default:
+                        return NotFound;
+                }
+            }
+            catch (Exception)
+            {
+                return NotFound;
             }
         }
+
+        /// <summary>
+        /// Get InternationalContext By id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static InternationalContext Context(int id)
+        {
+            try
+            {
+                dynamic result = Get(id);
+                //if result = null,return not found, if not, return international context
+                return result == null ? NotFound : new InternationalContext
+                {
+                    ID = result.ID,
+                    Code = result.Code,
+                    Content = result.Content,
+                    Description = result.Description
+                };
+            }
+            catch (Exception)
+            {
+                return NotFound;
+            }
+        }
+
+        public static string InternationalCode(int id) => Get(id)?.Code ?? NotFound.Code;
+        public static string InternationalContent(int id) => Get(id)?.Content ?? NotFound.Content;
+        public static string InternationalDescription(int id) => Get(id)?.Description ?? NotFound.Description;
     }
 }

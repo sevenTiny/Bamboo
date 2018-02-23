@@ -38,9 +38,9 @@ namespace SevenTiny.Bantina.Internationalization.Configs
         }
         public static Internationalization_Chinese_Config Get(int id)
         {
-            if (dictionary != null && dictionary.ContainsKey(id))
+            if (dictionary != null)
             {
-                return dictionary[id];
+                return dictionary.SafeGet(id);
             }
             Initial();
             return dictionary.SafeGet(id);
