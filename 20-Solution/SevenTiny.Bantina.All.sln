@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Internati
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.ElasticSearch", "..\10-Code\SevenTiny.Bantina.ElasticSearch\SevenTiny.Bantina.ElasticSearch.csproj", "{68E3ED73-BE4A-4744-A473-568B8A3CCE19}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Cache", "..\10-Code\SevenTiny.Bantina.Cache\SevenTiny.Bantina.Cache.csproj", "{DC76AC3A-EF65-485E-BF97-D99E5286B782}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Redis", "..\10-Code\SevenTiny.Bantina.Redis\SevenTiny.Bantina.Redis.csproj", "{D6814C3C-58A1-4F1F-8D47-8B4C5BEA6485}"
 EndProject
 Global
@@ -69,10 +67,6 @@ Global
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D6814C3C-58A1-4F1F-8D47-8B4C5BEA6485}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D6814C3C-58A1-4F1F-8D47-8B4C5BEA6485}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D6814C3C-58A1-4F1F-8D47-8B4C5BEA6485}.Release|Any CPU.ActiveCfg = Release|Any CPU
