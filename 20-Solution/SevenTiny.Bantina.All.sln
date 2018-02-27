@@ -15,15 +15,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Configura
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Logging", "..\10-Code\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj", "{DA01D74A-9421-4F91-9821-34BA9D499293}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Bankinate", "..\10-Code\SevenTiny.Bantina.Bankinate\SevenTiny.Bantina.Bankinate.csproj", "{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Bankinate", "..\10-Code\SevenTiny.Bantina.Bankinate\SevenTiny.Bantina.Bankinate.csproj", "{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Amqp", "..\10-Code\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj", "{612AD90E-78E1-49AB-8112-0980EF31039E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Amqp", "..\10-Code\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj", "{612AD90E-78E1-49AB-8112-0980EF31039E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Internationalization", "..\10-Code\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj", "{D1DE01A0-43B5-44E9-B6FD-805ED0198904}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Internationalization", "..\10-Code\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj", "{D1DE01A0-43B5-44E9-B6FD-805ED0198904}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Redis", "..\10-Code\SevenTiny.Bantina.Redis\SevenTiny.Bantina.Redis.csproj", "{908B22B2-7403-4EF0-BAF4-57DA8DF9905B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.ElasticSearch", "..\10-Code\SevenTiny.Bantina.ElasticSearch\SevenTiny.Bantina.ElasticSearch.csproj", "{68E3ED73-BE4A-4744-A473-568B8A3CCE19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.ElasticSearch", "..\10-Code\SevenTiny.Bantina.ElasticSearch\SevenTiny.Bantina.ElasticSearch.csproj", "{68E3ED73-BE4A-4744-A473-568B8A3CCE19}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.Cache", "..\10-Code\SevenTiny.Bantina.Cache\SevenTiny.Bantina.Cache.csproj", "{DC76AC3A-EF65-485E-BF97-D99E5286B782}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,14 +63,14 @@ Global
 		{D1DE01A0-43B5-44E9-B6FD-805ED0198904}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1DE01A0-43B5-44E9-B6FD-805ED0198904}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1DE01A0-43B5-44E9-B6FD-805ED0198904}.Release|Any CPU.Build.0 = Release|Any CPU
-		{908B22B2-7403-4EF0-BAF4-57DA8DF9905B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{908B22B2-7403-4EF0-BAF4-57DA8DF9905B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{908B22B2-7403-4EF0-BAF4-57DA8DF9905B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{908B22B2-7403-4EF0-BAF4-57DA8DF9905B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68E3ED73-BE4A-4744-A473-568B8A3CCE19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC76AC3A-EF65-485E-BF97-D99E5286B782}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

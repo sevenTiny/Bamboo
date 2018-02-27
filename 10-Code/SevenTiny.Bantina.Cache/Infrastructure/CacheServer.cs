@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: 7tiny
  * Address: Earth
- * Create: 2018-02-18 19:34:32
- * Modify: 2018-02-18 19:34:32
+ * Create: 2018-02-27 14:22:49
+ * Modify: 2018-02-27 14:22:49
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -12,11 +12,11 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-namespace SevenTiny.Bantina.Logging.Infrastructure
+namespace SevenTiny.Bantina.Cache.Infrastructure
 {
-    public enum LoggingStorageMedium
+    public enum CacheServer
     {
-        LocalFile=0,
-        DataBase=1
+        LocalCache=0,
+        Redis=1
     }
 }

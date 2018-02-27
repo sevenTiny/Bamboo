@@ -45,7 +45,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                     case (int)LoggingStorageMedium.DataBase:
                         ToDataBase(message);
                         break;
-                    case (int)LoggingStorageMedium.File:
+                    case (int)LoggingStorageMedium.LocalFile:
                         ToFile(message);
                         break;
                     default:

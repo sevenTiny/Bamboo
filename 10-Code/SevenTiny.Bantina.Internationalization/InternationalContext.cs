@@ -13,76 +13,73 @@
  * Thx , Best Regards ~
  *********************************************************/
 using SevenTiny.Bantina.Configuration;
+using SevenTiny.Bantina.Extensions;
 using SevenTiny.Bantina.Internationalization.Configs;
 using System;
+using System.Collections.Generic;
 
 namespace SevenTiny.Bantina.Internationalization
 {
     public sealed class InternationalContext
     {
-        public int ID { get; set; }
-        public string Code { get; set; }
-        public string Content { get; set; }
-        public string Description { get; set; }
-
         /// <summary>
         /// English is default
         /// </summary>
-        private static InternationalContext NotFound => new InternationalContext
-        {
-            ID = 101,
-            Code = "System.Error.ConfigNotFound",
-            Content = "International config not found.",
-            Description = "Config not found or node of id is not exist."
-        };
-
-        private static dynamic Get(int id)
-        {
-            try
-            {
-                switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
-                {
-                    case (int)InternationalizationLanguage.english:
-                        return Internationalization_English_Config.Get(id);
-                    case (int)InternationalizationLanguage.chinese:
-                        return Internationalization_Chinese_Config.Get(id);
-                    default:
-                        return NotFound;
-                }
-            }
-            catch (Exception)
-            {
-                return NotFound;
-            }
-        }
+        private static (int ID, string Code, string Content, string Description) NotFound =>
+        (
+            101,
+            "System.Error.ConfigNotFound",
+            "International config not found.",
+            "Config not found or node of id is not exist."
+        );
 
         /// <summary>
-        /// Get InternationalContext By id
+        /// internal cache
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public static InternationalContext Context(int id)
+        private static Dictionary<int, (int ID, string Code, string Content, string Description)> _dictionary;
+
+        private static void Initial()
         {
-            try
+            _dictionary = new Dictionary<int, (int ID, string Code, string Content, string Description)>();
+
+            IEnumerable<dynamic> configs;
+            switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
             {
-                dynamic result = Get(id);
-                //if result = null,return not found, if not, return international context
-                return result == null ? NotFound : new InternationalContext
-                {
-                    ID = result.ID,
-                    Code = result.Code,
-                    Content = result.Content,
-                    Description = result.Description
-                };
+                case (int)InternationalizationLanguage.english:
+                    configs = Internationalization_English_Config.ConfigEnumerable;
+                    break;
+                case (int)InternationalizationLanguage.chinese:
+                    configs = Internationalization_Chinese_Config.ConfigEnumerable;
+                    break;
+                default:
+                    configs = null;
+                    break;
             }
-            catch (Exception)
+
+            foreach (var item in configs)
             {
-                return NotFound;
+                _dictionary.AddOrUpdate((int)item.ID, ((int)item.ID, (string)item.Code, (string)item.Content, (string)item.Description));
             }
         }
 
-        public static string InternationalCode(int id) => Get(id)?.Code ?? NotFound.Code;
-        public static string InternationalContent(int id) => Get(id)?.Content ?? NotFound.Content;
-        public static string InternationalDescription(int id) => Get(id)?.Description ?? NotFound.Description;
+        public static (int ID, string Code, string Content, string Description) Context(int id)
+        {
+            //get from local cache
+            if (_dictionary != null)
+            {
+                return _dictionary.SafeGet(id);
+            }
+            //if not exist,initial.
+            Initial();
+            //get from local cache after initial.
+            if (_dictionary != null)
+            {
+                return _dictionary.SafeGet(id);
+            }
+            return NotFound;
+        }
+        public static string Code(int id) => Context(id).Code??NotFound.Code;
+        public static string Content(int id) => Context(id).Content??NotFound.Content;
+        public static string Description(int id) => Context(id).Description??NotFound.Description;
     }
 }
