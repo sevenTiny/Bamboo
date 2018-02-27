@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: 7tiny
  * Address: Earth
- * Create: 2018-02-27 14:22:49
- * Modify: 2018-02-27 14:22:49
+ * Create: 2018-02-27 19:23:12
+ * Modify: 2018-02-27 19:23:12
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -12,11 +12,16 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-namespace SevenTiny.Bantina.Cache.Infrastructure
+using SevenTiny.Bantina.Configuration;
+
+namespace SevenTiny.Bantina.Redis.Infrastructure
 {
-    public enum CacheServer
+    [ConfigClass(Name = "Redis")]
+    public class RedisConfig : ConfigBase<RedisConfig>
     {
-        LocalCache=0,
-        Redis=1
+        public int ID { get; set; }
+        public string InstanceName { get; set; }
+        public string Server { get; set; }
+        public int Port { get; set; }
     }
 }
