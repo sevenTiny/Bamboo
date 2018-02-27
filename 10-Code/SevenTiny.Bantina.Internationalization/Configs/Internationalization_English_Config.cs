@@ -13,7 +13,6 @@
  * Thx , Best Regards ~
  *********************************************************/
 using SevenTiny.Bantina.Configuration;
-using SevenTiny.Bantina.Extensions;
 using System.Collections.Generic;
 
 namespace SevenTiny.Bantina.Internationalization.Configs
@@ -25,25 +24,6 @@ namespace SevenTiny.Bantina.Internationalization.Configs
         public string Code { get; set; }
         public string Content { get; set; }
         public string Description { get; set; }
-
-        private static Dictionary<int, Internationalization_English_Config> dictionary;
-
-        private static void Initial()
-        {
-            dictionary = new Dictionary<int, Internationalization_English_Config>();
-            foreach (var item in Configs)
-            {
-                dictionary.AddOrUpdate(item.ID, item);
-            }
-        }
-        public static Internationalization_English_Config Get(int id)
-        {
-            if (dictionary != null)
-            {
-                return dictionary.SafeGet(id);
-            }
-            Initial();
-            return dictionary.SafeGet(id);
-        }
+        public static IEnumerable<Internationalization_English_Config> ConfigEnumerable => Configs;
     }
 }

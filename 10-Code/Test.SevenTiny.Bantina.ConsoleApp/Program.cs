@@ -16,10 +16,10 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
             var result = StopwatchHelper.Caculate(() =>
             {
-                for (int i = 0; i < 10000; i++)
+                for (int i = 0; i < 1000; i++)
                 {
-                    //Console.WriteLine(InternationalContext.InternationalDescription(122));
-                    Console.WriteLine(111);
+                    Console.WriteLine(InternationalContext.Description(1001));
+                    //Console.WriteLine(111);
                 }
             });
 
