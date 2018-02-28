@@ -15,6 +15,7 @@
     <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.Redis\SevenTiny.Bantina.Redis.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
     <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
   </ItemGroup>
