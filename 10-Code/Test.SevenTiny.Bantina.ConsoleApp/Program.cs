@@ -14,16 +14,20 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         {
             //ILog logger = new LogManager();
 
-            var result = StopwatchHelper.Caculate(() =>
-            {
-                for (int i = 0; i < 1000; i++)
-                {
-                    IRedisCache redis = RedisManager.Instance;
-                    redis.Post("name", $"zhangsan");
-                }
-            });
 
-            Console.WriteLine(result.TotalMilliseconds);
+            IRedisCache redis = RedisManager.Instance;
+            redis.Post("name", $"zhangsan");
+
+            //var result = StopwatchHelper.Caculate(() =>
+            //{
+            //    for (int i = 0; i < 1000; i++)
+            //    {
+            //        IRedisCache redis = RedisManager.Instance;
+            //        redis.Post("name", $"zhangsan");
+            //    }
+            //});
+
+            //Console.WriteLine(result.TotalMilliseconds);
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
