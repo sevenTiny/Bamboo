@@ -58,13 +58,10 @@ namespace SevenTiny.Bantina.Logging
             Task.Run(() =>
             {
                 StringBuilder builder = new StringBuilder();
-                builder.Append($"Message:{exception.Message}");
-                builder.Append("\n");
-                builder.Append($"StackTrace:{exception.StackTrace}");
-                builder.Append("\n");
-                builder.Append($"InnerException:{exception.InnerException}");
-                builder.Append("\n");
+                builder.Append($"Message:{exception.Message}\r\n");
                 builder.Append($"Source:{exception.Source}");
+                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
+                builder.Append($"InnerException:{exception.InnerException}\r\n");
                 LogStorage.Storage(loggingLevel, builder.ToString());
             });
         }
@@ -73,15 +70,11 @@ namespace SevenTiny.Bantina.Logging
             Task.Run(() =>
             {
                 StringBuilder builder = new StringBuilder();
-                builder.Append($"CustomMessage:{message}");
-                builder.Append("\n");
-                builder.Append($"Message:{exception.Message}");
-                builder.Append("\n");
-                builder.Append($"StackTrace:{exception.StackTrace}");
-                builder.Append("\n");
-                builder.Append($"InnerException:{exception.InnerException}");
-                builder.Append("\n");
+                builder.Append($"CustomMessage:{message}\r\n");
+                builder.Append($"Message:{exception.Message}\r\n");
                 builder.Append($"Source:{exception.Source}");
+                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
+                builder.Append($"InnerException:{exception.InnerException}\r\n");
                 LogStorage.Storage(loggingLevel, builder.ToString());
             });
         }
