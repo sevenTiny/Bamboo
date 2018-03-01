@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />
   </ItemGroup>
 
 </Project>
