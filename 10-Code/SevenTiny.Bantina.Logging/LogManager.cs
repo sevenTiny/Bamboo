@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Logging
 {
-    public class  LogManager : ILog
+    public class LogManager : ILog
     {
         public LogManager()
         {
@@ -36,9 +36,13 @@ namespace SevenTiny.Bantina.Logging
 
         public void Error(Exception exception) => LogException(LoggingLevel.Error, exception);
 
+        public void Error(string message, Exception exception) => LogException(LoggingLevel.Fatal, message, exception);
+
         public void Fatal(string message) => LogMessage(LoggingLevel.Fatal, $"(Fatal)]:{message}");
 
         public void Fatal(Exception exception) => LogException(LoggingLevel.Fatal, exception);
+
+        public void Fatal(string message, Exception exception) => LogException(LoggingLevel.Fatal, message, exception);
 
         public void Info(string message) => LogMessage(LoggingLevel.Info, $"(Info)]:{message}");
 
@@ -48,11 +52,29 @@ namespace SevenTiny.Bantina.Logging
         {
             LogStorage.Storage(loggingLevel, $"\n---- [{DateTime.Now.ToString("yyyyMMdd hh:mm:ss")} {message}");
         }
+
         private void LogException(LoggingLevel loggingLevel, Exception exception)
         {
             Task.Run(() =>
             {
                 StringBuilder builder = new StringBuilder();
+                builder.Append($"Message:{exception.Message}");
+                builder.Append("\n");
+                builder.Append($"StackTrace:{exception.StackTrace}");
+                builder.Append("\n");
+                builder.Append($"InnerException:{exception.InnerException}");
+                builder.Append("\n");
+                builder.Append($"Source:{exception.Source}");
+                LogStorage.Storage(loggingLevel, builder.ToString());
+            });
+        }
+        private void LogException(LoggingLevel loggingLevel, string message, Exception exception)
+        {
+            Task.Run(() =>
+            {
+                StringBuilder builder = new StringBuilder();
+                builder.Append($"CustomMessage:{message}");
+                builder.Append("\n");
                 builder.Append($"Message:{exception.Message}");
                 builder.Append("\n");
                 builder.Append($"StackTrace:{exception.StackTrace}");
