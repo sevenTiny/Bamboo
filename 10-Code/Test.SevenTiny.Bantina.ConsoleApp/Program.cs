@@ -5,6 +5,7 @@ using SevenTiny.Bantina.Redis;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SevenTiny.Bantina.Security;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
@@ -15,8 +16,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             //ILog logger = new LogManager();
 
 
-            IRedisCache redis = RedisManager.Instance;
-            redis.Post("name", $"zhangsan");
+            //IRedisCache redis = RedisManager.Instance;
+            //redis.Post("name", $"zhangsan");
 
             //var result = StopwatchHelper.Caculate(() =>
             //{
@@ -28,6 +29,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             //});
 
             //Console.WriteLine(result.TotalMilliseconds);
+
+            Console.WriteLine(MD5.GetMd5Hash("123456"));
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
