@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Logging
 {
-    public class  LogManager : ILog
+    public class LogManager : ILog
     {
         public LogManager()
         {
@@ -30,38 +30,79 @@ namespace SevenTiny.Bantina.Logging
             LogStorage._LoggingConfig = LoggingConfig.Get(group);
         }
 
-        public void Debug(string message) => LogMessage(LoggingLevel.Debug, $"(Debug)]:{message}");
+        public void Debug(string message) => LogMessage(LoggingLevel.Debug, message);
 
-        public void Error(string message) => LogMessage(LoggingLevel.Error, $"(Error)]:{message}");
+        public void Error(string message) => LogMessage(LoggingLevel.Error, message);
 
-        public void Error(Exception exception) => LogException(LoggingLevel.Error, exception);
+        public void Error(Exception exception) => ExceptionLog(LoggingLevel.Error, exception);
 
-        public void Fatal(string message) => LogMessage(LoggingLevel.Fatal, $"(Fatal)]:{message}");
+        public void Error(string message, Exception exception) => ExceptionLog(LoggingLevel.Fatal, message, exception);
 
-        public void Fatal(Exception exception) => LogException(LoggingLevel.Fatal, exception);
+        public void Fatal(string message) => LogMessage(LoggingLevel.Fatal, message);
 
-        public void Info(string message) => LogMessage(LoggingLevel.Info, $"(Info)]:{message}");
+        public void Fatal(Exception exception) => ExceptionLog(LoggingLevel.Fatal, exception);
 
-        public void Warn(string message) => LogMessage(LoggingLevel.Warn, $"(Warn)]:{message}");
+        public void Fatal(string message, Exception exception) => ExceptionLog(LoggingLevel.Fatal, message, exception);
 
-        private void LogMessage(LoggingLevel loggingLevel, string message)
-        {
-            LogStorage.Storage(loggingLevel, $"\n---- [{DateTime.Now.ToString("yyyyMMdd hh:mm:ss")} {message}");
-        }
-        private void LogException(LoggingLevel loggingLevel, Exception exception)
+        public void Info(string message) => LogMessage(LoggingLevel.Info, message);
+
+        public void Warn(string message) => LogMessage(LoggingLevel.Warn, message);
+
+        private void ExceptionLog(LoggingLevel loggingLevel, Exception exception)
         {
             Task.Run(() =>
             {
                 StringBuilder builder = new StringBuilder();
-                builder.Append($"Message:{exception.Message}");
-                builder.Append("\n");
-                builder.Append($"StackTrace:{exception.StackTrace}");
-                builder.Append("\n");
-                builder.Append($"InnerException:{exception.InnerException}");
-                builder.Append("\n");
-                builder.Append($"Source:{exception.Source}");
-                LogStorage.Storage(loggingLevel, builder.ToString());
+                builder.Append($"Message:{exception.Message}\r\n");
+                builder.Append($"Source:{exception.Source}\r\n");
+                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
+                builder.Append($"InnerException:{exception.InnerException}\r\n");
+                LogMessage(loggingLevel, builder.ToString());
             });
+        }
+        private void ExceptionLog(LoggingLevel loggingLevel, string message, Exception exception)
+        {
+            Task.Run(() =>
+            {
+                StringBuilder builder = new StringBuilder();
+                builder.Append($"CustomMessage:{message}\r\n");
+                builder.Append($"Message:{exception.Message}\r\n");
+                builder.Append($"Source:{exception.Source}\r\n");
+                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
+                builder.Append($"InnerException:{exception.InnerException}\r\n");
+                LogMessage(loggingLevel, builder.ToString());
+            });
+        }
+        
+        /// <summary>
+        /// Connon storage
+        /// </summary>
+        /// <param name="loggingLevel"></param>
+        /// <param name="message"></param>
+        private void LogMessage(LoggingLevel loggingLevel, string message)
+        {
+            string loggingLevelString = "";
+            switch (loggingLevel)
+            {
+                case LoggingLevel.Info:
+                    loggingLevelString = "Info";
+                    break;
+                case LoggingLevel.Debug:
+                    loggingLevelString = "Debug";
+                    break;
+                case LoggingLevel.Warn:
+                    loggingLevelString = "Warn";
+                    break;
+                case LoggingLevel.Error:
+                    loggingLevelString = "Error";
+                    break;
+                case LoggingLevel.Fatal:
+                    loggingLevelString = "Fatal";
+                    break;
+                default:
+                    break;
+            }
+            LogStorage.Storage(loggingLevel, $"\r\n---- [{DateTime.Now.ToString()}]({loggingLevelString}):\r\n{message}");
         }
     }
 }

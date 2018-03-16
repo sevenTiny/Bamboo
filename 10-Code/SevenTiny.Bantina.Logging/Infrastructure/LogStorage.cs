@@ -15,6 +15,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
@@ -69,9 +71,21 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
             {
                 Directory.CreateDirectory(SavePath);
             }
-            using (StreamWriter writer = File.AppendText(FilePath))
+            using (Mutex myMutex = new Mutex(true, "log mutex lock"))
             {
-                writer.WriteLine(message);
+                myMutex.WaitOne();
+                try
+                {
+                    using (StreamWriter writer = new StreamWriter(FilePath, true))
+                    {
+                        writer.AutoFlush = true;
+                        writer.WriteLine(message);
+                    }
+                }
+                finally
+                {
+                    myMutex.ReleaseMutex();
+                }
             }
         }
         /// <summary>
