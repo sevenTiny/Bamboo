@@ -23,11 +23,8 @@ namespace SevenTiny.Bantina.Redis
         void Post(string key, string value);
         void Post(string key, string value,TimeSpan absoluteExpirationRelativeToNow);
         void Post(string key, string value, DateTime absoluteExpiration);
-
         void Put(string key, string value);
-
         void Delete(string key);
-
         bool Exist(string key);
     }
 }
