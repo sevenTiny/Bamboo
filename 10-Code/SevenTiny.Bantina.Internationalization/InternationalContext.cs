@@ -43,7 +43,7 @@ namespace SevenTiny.Bantina.Internationalization
             _dictionary = new Dictionary<int, (int ID, string Code, string Content, string Description)>();
 
             IEnumerable<dynamic> configs;
-            switch (Convert.ToInt32(SevenTinyBantinaConfig.Get("InternationalizationLanguage")))
+            switch (Convert.ToInt32(ConfigRoot.Get("InternationalizationLanguage")))
             {
                 case (int)InternationalizationLanguage.english:
                     configs = Internationalization_English_Config.ConfigEnumerable;
@@ -78,8 +78,8 @@ namespace SevenTiny.Bantina.Internationalization
             }
             return NotFound;
         }
-        public static string Code(int id) => Context(id).Code??NotFound.Code;
-        public static string Content(int id) => Context(id).Content??NotFound.Content;
-        public static string Description(int id) => Context(id).Description??NotFound.Description;
+        public static string Code(int id) => Context(id).Code ?? NotFound.Code;
+        public static string Content(int id) => Context(id).Content ?? NotFound.Content;
+        public static string Description(int id) => Context(id).Description ?? NotFound.Description;
     }
 }
