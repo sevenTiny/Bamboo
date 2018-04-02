@@ -6,7 +6,7 @@ using System.Text;
 namespace SevenTiny.Bantina.Configuration
 {
     [ConfigClass(Name = "SevenTinyBantina")]
-    public class SevenTinyBantinaConfig : ConfigBase<SevenTinyBantinaConfig>
+    public class ConfigRoot : ConfigBase<ConfigRoot>
     {
         public string Key { get; set; }
         public string Value { get; set; }

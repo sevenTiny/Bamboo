@@ -50,7 +50,6 @@ namespace SevenTiny.Bantina.Configuration.Extensions
                                 {
                                     propertyInfo.SetValue(model, null, null);
                                 }
-
                             }
                             catch (Exception)
                             { }
