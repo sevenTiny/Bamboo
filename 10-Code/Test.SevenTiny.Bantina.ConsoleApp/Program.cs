@@ -6,6 +6,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SevenTiny.Bantina.Security;
+using Test.SevenTiny.Bantina.Model;
+using Test.SevenTiny.Bantina.Model.DTO;
+using SevenTiny.Bantina.AutoMapper;
+using static Newtonsoft.Json.JsonConvert;
+using System.Reflection;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
@@ -14,7 +19,6 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         static void Main(string[] args)
         {
             //ILog logger = new LogManager();
-
 
             //IRedisCache redis = RedisManager.Instance;
             //redis.Post("name", $"zhangsan");
@@ -30,7 +34,16 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
             //Console.WriteLine(result.TotalMilliseconds);
 
-            Console.WriteLine(MD5.GetMd5Hash("123456"));
+            Student student = new Student
+            {
+                Uid = Guid.NewGuid(),
+                Age = 16,
+                Name = "bankinate"
+            };
+
+            StudentReferee stuRef = Mapper.AutoMapper<StudentReferee, Student>(student);
+
+            Console.WriteLine(SerializeObject(stuRef));
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();

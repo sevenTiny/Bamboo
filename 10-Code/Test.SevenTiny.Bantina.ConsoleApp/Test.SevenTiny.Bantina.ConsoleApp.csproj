@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.AutoMapper\SevenTiny.Bantina.AutoMapper.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Bankinate\SevenTiny.Bantina.Bankinate.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj" />
