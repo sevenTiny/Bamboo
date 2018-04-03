@@ -18,14 +18,14 @@ using System.Reflection;
 
 namespace SevenTiny.Bantina.AutoMapper
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property, Inherited = true)]
     public class MapperAttribute : Attribute
     {
-        public string Name { get; set; }
-        public static string GetName(PropertyInfo property)
+        public string TargetName { get; set; }
+        public static string GetTargetName(PropertyInfo property)
         {
-            var attr = property.GetCustomAttributes(typeof(MapperAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as MapperAttribute).Name ?? default(string) : default(string);
+            var attr = property.GetCustomAttributes<MapperAttribute>(true).FirstOrDefault();
+            return attr != null ? (attr as MapperAttribute).TargetName ?? default(string) : default(string);
         }
     }
 }
