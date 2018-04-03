@@ -3,8 +3,8 @@
  * Version: 5.0.0
  * Author: 7tiny
  * Address: Earth
- * Create: 2018-02-14 20:00:43
- * Modify: 2018-02-14 20:00:43
+ * Create: 2018-04-03 13:28:38
+ * Modify: 2018-04-03 13:28:38
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -14,18 +14,18 @@
  *********************************************************/
 using System;
 using System.Linq;
+using System.Reflection;
 
-namespace SevenTiny.Bantina.Configuration
+namespace SevenTiny.Bantina.AutoMapper
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    public class ConfigClassAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
+    public class MapperAttribute : Attribute
     {
         public string Name { get; set; }
-
-        public static string GetName(Type type)
+        public static string GetName(PropertyInfo property)
         {
-            var attr = type.GetCustomAttributes(typeof(ConfigClassAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as ConfigClassAttribute).Name ?? default(string) : default(string);
+            var attr = property.GetCustomAttributes(typeof(MapperAttribute), true).FirstOrDefault();
+            return attr != null ? (attr as MapperAttribute).Name ?? default(string) : default(string);
         }
     }
 }
