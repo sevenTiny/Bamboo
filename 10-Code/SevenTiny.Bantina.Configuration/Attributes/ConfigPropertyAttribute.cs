@@ -26,15 +26,7 @@ namespace SevenTiny.Bantina.Configuration
         public static string GetName(PropertyInfo property)
         {
             var attr = property.GetCustomAttributes(typeof(ConfigPropertyAttribute), true).FirstOrDefault();
-            if (attr != null)
-            {
-                string name = (attr as ConfigPropertyAttribute).Name;
-                if (!string.IsNullOrEmpty(name))
-                {
-                    return name;
-                }
-            }
-            return default(string);
+            return attr != null ? (attr as ConfigPropertyAttribute).Name ?? default(string) : default(string);
         }
     }
 }
