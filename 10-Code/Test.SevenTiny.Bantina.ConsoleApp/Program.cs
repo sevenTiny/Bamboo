@@ -18,23 +18,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         static void Main(string[] args)
         {
-            //ILog logger = new LogManager();
 
-            //IRedisCache redis = RedisManager.Instance;
-            //redis.Post("name", $"zhangsan");
-
-
-
-            Student student = new Student
-            {
-                Uid = Guid.NewGuid(),
-                Age = 16,
-                Name = "bankinate"
-            };
-
-            StudentReferee stuRef = Mapper.AutoMapper<StudentReferee, Student>(student);
-
-            Console.WriteLine(SerializeObject(stuRef));
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
