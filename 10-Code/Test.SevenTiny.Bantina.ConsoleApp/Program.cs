@@ -18,7 +18,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         static void Main(string[] args)
         {
-
+            EncryptTest.Test();
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();

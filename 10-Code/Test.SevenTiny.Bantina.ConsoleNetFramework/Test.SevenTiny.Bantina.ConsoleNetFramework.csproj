@@ -48,5 +48,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj">
+      <Project>{91e2949d-d240-489a-801f-f86706da6530}</Project>
+      <Name>SevenTiny.Bantina</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
