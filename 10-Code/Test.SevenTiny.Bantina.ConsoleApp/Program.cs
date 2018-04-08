@@ -11,6 +11,8 @@ using Test.SevenTiny.Bantina.Model.DTO;
 using SevenTiny.Bantina.AutoMapper;
 using static Newtonsoft.Json.JsonConvert;
 using System.Reflection;
+using System.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
@@ -18,22 +20,17 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         static void Main(string[] args)
         {
+<<<<<<< Updated upstream
             //ILog logger = new LogManager();
 
             //IRedisCache redis = RedisManager.Instance;
             //redis.Post("name", $"zhangsan");
+=======
+>>>>>>> Stashed changes
 
-            //var result = StopwatchHelper.Caculate(() =>
-            //{
-            //    for (int i = 0; i < 1000; i++)
-            //    {
-            //        IRedisCache redis = RedisManager.Instance;
-            //        redis.Post("name", $"zhangsan");
-            //    }
-            //});
 
-            //Console.WriteLine(result.TotalMilliseconds);
 
+<<<<<<< Updated upstream
             Student student = new Student
             {
                 Uid = Guid.NewGuid(),
@@ -44,6 +41,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             StudentReferee stuRef = Mapper.AutoMapper<StudentReferee, Student>(student);
 
             Console.WriteLine(SerializeObject(stuRef));
+=======
+>>>>>>> Stashed changes
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
