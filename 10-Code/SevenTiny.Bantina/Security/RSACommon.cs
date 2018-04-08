@@ -1,111 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
+﻿/*********************************************************
+ * CopyRight: 7TINY CODE BUILDER. 
+ * Version: 5.0.0
+ * Author: 7tiny
+ * Address: Earth
+ * Create: 2018-04-08 21:54:19
+ * Modify: 2018-04-08 21:54:19
+ * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+ * GitHub: https://github.com/sevenTiny 
+ * Personal web site: http://www.7tiny.com 
+ * Technical WebSit: http://www.cnblogs.com/7tiny/ 
+ * Description: 
+ * Thx , Best Regards ~
+ *********************************************************/
+using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace SevenTiny.Bantina.Security
 {
-    internal class RSA
+    /// <summary>
+    /// RSA Encrypt Common Class
+    /// </summary>
+    internal class RSACommon
     {
-        private readonly RSA _privateKeyRsaProvider;
-        private readonly RSA _publicKeyRsaProvider;
-        private readonly HashAlgorithmName _hashAlgorithmName;
-        private readonly Encoding _encoding;
+        private RSACommon() { }
 
-        /// <summary>
-        /// 实例化RSAHelper
-        /// </summary>
-        /// <param name="rsaType">加密算法类型 RSA SHA1;RSA2 SHA256 密钥长度至少为2048</param>
-        /// <param name="encoding">编码类型</param>
-        /// <param name="privateKey">私钥</param>
-        /// <param name="publicKey">公钥</param>
-        public RSAHelper(RSAType rsaType, Encoding encoding, string privateKey, string publicKey = null)
+        public static string Sign(string data, string privateKey, Encoding encoding, HashAlgorithmName hashAlgorithmName)
         {
-            _encoding = encoding;
-            if (!string.IsNullOrEmpty(privateKey))
-            {
-                _privateKeyRsaProvider = CreateRsaProviderFromPrivateKey(privateKey);
-            }
+            byte[] dataBytes = encoding.GetBytes(data);
 
-            if (!string.IsNullOrEmpty(publicKey))
-            {
-                _publicKeyRsaProvider = CreateRsaProviderFromPublicKey(publicKey);
-            }
+            RSA rsa = CreateRsaProviderFromPrivateKey(privateKey);
 
-            _hashAlgorithmName = rsaType == RSAType.RSA ? HashAlgorithmName.SHA1 : HashAlgorithmName.SHA256;
-        }
-
-        #region 使用私钥签名
-
-        /// <summary>
-        /// 使用私钥签名
-        /// </summary>
-        /// <param name="data">原始数据</param>
-        /// <returns></returns>
-        public string Sign(string data)
-        {
-            byte[] dataBytes = _encoding.GetBytes(data);
-
-            var signatureBytes = _privateKeyRsaProvider.SignData(dataBytes, _hashAlgorithmName, RSASignaturePadding.Pkcs1);
+            var signatureBytes = rsa.SignData(dataBytes, hashAlgorithmName, RSASignaturePadding.Pkcs1);
 
             return Convert.ToBase64String(signatureBytes);
         }
 
-        #endregion
-
-        #region 使用公钥验证签名
-
-        /// <summary>
-        /// 使用公钥验证签名
-        /// </summary>
-        /// <param name="data">原始数据</param>
-        /// <param name="sign">签名</param>
-        /// <returns></returns>
-        public bool Verify(string data, string sign)
+        public static bool Verify(string data, string sign, string publicKey, Encoding encoding, HashAlgorithmName hashAlgorithmName)
         {
-            byte[] dataBytes = _encoding.GetBytes(data);
+            byte[] dataBytes = encoding.GetBytes(data);
             byte[] signBytes = Convert.FromBase64String(sign);
-
-            var verify = _publicKeyRsaProvider.VerifyData(dataBytes, signBytes, _hashAlgorithmName, RSASignaturePadding.Pkcs1);
-
+            RSA rsa = CreateRsaProviderFromPublicKey(publicKey);
+            var verify = rsa.VerifyData(dataBytes, signBytes, hashAlgorithmName, RSASignaturePadding.Pkcs1);
             return verify;
         }
 
-        #endregion
-
-        #region 解密
-
-        public string Decrypt(string cipherText)
+        public static string Decrypt(string source, string privateKey)
         {
-            if (_privateKeyRsaProvider == null)
-            {
-                throw new Exception("_privateKeyRsaProvider is null");
-            }
-            return Encoding.UTF8.GetString(_privateKeyRsaProvider.Decrypt(Convert.FromBase64String(cipherText), RSAEncryptionPadding.Pkcs1));
+            RSA rsa = CreateRsaProviderFromPrivateKey(privateKey);
+            return Encoding.UTF8.GetString(rsa.Decrypt(Convert.FromBase64String(source), RSAEncryptionPadding.Pkcs1));
         }
 
-        #endregion
-
-        #region 加密
-
-        public string Encrypt(string text)
+        public static string Encrypt(string text, string publicKey)
         {
-            if (_publicKeyRsaProvider == null)
-            {
-                throw new Exception("_publicKeyRsaProvider is null");
-            }
-            return Convert.ToBase64String(_publicKeyRsaProvider.Encrypt(Encoding.UTF8.GetBytes(text), RSAEncryptionPadding.Pkcs1));
+            RSA rsa = CreateRsaProviderFromPublicKey(publicKey);
+            return Convert.ToBase64String(rsa.Encrypt(Encoding.UTF8.GetBytes(text), RSAEncryptionPadding.Pkcs1));
         }
 
-        #endregion
-
-        #region 使用私钥创建RSA实例
-
-        public RSA CreateRsaProviderFromPrivateKey(string privateKey)
+        private static RSA CreateRsaProviderFromPrivateKey(string privateKey)
         {
             var privateKeyBits = Convert.FromBase64String(privateKey);
 
-            var rsa = RSA.Create();
+            var rsa = System.Security.Cryptography.RSA.Create();
             var rsaParameters = new RSAParameters();
 
             using (BinaryReader binr = new BinaryReader(new MemoryStream(privateKeyBits)))
@@ -142,11 +99,7 @@ namespace SevenTiny.Bantina.Security
             return rsa;
         }
 
-        #endregion
-
-        #region 使用公钥创建RSA实例
-
-        public RSA CreateRsaProviderFromPublicKey(string publicKeyString)
+        private static RSA CreateRsaProviderFromPublicKey(string publicKeyString)
         {
             // encoded OID sequence for  PKCS #1 rsaEncryption szOID_RSA_RSA = "1.2.840.113549.1.1.1"
             byte[] seqOid = { 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01, 0x05, 0x00 };
@@ -225,7 +178,7 @@ namespace SevenTiny.Bantina.Security
                     byte[] exponent = binr.ReadBytes(expbytes);
 
                     // ------- create RSACryptoServiceProvider instance and initialize with public key -----
-                    var rsa = RSA.Create();
+                    var rsa = System.Security.Cryptography.RSA.Create();
                     RSAParameters rsaKeyInfo = new RSAParameters
                     {
                         Modulus = modulus,
@@ -239,11 +192,7 @@ namespace SevenTiny.Bantina.Security
             }
         }
 
-        #endregion
-
-        #region 导入密钥算法
-
-        private int GetIntegerSize(BinaryReader binr)
+        private static int GetIntegerSize(BinaryReader binr)
         {
             byte bt = 0;
             int count = 0;
@@ -275,7 +224,7 @@ namespace SevenTiny.Bantina.Security
             return count;
         }
 
-        private bool CompareBytearrays(byte[] a, byte[] b)
+        private static bool CompareBytearrays(byte[] a, byte[] b)
         {
             if (a.Length != b.Length)
                 return false;
@@ -288,7 +237,5 @@ namespace SevenTiny.Bantina.Security
             }
             return true;
         }
-
-        #endregion
     }
 }

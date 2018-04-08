@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Security;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,10 @@ namespace Test.SevenTiny.Bantina.ConsoleNetFramework
     {
         static void Main(string[] args)
         {
+
+
+            Console.WriteLine("any key to exit ...");
+            Console.ReadKey();
         }
     }
 }

@@ -17,7 +17,7 @@ using System.Text;
 
 namespace SevenTiny.Bantina.Security
 {
-    public static class MD5
+    public static class MD5Helper
     {
         public static string GetMd5Hash(string source)
         {
