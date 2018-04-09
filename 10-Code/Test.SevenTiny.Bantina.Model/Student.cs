@@ -11,6 +11,8 @@ namespace Test.SevenTiny.Bantina.Model
         public int Age { get; set; }
         public int BodyHigh { get; set; }
         public int HealthLevel { get; set; }
+        public string SchoolName { get; set; }
+        public SchoolClass SchoolClass { get; set; }
 
         public string GetName()
         {

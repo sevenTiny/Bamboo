@@ -22,6 +22,13 @@ namespace SevenTiny.Bantina.AutoMapper
     public class MapperAttribute : Attribute
     {
         public string TargetName { get; set; }
+
+        public MapperAttribute() { }
+        public MapperAttribute(string targetName)
+        {
+            this.TargetName = targetName;
+        }
+
         public static string GetTargetName(PropertyInfo property)
         {
             var attr = property.GetCustomAttributes<MapperAttribute>(true).FirstOrDefault();
