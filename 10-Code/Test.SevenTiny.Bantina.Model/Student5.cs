@@ -7,6 +7,6 @@ namespace Test.SevenTiny.Bantina.Model
     public class Student5
     {
         public int HealthLevel { get; set; }
-        public SchoolClass SchoolClass { get; set; }
+        public string GradeName { get; set; }
     }
 }
