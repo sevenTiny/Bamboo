@@ -2,6 +2,7 @@
 using SevenTiny.Bantina.AutoMapper;
 using System;
 using Test.SevenTiny.Bantina.Model;
+using Test.SevenTiny.Bantina.Model.DTO;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
@@ -10,32 +11,77 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         public static void Test()
         {
-            Student5 stu5 = new Student5 { HealthLevel = 100, SchoolClass = new SchoolClass { Name = "class1" } };
 
-            var test0 = StopwatchHelper.Caculate(1000000, () =>
+
+            Student student = new Student
             {
-                Student stu = Mapper.AutoMapper<Student,Student5>(stu5, t => t.Name = "jony");
-            });
-            Console.WriteLine("使用反射调用 1 百万次耗时：");
-            Console.WriteLine(test0.TotalMilliseconds);
+                Name = "jony",
+                Age = 18
+            };
 
-            Console.WriteLine();
-
-            var test1 = StopwatchHelper.Caculate(1000000, () =>
+            School school = new School
             {
-                Student stu = Mapper<Student5, Student>.AutoMapper(stu5, t => t.Name = "jony");
-            });
-            Console.WriteLine("使用Expression表达式树调用 1 百万次耗时：");
-            Console.WriteLine(test1.TotalMilliseconds);
+                Name = "Tsinghua"
+            };
 
-            Console.WriteLine();
-
-            var test2 = StopwatchHelper.Caculate(1000000, () =>
+            Grade grade = new Grade
             {
-                Student stu = new Student { HealthLevel = stu5.HealthLevel, Name = "jony" };
-            });
-            Console.WriteLine("使用代码直接构建 1 百万次耗时：");
-            Console.WriteLine(test2.TotalMilliseconds);
+                Name = "First"
+            };
+
+            StudentDTO studentDTO2 = Mapper<Student, School, Grade, StudentDTO>.AutoMapper(student, school, grade);
+
+
+
+
+
+
+
+
+
+
+
+
+            StudentDTO studentDTO = new StudentDTO
+            {
+                Name = student.Name,
+                Age = student.Age,
+                SchoolName = school.Name,
+                GradeName = grade.Name
+            };
+
+            Action<StudentDTO, School> action = (dto, sc) => dto.SchoolName = sc.Name;
+
+            studentDTO.SchoolName = school.Name;
+
+
+
+            //Student5 stu5 = new Student5 { HealthLevel = 100 };
+
+            //var test0 = StopwatchHelper.Caculate(1000000, () =>
+            //{
+            //    Student stu = Mapper.AutoMapper<Student,Student5>(stu5, t => t.Name = "jony");
+            //});
+            //Console.WriteLine("使用反射调用 1 百万次耗时：");
+            //Console.WriteLine(test0.TotalMilliseconds);
+
+            //Console.WriteLine();
+
+            //var test1 = StopwatchHelper.Caculate(1000000, () =>
+            //{
+            //    Student stu = Mapper<Student5, Student>.AutoMapper(stu5, t => t.Name = "jony");
+            //});
+            //Console.WriteLine("使用Expression表达式树调用 1 百万次耗时：");
+            //Console.WriteLine(test1.TotalMilliseconds);
+
+            //Console.WriteLine();
+
+            //var test2 = StopwatchHelper.Caculate(1000000, () =>
+            //{
+            //    Student stu = new Student { HealthLevel = stu5.HealthLevel, Name = "jony" };
+            //});
+            //Console.WriteLine("使用代码直接构建 1 百万次耗时：");
+            //Console.WriteLine(test2.TotalMilliseconds);
 
             //Student1 stu1 = new Student1 { Uid = Guid.NewGuid() };
             //Student2 stu2 = new Student2 { Name = "jony" };
