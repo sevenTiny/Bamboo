@@ -33,6 +33,15 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
 
 
+
+
+
+
+
+
+
+
+
             StudentDTO studentDTO = new StudentDTO
             {
                 Name = student.Name,
