@@ -32,6 +32,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             StudentDTO studentDTO2 = Mapper<Student, School, Grade, StudentDTO>.AutoMapper(student, school, grade);
 
 
+
             StudentDTO studentDTO = new StudentDTO
             {
                 Name = student.Name,
