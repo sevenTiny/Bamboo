@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public abstract class MongoDbContext<TDataBase> : IDbContext, IDisposable where TDataBase : class
+    public abstract class MongoDbContext<TDataBase> : IDbContext where TDataBase : class
     {
         public MongoDbContext(string connectionString)
         {
