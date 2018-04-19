@@ -12,6 +12,17 @@ namespace SevenTiny.Bantina.Bankinate
         {
             Client = new MongoClient(connectionString);
         }
+        public MongoDbContext(string connectionString_Read, string connectionString_ReadWrite)
+        {
+            try
+            {
+                Client = new MongoClient(connectionString_Read);
+            }
+            catch (Exception)
+            {
+                Client = new MongoClient(connectionString_ReadWrite);
+            }
+        }
         public MongoDbContext(MongoClientSettings mongoClientSettings)
         {
             Client = new MongoClient(mongoClientSettings);
@@ -109,7 +120,7 @@ namespace SevenTiny.Bantina.Bankinate
             return GetCollection<TEntity>().Find(filter).ToList();
         }
 
-        public TEntity QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             throw new NotImplementedException();
         }
@@ -122,6 +133,11 @@ namespace SevenTiny.Bantina.Bankinate
         public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
         {
             throw new NotImplementedException();
+        }
+
+        public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            return QueryCount<TEntity>(filter) > 0;
         }
     }
 }

@@ -4,13 +4,15 @@ using System.Linq;
 namespace SevenTiny.Bantina.Bankinate
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class KeyAttribute : Attribute
+    public class ColumnAttribute : Attribute
     {
-        public KeyAttribute() { }
-        public KeyAttribute(string propertyName)
+        public ColumnAttribute()
+        { }
+        public ColumnAttribute(string columnName)
         {
-            this.Name = propertyName;
+            this.Name = columnName;
         }
+
         public string Name { get; set; }
 
         public string GetName(string @default)
@@ -20,8 +22,8 @@ namespace SevenTiny.Bantina.Bankinate
 
         public static string GetName(Type type)
         {
-            var attr = type.GetCustomAttributes(typeof(KeyAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as KeyAttribute).Name ?? type.Name : type.Name;
+            var attr = type.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
+            return attr != null ? (attr as ColumnAttribute).Name ?? type.Name : type.Name;
         }
     }
 }
