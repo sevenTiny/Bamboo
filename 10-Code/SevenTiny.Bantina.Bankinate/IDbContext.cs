@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public interface IDbContext
+    public interface IDbContext : IDisposable
     {
         void Add<TEntity>(TEntity entity) where TEntity : class;
         void AddAsync<TEntity>(TEntity entity) where TEntity : class;
