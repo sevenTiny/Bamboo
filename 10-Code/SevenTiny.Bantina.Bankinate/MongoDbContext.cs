@@ -92,6 +92,13 @@ namespace SevenTiny.Bantina.Bankinate
             GetCollection<TEntity>().DeleteManyAsync(filter);
         }
 
+        public TEntity QueryOne<TEntity>(string _id) where TEntity : class
+        {
+            FilterDefinitionBuilder<TEntity> builderFilter = Builders<TEntity>.Filter;
+            FilterDefinition<TEntity> filter = builderFilter.Eq("_id", _id);
+            return GetCollection<TEntity>().Find(filter).FirstOrDefault();
+        }
+
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return Query(filter).FirstOrDefault();
@@ -100,6 +107,21 @@ namespace SevenTiny.Bantina.Bankinate
         public List<TEntity> Query<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return GetCollection<TEntity>().Find(filter).ToList();
+        }
+
+        public TEntity QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
+        {
+            throw new NotImplementedException();
         }
     }
 }

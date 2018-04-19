@@ -14,7 +14,11 @@ namespace SevenTiny.Bantina.Bankinate
         void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class;
         void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+        TEntity QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+        TEntity QueryOne<TEntity>(string id) where TEntity : class;
         TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         List<TEntity> Query<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+        void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null);
+        object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null);
     }
 }
