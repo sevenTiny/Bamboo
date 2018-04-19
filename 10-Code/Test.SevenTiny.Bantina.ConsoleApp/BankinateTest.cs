@@ -19,7 +19,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             {
                 //db.Add<Grade>(new Grade { Name = "Three", GradeId = 9 });
 
-                IList<Grade> dbs = db.Query<Grade>(t => true);
+                IList<Grade> dbs = db.QueryList<Grade>(t => true);
                 Console.WriteLine(SerializeObject(dbs));
             }
         }
@@ -36,6 +36,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                 //    db.Add(stu);
                 //}
 
+                //var result = db.QueryCount<Student>(t => t.Name.Contains("1"));
+                var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
             }
         }
     }

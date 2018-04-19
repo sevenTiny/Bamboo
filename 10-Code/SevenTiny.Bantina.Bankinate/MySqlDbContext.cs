@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*********************************************************
+ * CopyRight: 7TINY CODE BUILDER. 
+ * Version: 5.0.0
+ * Author: 7tiny
+ * Address: Earth
+ * Create: 2018-04-19 23:57:48
+ * Modify: 2018-04-19 23:57:48
+ * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+ * GitHub: https://github.com/sevenTiny 
+ * Personal web site: http://www.7tiny.com 
+ * Technical WebSit: http://www.cnblogs.com/7tiny/ 
+ * Description: 
+ * Thx , Best Regards ~
+ *********************************************************/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -7,7 +21,7 @@ using System.Text;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public abstract class MySqlDbContext<TDataBase> : IDbContext where TDataBase : class
+    public abstract class MySqlDbContext<TDataBase> : IDbContext, IExecuteSqlOperate, IQueryPagingOperate where TDataBase : class
     {
         public MySqlDbContext(string connectionString)
         {
@@ -23,6 +37,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
 
         public string SqlStatement { get; set; }
+        public string TableName { get; set; }
 
         //Cache properties by type
         private Dictionary<Type, PropertyInfo[]> propertiesDic = new Dictionary<Type, PropertyInfo[]>();
@@ -35,25 +50,21 @@ namespace SevenTiny.Bantina.Bankinate
             return propertiesDic[type];
         }
 
-        public void Add<TEntity>(TEntity entity) where TEntity : class
+        private Dictionary<string, object> GenerateAddSqlAndGetParams<TEntity>(TEntity entity) where TEntity : class
         {
-            Type entityType = typeof(TEntity);
-
-            string tableName = TableAttribute.GetName(entityType);
-
             Dictionary<string, object> paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder(), builder_behind = new StringBuilder();
             builder_front.Append("INSERT INTO ");
-            builder_front.Append(tableName);
+            builder_front.Append(TableName);
             builder_front.Append(" (");
             builder_behind.Append(" VALUES (");
 
-            PropertyInfo[] propertyInfos = GetPropertiesDicByType(entityType);
+            PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 //if not column mark exist,jump to next
-                if (NotColumnAttribute.Exist(entityType))
+                if (NotColumnAttribute.Exist(typeof(TEntity)))
                 {
                     continue;
                 }
@@ -103,15 +114,28 @@ namespace SevenTiny.Bantina.Bankinate
             //Generate SqlStatement
             this.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
 
-            int result = DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
+            return paramsDic;
         }
 
-        public void Add<TEntity>(IList<TEntity> entities) where TEntity : class
+        public void Add<TEntity>(TEntity entity) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
+
+            DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
+
+            DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
+        }
+
+        public void Add<TEntity>(IList<TEntity> entities) where TEntity : class
         {
             throw new NotImplementedException();
         }
@@ -123,19 +147,9 @@ namespace SevenTiny.Bantina.Bankinate
 
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            string tableName = TableAttribute.GetName(typeof(TEntity));
+            TableName = TableAttribute.GetName(typeof(TEntity));
 
-            StringBuilder builder_front = new StringBuilder();
-
-            builder_front.Append("DELETE ");
-            builder_front.Append(filter.Parameters[0].Name);
-            builder_front.Append(" From ");
-            builder_front.Append(tableName);
-            builder_front.Append(" ");
-            builder_front.Append(LambdaToSql.ConvertWhere(filter));
-
-            //Generate SqlStatement
-            this.SqlStatement = builder_front.ToString();
+            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {LambdaToSql.ConvertWhere(filter)}";
 
             //Execute Task That Execute SqlStatement
             DbHelper.ExecuteNonQuery(SqlStatement);
@@ -143,18 +157,16 @@ namespace SevenTiny.Bantina.Bankinate
 
         public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {LambdaToSql.ConvertWhere(filter)}";
+
+            //Execute Task That Execute SqlStatement
+            DbHelper.ExecuteNonQueryAsync(SqlStatement);
         }
 
-        public void Dispose()
+        private Dictionary<string, object> GenerateUpdateSqlAndGetParams<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-
-        }
-
-        public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
-        {
-            string tableName = TableAttribute.GetName(typeof(TEntity));
-
             Dictionary<string, object> paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder();
@@ -203,33 +215,78 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     builder_front.Remove(builder_front.Length - 1, 1);
                     builder_front.Append(" From ");
-                    builder_front.Append(tableName);
+                    builder_front.Append(TableName);
                     builder_front.Append(" ");
                 }
             }
             //Generate SqlStatement
             this.SqlStatement = builder_front.Append(LambdaToSql.ConvertWhere(filter)).ToString();
+            return paramsDic;
+        }
+
+        public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
+
             //Execute Task That Execute SqlStatement
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
+
+            //Execute Task That Execute SqlStatement
+            DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
-        public List<TEntity> Query<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public List<TEntity> QueryList<TEntity>() where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement
+            this.SqlStatement = $"SELECT * FROM {TableName}";
+
+            return DbHelper.ExecuteList<TEntity>(SqlStatement);
         }
-        public TEntity QueryOne<TEntity>(string id) where TEntity : class
+
+        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement
+            this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)}";
+
+            return DbHelper.ExecuteList<TEntity>(SqlStatement);
         }
 
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement
+            this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} LIMIT 1";
+
+            return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
+        }
+
+        public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement
+            this.SqlStatement = $"SELECT COUNT(0) FROM {TableName} {LambdaToSql.ConvertWhere(filter)}";
+
+            return Convert.ToInt32(DbHelper.ExecuteScalar(SqlStatement));
+        }
+
+        public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            return QueryCount(filter) > 0;
         }
 
         public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
@@ -237,19 +294,71 @@ namespace SevenTiny.Bantina.Bankinate
             DbHelper.ExecuteNonQuery(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
+        public void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null)
+        {
+            DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
         public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
         {
             return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
-        public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
         {
-            throw new NotImplementedException();
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
+
+            return DbHelper.ExecuteList<TEntity>(SqlStatement);
         }
 
-        public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class
         {
-            return QueryCount(filter) > 0;
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
+
+            return DbHelper.ExecuteList<TEntity>(SqlStatement);
+        }
+
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, out int count, bool isDESC = false) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
+
+            List < TEntity> result = DbHelper.ExecuteList<TEntity>(SqlStatement);
+
+            count = result.Count;
+
+            return result;
+        }
+
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
+
+            List<TEntity> result = DbHelper.ExecuteList<TEntity>(SqlStatement);
+
+            count = result.Count;
+
+            return result;
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }

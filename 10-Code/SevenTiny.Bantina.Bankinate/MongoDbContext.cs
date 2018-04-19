@@ -1,4 +1,18 @@
-﻿using MongoDB.Driver;
+﻿/*********************************************************
+ * CopyRight: 7TINY CODE BUILDER. 
+ * Version: 5.0.0
+ * Author: 7tiny
+ * Address: Earth
+ * Create: 2018-04-19 23:58:08
+ * Modify: 2018-04-19 23:58:08
+ * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+ * GitHub: https://github.com/sevenTiny 
+ * Personal web site: http://www.7tiny.com 
+ * Technical WebSit: http://www.cnblogs.com/7tiny/ 
+ * Description: 
+ * Thx , Best Regards ~
+ *********************************************************/
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -112,27 +126,22 @@ namespace SevenTiny.Bantina.Bankinate
 
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            return Query(filter).FirstOrDefault();
+            return QueryList(filter).FirstOrDefault();
         }
 
-        public List<TEntity> Query<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public List<TEntity> QueryList<TEntity>() where TEntity : class
+        {
+            return GetCollection<TEntity>().Find(t => true).ToList();
+        }
+
+        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return GetCollection<TEntity>().Find(filter).ToList();
         }
 
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            throw new NotImplementedException();
-        }
-
-        public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
-        {
-            throw new NotImplementedException();
+            return Convert.ToInt32(GetCollection<TEntity>().Count(filter));
         }
 
         public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class

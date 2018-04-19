@@ -1,4 +1,18 @@
-﻿using MySql.Data.MySqlClient;
+﻿/*********************************************************
+ * CopyRight: 7TINY CODE BUILDER. 
+ * Version: 5.0.0
+ * Author: 7tiny
+ * Address: Earth
+ * Create: 2018-04-19 21:34:01
+ * Modify: 2018-04-19 21:34:01
+ * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+ * GitHub: https://github.com/sevenTiny 
+ * Personal web site: http://www.7tiny.com 
+ * Technical WebSit: http://www.cnblogs.com/7tiny/ 
+ * Description: 
+ * Thx , Best Regards ~
+ *********************************************************/
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +20,9 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Bankinate
 {
@@ -50,13 +66,6 @@ namespace SevenTiny.Bantina.Bankinate
         #endregion
 
         #region ExcuteNonQuery 执行sql语句或者存储过程,返回影响的行数---ExcuteNonQuery
-        /// <summary>
-        /// 执行sql语句或存储过程，返回受影响的行数,不带参数。
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 有默认值CommandType.Text</param>
-        /// <returns>返回受影响的行数</returns>
         public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
@@ -68,14 +77,6 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
-        /// <summary>
-        /// 执行sql语句或存储过程，返回受影响的行数。
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 t</param>
-        /// <param name="dictionary">SqlParameter[]参数数组，允许空</param>
-        /// <returns>返回受影响的行数</returns>
         public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
@@ -87,16 +88,31 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
+        public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        {
+            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
+                    return cmd.DbCommand.ExecuteNonQueryAsync();
+                }
+            }
+        }
+        public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
+        {
+            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);//参数增加了commandType 可以自己编辑执行方式
+                    return cmd.DbCommand.ExecuteNonQueryAsync();
+                }
+            }
+        }
         #endregion
 
         #region ExecuteScalar 执行sql语句或者存储过程,执行单条语句，返回单个结果---ScalarExecuteScalar
-        /// <summary>
-        /// 执行sql语句或存储过程 返回ExecuteScalar （返回自增的ID）不带参数
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 有默认值CommandType.Text</param>
-        /// <returns></returns>
         public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -108,14 +124,6 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
-        /// <summary>
-        /// 执行sql语句或存储过程 返回ExecuteScalar （返回自增的ID）
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型</param>
-        /// <param name="dictionary">SqlParameter[]参数数组，允许空</param>
-        /// <returns></returns>
         public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -128,16 +136,32 @@ namespace SevenTiny.Bantina.Bankinate
 
             }
         }
+        public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        {
+            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
+                    return cmd.DbCommand.ExecuteScalarAsync();
+                }
+            }
+        }
+        public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
+        {
+            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
+                    return cmd.DbCommand.ExecuteScalarAsync();
+                }
+
+            }
+        }
         #endregion
 
-        #region ExecuteScalar 执行sql语句或者存储过程,返回DataReader---DaataReader
-        /// <summary>
-        /// 执行sql语句或存储过程 返回DataReader 不带参数
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 有默认值CommandType.Text</param>
-        /// <returns></returns>
+        #region ExecuteReader 执行sql语句或者存储过程,返回DataReader---DataReader
         public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
@@ -146,14 +170,6 @@ namespace SevenTiny.Bantina.Bankinate
             PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
             return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
         }
-        /// <summary>
-        /// 执行sql语句或存储过程 返回DataReader
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型</param>
-        /// <param name="dictionary">SqlParameter[]参数数组，允许空</param>
-        /// <returns></returns>
         public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
@@ -170,14 +186,6 @@ namespace SevenTiny.Bantina.Bankinate
          * Update At 2017-3-2 14:58:45
          * Add the ExecuteDataTable Method into Sql_Helper_DG  
          **/
-
-        /// <summary>
-        /// 执行sql语句或存储过程，返回DataTable不带参数
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 有默认值CommandType.Text</param>
-        /// <returns></returns>
         public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -198,14 +206,6 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
-        /// <summary>
-        /// 执行sql语句或存储过程，返回DataTable
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型</param>
-        /// <param name="dictionary">SqlParameter[]参数数组，允许空</param>
-        /// <returns></returns>
         public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -229,13 +229,6 @@ namespace SevenTiny.Bantina.Bankinate
         #endregion
 
         #region ExecuteDataSet 执行sql语句或者存储过程,返回一个DataSet---DataSet
-        /// <summary>
-        /// 执行sql语句或存储过程，返回DataSet 不带参数
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型 有默认值CommandType.Text</param>
-        /// <returns></returns>
         public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -252,14 +245,6 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
-        /// <summary>
-        /// 执行sql语句或存储过程，返回DataSet
-        /// </summary>
-        /// <param name="ConnString">连接字符串，可以自定义，可以以使用SqlHelper_DG.ConnString</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">命令类型</param>
-        /// <param name="dictionary">SqlParameter[]参数数组，允许空</param>
-        /// <returns></returns>
         public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
@@ -281,34 +266,26 @@ namespace SevenTiny.Bantina.Bankinate
         #region ExecuteList Entity 执行sql语句或者存储过程，返回一个List<T>---List<T>
         public static List<Entity> ExecuteList<Entity>(string commandTextOrSpName, CommandType commandType = CommandType.Text) where Entity : class
         {
-            return GetListFromDataSet<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
+            return GetListFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
         }
         public static List<Entity> ExecuteList<Entity>(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary) where Entity : class
         {
-            return GetListFromDataSet<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
+            return GetListFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
         }
         #endregion
 
         #region ExecuteEntity 执行sql语句或者存储过程，返回一个Entity---Entity
         public static Entity ExecuteEntity<Entity>(string commandTextOrSpName, CommandType commandType = CommandType.Text) where Entity : class
         {
-            return GetEntityFromDataSet<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
+            return GetEntityFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
         }
         public static Entity ExecuteEntity<Entity>(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary) where Entity : class
         {
-            return GetEntityFromDataSet<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
+            return GetEntityFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
         }
         #endregion
 
         #region ---PreparCommand 构建一个通用的command对象供内部方法进行调用---
-        /// <summary>
-        /// 设置一个等待执行的SqlCommand对象
-        /// </summary>
-        /// <param name="conn">sqlconnection对象</param>
-        /// <param name="cmd">sqlcommmand对象</param>
-        /// <param name="commandTextOrSpName">sql语句或存储过程名称</param>
-        /// <param name="commandType">语句的类型</param>
-        /// <param name="dictionary">参数，sqlparameter类型，需要指出所有的参数名称</param>
         private static void PreparCommand(DbConnection conn, DbCommand cmd, string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary = null)
         {
             //打开连接
@@ -370,18 +347,12 @@ namespace SevenTiny.Bantina.Bankinate
         #endregion
 
         #region 通过Model反射返回结果集 Model为 Entity 泛型变量的真实类型---反射返回结果集
-        /// <summary>
-        /// 反射返回一个List T 类型的结果集
-        /// </summary>
-        /// <typeparam name="T">Model中对象类型</typeparam>
-        /// <param name="ds">DataSet结果集</param>
-        /// <returns></returns>
         public static List<Entity> GetListFromDataSet<Entity>(DataSet ds) where Entity : class
         {
             List<Entity> list = new List<Entity>();//实例化一个list对象
             PropertyInfo[] propertyInfos = typeof(Entity).GetProperties();     //获取T对象的所有公共属性
 
-            DataTable dt = ds.Tables[0];    // 获取到ds的dt
+            DataTable dt = ds.Tables[0];//获取到ds的dt
             if (dt.Rows.Count > 0)
             {
                 //判断读取的行是否>0 即数据库数据已被读取
@@ -423,12 +394,20 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return list;
         }
-        /// <summary>
-        /// 反射返回一个T类型的结果
-        /// </summary>
-        /// <typeparam name="T">Model中对象类型</typeparam>
-        /// <param name="reader">SqlDataReader结果集</param>
-        /// <returns></returns>
+        public static List<Entity> GetListFromDataSetV2<Entity>(DataSet ds) where Entity : class
+        {
+            List<Entity> list = new List<Entity>();
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    Entity entity = FillAdapter<Entity>.AutoFill(row);
+                    list.Add(entity);
+                }
+            }
+            return list;
+        }
         public static Entity GetEntityFromDataReader<Entity>(DbDataReader reader) where Entity : class
         {
             Entity model = System.Activator.CreateInstance<Entity>();           //实例化一个T类型对象
@@ -465,18 +444,74 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return default(Entity);//返回引用类型和值类型的默认值0或null
         }
-        /// <summary>
-        /// 反射返回一个T类型的结果
-        /// </summary>
-        /// <typeparam name="T">Model中对象类型</typeparam>
-        /// <param name="ds">DataSet结果集</param>
-        /// <returns></returns>
         public static Entity GetEntityFromDataSet<Entity>(DataSet ds) where Entity : class
         {
             return GetListFromDataSet<Entity>(ds).FirstOrDefault();
         }
+        public static Entity GetEntityFromDataSetV2<Entity>(DataSet ds) where Entity : class
+        {
+            DataTable dt = ds.Tables[0];// 获取到ds的dt
+            if (dt.Rows.Count > 0)
+            {
+                return FillAdapter<Entity>.AutoFill(dt.Rows[0]);
+            }
+            return default(Entity);
+        }
         #endregion
     }
+
+    /// <summary>
+    /// Auto Fill Adapter
+    /// </summary>
+    /// <typeparam name="Entity"></typeparam>
+    public class FillAdapter<Entity>
+    {
+        private static readonly Func<DataRow, Entity> funcCache = GetFactory();
+        public static Entity AutoFill(DataRow row)
+        {
+            return funcCache(row);
+        }
+        private static Func<DataRow, Entity> GetFactory()
+        {
+            var type = typeof(Entity);
+            var rowType = typeof(DataRow);
+            var rowDeclare = Expression.Parameter(rowType, "row");
+            var instanceDeclare = Expression.Parameter(type, "t");
+            //new Student()
+            var newExpression = Expression.New(type);
+            //(t = new Student())
+            var instanceExpression = Expression.Assign(instanceDeclare, newExpression);
+            //row == null
+            var nullEqualExpression = Expression.Equal(rowDeclare, Expression.Constant(null));
+            var containsMethod = typeof(DataColumnCollection).GetMethod("Contains");
+            var indexerMethod = rowType.GetMethod("get_Item", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(string) }, new[] { new ParameterModifier(1) });
+            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+            var setExpressions = new List<Expression>();
+            //row.Table.Columns
+            var columns = Expression.Property(Expression.Property(rowDeclare, "Table"), "Columns");
+            foreach (var propertyInfo in properties)
+            {
+                if (propertyInfo.CanWrite)
+                {
+                    //Id,Id is a property of Entity
+                    var propertyName = Expression.Constant(propertyInfo.Name, typeof(string));
+                    //row.Table.Columns.Contains("Id")
+                    var checkIfContainsColumn = Expression.Call(columns, containsMethod, propertyName);
+                    //t.Id
+                    var propertyExpression = Expression.Property(instanceDeclare, propertyInfo);
+                    //row.get_Item("Id")
+                    var value = Expression.Call(rowDeclare, indexerMethod, propertyName);
+                    //t.Id = Convert(row.get_Item("Id"), Int32)
+                    var proertyAssign = Expression.Assign(propertyExpression, Expression.Convert(value, propertyInfo.PropertyType));
+                    setExpressions.Add(Expression.IfThen(checkIfContainsColumn, proertyAssign));
+                }
+            }
+            var checkIfRowIsNull = Expression.IfThenElse(nullEqualExpression, Expression.Empty(), Expression.Block(setExpressions));
+            var body = Expression.Block(new[] { instanceDeclare }, newExpression, instanceExpression, checkIfRowIsNull, instanceDeclare);
+            return Expression.Lambda<Func<DataRow, Entity>>(body, rowDeclare).Compile();
+        }
+    }
+
     /**
     * author:qixiao
     * time:2017-9-18 18:02:23
