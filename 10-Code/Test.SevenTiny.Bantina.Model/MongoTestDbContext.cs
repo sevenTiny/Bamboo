@@ -6,9 +6,9 @@ using System.Text;
 namespace Test.SevenTiny.Bantina.Model
 {
     [DataBase("local")]
-    public class TestDbContext : MongoDbContext<TestDbContext>
+    public class MongoTestDbContext : MongoDbContext<MongoTestDbContext>
     {
-        public TestDbContext() : base("mongodb://192.168.1.116:39601/local")
+        public MongoTestDbContext() : base("mongodb://192.168.1.116:39601/local")
         {
 
         }

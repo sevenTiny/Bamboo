@@ -6,6 +6,9 @@
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Driver" Version="2.5.0" />
+    <PackageReference Include="MySql.Data" Version="6.10.6" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
   </ItemGroup>
 
 </Project>
