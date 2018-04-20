@@ -25,8 +25,6 @@ namespace SevenTiny.Bantina.Bankinate
         public static string ConvertWhere<T>(Expression<Func<T, bool>> where) where T : class
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append(" ");
-            builder.Append(where.Parameters.FirstOrDefault().Name);
             builder.Append(" WHERE ");
             if (where.Body is BinaryExpression be)
             {

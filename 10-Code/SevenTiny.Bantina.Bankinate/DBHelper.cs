@@ -482,7 +482,7 @@ namespace SevenTiny.Bantina.Bankinate
             //(t = new Student())
             var instanceExpression = Expression.Assign(instanceDeclare, newExpression);
             //row == null
-            var nullEqualExpression = Expression.Equal(rowDeclare, Expression.Constant(null));
+            var nullEqualExpression = Expression.NotEqual(rowDeclare, Expression.Constant(null));
             var containsMethod = typeof(DataColumnCollection).GetMethod("Contains");
             var indexerMethod = rowType.GetMethod("get_Item", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(string) }, new[] { new ParameterModifier(1) });
             var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
@@ -496,18 +496,23 @@ namespace SevenTiny.Bantina.Bankinate
                     //Id,Id is a property of Entity
                     var propertyName = Expression.Constant(propertyInfo.Name, typeof(string));
                     //row.Table.Columns.Contains("Id")
-                    var checkIfContainsColumn = Expression.Call(columns, containsMethod, propertyName);
+                    var checkIfContainsColumn =Expression.Call(columns, containsMethod, propertyName);
                     //t.Id
                     var propertyExpression = Expression.Property(instanceDeclare, propertyInfo);
                     //row.get_Item("Id")
                     var value = Expression.Call(rowDeclare, indexerMethod, propertyName);
                     //t.Id = Convert(row.get_Item("Id"), Int32)
-                    var proertyAssign = Expression.Assign(propertyExpression, Expression.Convert(value, propertyInfo.PropertyType));
-                    setExpressions.Add(Expression.IfThen(checkIfContainsColumn, proertyAssign));
+                    var propertyAssign = Expression.Assign(propertyExpression, Expression.Convert(value, propertyInfo.PropertyType));
+                    //t.Id = default(Int32)
+                    var propertyAssignDefault = Expression.Assign(propertyExpression, Expression.Default(propertyInfo.PropertyType));
+                    //if(row.Table.Columns.Contains("Id")&&!value.Equals(DBNull.Value<>)) {t.Id = Convert(row.get_Item("Id"), Int32)}else{t.Id = default(Int32)}
+                    var checkRowNull = Expression.IfThenElse(Expression.AndAlso(checkIfContainsColumn, Expression.NotEqual(value, Expression.Constant(System.DBNull.Value))), propertyAssign, propertyAssignDefault);
+                    //var checkContains = Expression.IfThen(checkIfContainsColumn, propertyAssign);
+                    setExpressions.Add(checkRowNull);
                 }
             }
-            var checkIfRowIsNull = Expression.IfThenElse(nullEqualExpression, Expression.Empty(), Expression.Block(setExpressions));
-            var body = Expression.Block(new[] { instanceDeclare }, newExpression, instanceExpression, checkIfRowIsNull, instanceDeclare);
+            var checkIfRowIsNull = Expression.IfThen(nullEqualExpression, Expression.Block(setExpressions));
+            var body = Expression.Block(new[] { instanceDeclare }, instanceExpression, checkIfRowIsNull, instanceDeclare);
             return Expression.Lambda<Func<DataRow, Entity>>(body, rowDeclare).Compile();
         }
     }
