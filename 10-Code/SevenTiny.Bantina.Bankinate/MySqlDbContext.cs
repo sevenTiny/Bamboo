@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Bankinate
 {
@@ -124,6 +125,8 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
 
+            MCache.MarkTableModify(TableName);
+
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
@@ -132,6 +135,8 @@ namespace SevenTiny.Bantina.Bankinate
             TableName = TableAttribute.GetName(typeof(TEntity));
 
             Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
+
+            MCache.MarkTableModify(TableName);
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
@@ -152,7 +157,8 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            //Execute Task That Execute SqlStatement
+            MCache.MarkTableModify(TableName);
+
             DbHelper.ExecuteNonQuery(SqlStatement);
         }
 
@@ -162,7 +168,8 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            //Execute Task That Execute SqlStatement
+            MCache.MarkTableModify(TableName);
+
             DbHelper.ExecuteNonQueryAsync(SqlStatement);
         }
 
@@ -230,7 +237,8 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
 
-            //Execute Task That Execute SqlStatement
+            MCache.MarkTableModify(TableName);
+
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
@@ -240,7 +248,8 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
 
-            //Execute Task That Execute SqlStatement
+            MCache.MarkTableModify(TableName);
+
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
@@ -248,27 +257,30 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement
             this.SqlStatement = $"SELECT * FROM {TableName}";
 
-            return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            return MCache.GetInCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, null, () =>
+              {
+                  return DbHelper.ExecuteList<TEntity>(SqlStatement);
+              });
         }
 
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            return MCache.GetInCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, filter, () =>
+            {
+                return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            });
         }
 
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1";
 
             return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
@@ -278,7 +290,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement
             this.SqlStatement = $"SELECT COUNT(0) FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
             return Convert.ToInt32(DbHelper.ExecuteScalar(SqlStatement));
@@ -308,7 +319,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
@@ -319,7 +329,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
@@ -330,11 +339,10 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
-            List < TEntity> result = DbHelper.ExecuteList<TEntity>(SqlStatement);
+            List<TEntity> result = DbHelper.ExecuteList<TEntity>(SqlStatement);
 
             count = result.Count;
 
@@ -345,7 +353,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            //Generate SqlStatement SELECT * FROM Student t ORDER BY t.Age DESC
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 

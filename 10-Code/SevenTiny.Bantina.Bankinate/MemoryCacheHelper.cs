@@ -21,9 +21,9 @@ namespace SevenTiny.Bantina.Bankinate
     {
         private static IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
-        public static void Put<TKey, TValue>(TKey key, TValue value) => _cache.Set(key, value);
-        public static void Put<TKey, TValue>(TKey key, TValue value, TimeSpan absoluteExpirationRelativeToNow) => _cache.Set(key, value, absoluteExpirationRelativeToNow);
-        public static void Put<TKey, TValue>(TKey key, TValue value, DateTime absoluteExpiration) => _cache.Set(key, value, absoluteExpiration - DateTime.Now);
+        public static TValue Put<TKey, TValue>(TKey key, TValue value) => _cache.Set(key, value);
+        public static TValue Put<TKey, TValue>(TKey key, TValue value, TimeSpan absoluteExpirationRelativeToNow) => _cache.Set(key, value, absoluteExpirationRelativeToNow);
+        public static TValue Put<TKey, TValue>(TKey key, TValue value, DateTime absoluteExpiration) => _cache.Set(key, value, absoluteExpiration - DateTime.Now);
         public static TValue Get<TKey, TValue>(TKey key)
         {
             if (Exist(key))

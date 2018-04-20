@@ -50,9 +50,9 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                     //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
 
                     //var grades = db.QueryList<Grade2>(t => true);
-
-                    var student = db.QueryOne<Student>(t => true);
-                    Console.WriteLine(student.Name);
+                    var list = db.QueryList<Student>(t => t.Name.Contains("monky"));
+                    //var student = db.QueryOne<Student>(t => true);
+                    //Console.WriteLine(student.Name);
                 }
             });
             Console.WriteLine();
