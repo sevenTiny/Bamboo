@@ -149,7 +149,7 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters.FirstOrDefault().Name} {LambdaToSql.ConvertWhere(filter)}";
+            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
             //Execute Task That Execute SqlStatement
             DbHelper.ExecuteNonQuery(SqlStatement);
@@ -159,7 +159,7 @@ namespace SevenTiny.Bantina.Bankinate
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
-            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters.FirstOrDefault().Name} {LambdaToSql.ConvertWhere(filter)}";
+            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
             //Execute Task That Execute SqlStatement
             DbHelper.ExecuteNonQueryAsync(SqlStatement);
@@ -258,7 +258,7 @@ namespace SevenTiny.Bantina.Bankinate
             TableName = TableAttribute.GetName(typeof(TEntity));
 
             //Generate SqlStatement
-            this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters.FirstOrDefault().Name} {LambdaToSql.ConvertWhere(filter)}";
+            this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
             return DbHelper.ExecuteList<TEntity>(SqlStatement);
         }
@@ -268,7 +268,7 @@ namespace SevenTiny.Bantina.Bankinate
             TableName = TableAttribute.GetName(typeof(TEntity));
 
             //Generate SqlStatement
-            this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters.FirstOrDefault().Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1";
+            this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1";
 
             return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
         }
@@ -278,7 +278,7 @@ namespace SevenTiny.Bantina.Bankinate
             TableName = TableAttribute.GetName(typeof(TEntity));
 
             //Generate SqlStatement
-            this.SqlStatement = $"SELECT COUNT(0) FROM {TableName} {filter.Parameters.FirstOrDefault().Name} {LambdaToSql.ConvertWhere(filter)}";
+            this.SqlStatement = $"SELECT COUNT(0) FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
             return Convert.ToInt32(DbHelper.ExecuteScalar(SqlStatement));
         }

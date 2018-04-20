@@ -32,7 +32,7 @@ namespace SevenTiny.Bantina.AutoMapper
         public static string GetTargetName(PropertyInfo property)
         {
             var attr = property.GetCustomAttributes<MapperAttribute>(true).FirstOrDefault();
-            return attr != null ? (attr as MapperAttribute).TargetName ?? default(string) : default(string);
+            return attr != null ? (attr as MapperAttribute).TargetName ?? property.Name : property.Name;
         }
     }
 }
