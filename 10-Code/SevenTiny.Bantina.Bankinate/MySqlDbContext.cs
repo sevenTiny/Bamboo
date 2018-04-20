@@ -38,6 +38,7 @@ namespace SevenTiny.Bantina.Bankinate
 
         public string SqlStatement { get; set; }
         public string TableName { get; set; }
+        public bool LocalCache { get; set; } = true;
 
         //Cache properties by type
         private Dictionary<Type, PropertyInfo[]> propertiesDic = new Dictionary<Type, PropertyInfo[]>();

@@ -39,8 +39,6 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                 GradeName = grade.Name
             };
 
-            Action<StudentDTO, School> action = (dto, sc) => dto.SchoolName = sc.Name;
-
             studentDTO.SchoolName = school.Name;
 
 

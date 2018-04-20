@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,31 +28,35 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
         private static void MySqlDbContextTest()
         {
-            using (MySqlTestDbContext db = new MySqlTestDbContext())
+           var result1= StopwatchHelper.Caculate(100,() =>
             {
-                //for (int i = 1; i < 4; i++)
-                //{
-                //    Student stu = new Student();
-                //    stu.Age = i;
-                //    stu.Name = $"monky-{i}";
-                //    stu.GradeId = i;
-                //    db.Add(stu);
-                //}
+                using (MySqlTestDbContext db = new MySqlTestDbContext())
+                {
+                    //for (int i = 1; i < 4; i++)
+                    //{
+                    //    Student stu = new Student();
+                    //    stu.Age = i;
+                    //    stu.Name = $"monky-{i}";
+                    //    stu.GradeId = i;
+                    //    db.Add(stu);
+                    //}
 
-                //var result = db.QueryOne<Student>(t => t.Name.Equals("monky-6"));
-                //result.Name = "monky-6";
-                //result.Age = 6;
-                //db.Update(t => t.Id == 109, result);
+                    //var result = db.QueryOne<Student>(t => t.Name.Equals("monky-6"));
+                    //result.Name = "monky-6";
+                    //result.Age = 6;
+                    //db.Update(t => t.Id == 109, result);
 
-                //var result = db.QueryCount<Student>(t => t.Name.Contains("1"));
-                //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
+                    //var result = db.QueryCount<Student>(t => t.Name.Contains("1"));
+                    //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
 
-                //var grades = db.QueryList<Grade2>(t => true);
+                    //var grades = db.QueryList<Grade2>(t => true);
 
-                var students = db.QueryList<Student>(t => true);
-                var stu = students.FirstOrDefault();
-                var gradeName = stu.Grade?.Name;
-            }
+                    var student = db.QueryOne<Student>(t => true);
+                    Console.WriteLine(student.Name);
+                }
+            });
+            Console.WriteLine();
+            Console.WriteLine($"QueryOne 100 sec：{result1.TotalMilliseconds} ms");
         }
     }
 }
