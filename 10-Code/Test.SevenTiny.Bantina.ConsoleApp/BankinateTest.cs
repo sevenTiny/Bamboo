@@ -15,7 +15,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
         private static void MongoDbTest()
         {
-            using (MongoTestDbContext db = new MongoTestDbContext ())
+            using (MongoTestDbContext db = new MongoTestDbContext())
             {
                 //db.Add<Grade>(new Grade { Name = "Three", GradeId = 9 });
 
@@ -36,8 +36,13 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                 //    db.Add(stu);
                 //}
 
+                var result = db.QueryOne<Student>(t => t.Name.Equals("monky-6"));
+                result.Name = "monky-6";
+                result.Age = 6;
+                //db.Update(t => t.Id == 109, result);
+
                 //var result = db.QueryCount<Student>(t => t.Name.Contains("1"));
-                var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
+                //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
             }
         }
     }
