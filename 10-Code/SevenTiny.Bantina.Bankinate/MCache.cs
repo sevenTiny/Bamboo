@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using cache = SevenTiny.Bantina.Bankinate.MemoryCacheHelper;
 
@@ -23,125 +24,551 @@ namespace SevenTiny.Bantina.Bankinate
 {
     /**
      * The cache memory1,quick memory value from sql statement.
+     * 
+     * Dictionary<string, Dictionary<string, object>>
+     * cache dictionary,storage cache like this structure
+     * {
+     *      "MCTable_TableName1":{
+     *                              "sqlkey":"data",
+     *                              "filterkey":"data",
+     *                              "tablekey":"data"
+     *                          },
+     *      "MCTable_TableName2":{
+     *                              "sqlkey":"data",
+     *                              "filterkey":"data",
+     *                              "tablekey":"data"
+     *                          }
+     * }
      * */
     internal class MCache
     {
-        //cache table modify mark,it will be cached when add/update/delete
-        public const string MCTable = "BankinateCache_Table_";
+        //cache entry point,also used to check table modify
+        public const string MC0 = "BankinateCache_MC0_";
+        //cache level 1 key prefix
+        public const string MC1 = "BankinateCache_MC1_";
         //cache level 2 key prefix
         public const string MC2 = "BankinateCache_MC2_";
         //cache time
         public static TimeSpan ExpiredTime => TimeSpan.FromDays(1);
 
-        private static readonly object locker = new object();
+        private static string EnterPoint { get; set; }
+        private static string SqlKey { get; set; }
+        private static string FilterKey { get; set; }
+        private static string TableKey { get; set; }
 
+        private static void SetKeys<TEntity>(string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter)
+        {
+            SetEnterPoint(tableName);
+            SqlKey = $"{MC1}{sqlstatement?.Trim() ?? string.Empty}";
+            FilterKey = $"{MC1}{filter?.ToString()?.Trim() ?? string.Empty}";
+            TableKey = $"{MC2}{tableName}";
+        }
+        private static void SetEnterPoint(string tableName)
+        {
+            EnterPoint = $"{MC0}{tableName}";
+        }
+
+        private static readonly object locker = new object();
+        private static readonly object tableQueryLocker = new object();
+
+        //clear all cache about table
         public static void MarkTableModify(string tableName)
         {
-            //no expired
-            cache.Put($"{MCTable}{tableName}", 1,DateTime.MaxValue);
-        }
-
-        public static TEntity GetInCacheIfNotExistReStoreEntity<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<TEntity> func) where TEntity : class
-        {
-            if (localCache)
+            SetEnterPoint(tableName);
+            if (cache.Exist(EnterPoint))
             {
-                TEntity result;
-                //check if table data has be changed
-                string mcTableKey = $"{MCTable}{tableName}";
-                int sqlstatementKey = sqlstatement.GetHashCode();
-
-                lock (locker)
+                cache.Delete(EnterPoint);
+            }
+        }
+        //if tableKey exist,update tableKey,no clear cache all about table.
+        public static void MarkTableModifyAdd<TEntity>(string tableName, TEntity entity) where TEntity : class
+        {
+            SetEnterPoint(tableName);
+            if (cache.Exist(EnterPoint))
+            {
+                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                if (enterPointDic.ContainsKey(TableKey))
                 {
-                    if (cache.Exist(mcTableKey))
+                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                    if (list != null)
                     {
-                        result = cache.Put(sqlstatementKey, func());
-                        cache.Delete(mcTableKey);
+                        list.Add(entity);
+                        enterPointDic[TableKey] = list;
+                        cache.Put(EnterPoint, enterPointDic);
                     }
                     else
                     {
-                        //1.if sqlstatement key exist,quick return!
-                        if (cache.Exist(sqlstatementKey))
+                        list = new List<TEntity>();
+                        list.Add(entity);
+                        enterPointDic[TableKey] = list;
+                        cache.Put(EnterPoint, enterPointDic);
+                    }
+                }
+                else
+                {
+                    cache.Delete(EnterPoint);
+                }
+            }
+        }
+        //if tableKey exist,update tableKey,no clear cache all about table.
+        public static void MarkTableModifyUpdate<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
+        {
+            SetEnterPoint(tableName);
+            if (cache.Exist(EnterPoint))
+            {
+                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                if (enterPointDic.ContainsKey(TableKey))
+                {
+                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                    if (list != null && list.Any())
+                    {
+                        var t = list.FirstOrDefault(filter.Compile());
+                        if (t != null)
                         {
-                            return result = cache.Get<object, TEntity>(sqlstatementKey);
-                        }
-                        //2.if sqlstatement key not exist,search in table cache.
-                        if (filter != null)
-                        {
-                            List<TEntity> list = GetTableListInCache<TEntity>(tableName);
-                            if (list != null && list.Any())
+                            list.Remove(t);
+                            //modify property without autocrease key!
+                            foreach (var item in typeof(TEntity).GetProperties())
                             {
-                                return result = list.Where(filter.Compile()).ToList().FirstOrDefault();
+                                if (item.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
+                                {
+                                    item.SetValue(entity, item.GetValue(t));
+                                }
+                            }
+                            list.Add(entity);
+                            enterPointDic[TableKey] = list;
+                            cache.Put(EnterPoint, enterPointDic);
+                        }
+                    }
+                }
+                else
+                {
+                    cache.Delete(EnterPoint);
+                }
+            }
+        }
+        //if tableKey exist,update tableKey,no clear cache all about table.
+        public static void MarkTableModifyDelete<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            SetEnterPoint(tableName);
+            if (cache.Exist(EnterPoint))
+            {
+                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                if (enterPointDic.ContainsKey(TableKey))
+                {
+                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                    if (list != null && list.Any())
+                    {
+                        var t = list.FirstOrDefault(filter.Compile());
+                        if (t != null)
+                        {
+                            list.Remove(t);
+                            enterPointDic[TableKey] = list;
+                            cache.Put(EnterPoint, enterPointDic);
+                        }
+                    }
+                }
+                else
+                {
+                    cache.Delete(EnterPoint);
+                }
+            }
+        }
+
+        //get table int a new thread in background
+        private static void GetTableBackground<TEntity>(string tableName) where TEntity : class
+        {
+            //if enter point not exist,get table async
+            if (!cache.Exist(EnterPoint))
+            {
+                Task.Run(() =>
+                {
+                    lock (tableQueryLocker)
+                    {
+                        List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
+                        if (!cache.Exist(EnterPoint))
+                        {
+                            cache.Put(EnterPoint, new Dictionary<string, object>
+                                 {
+                                     {TableKey,list }
+                                 }, ExpiredTime);
+                        }
+                        else
+                        {
+                            var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                            if (!enterPointDicInCache.ContainsKey(TableKey))
+                            {
+                                enterPointDicInCache[TableKey] = list;
+                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTime);
                             }
                         }
-                        //3.search in db,but start a thread to cache table at the sametime
-                        Task.Run(() =>
-                        {
-                            MCache.PutTableListIntoCache(tableName, DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}"));
-                        });
-
-                        return result = cache.Put(sqlstatementKey, func(), ExpiredTime);
                     }
+                });
+            }
+            else if (!cache.Get<string, Dictionary<string, object>>(EnterPoint).ContainsKey(TableKey))
+            {
+                //check if has query all table sql
+                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                if (enterPointDic.ContainsKey($"{MC1}{$"SELECT * FROM {tableName}".Trim()}"))
+                {
+                    enterPointDic[TableKey] = enterPointDic[SqlKey];
+                }
+                else
+                {
+                    Task.Run(() =>
+                    {
+                        lock (tableQueryLocker)
+                        {
+                            List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
+                            //thread safe(query agin)
+                            var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                            if (!enterPointDicInCache.ContainsKey(TableKey))
+                            {
+                                enterPointDicInCache[TableKey] = list;
+                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTime);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        #region Get in cache
+
+        public static object GetFromCacheIfNotExistReStoreCount<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<object> func, out bool fromCache) where TEntity : class
+        {
+            //mark if value from cache ?
+            fromCache = false;
+            //first call must!
+            SetKeys(tableName, sqlstatement, filter);
+
+            if (localCache)
+            {
+                object result = new object();
+                //0
+                GetTableBackground<TEntity>(tableName);
+
+                Dictionary<string, object> enterPointDic;
+
+                if (cache.Exist(EnterPoint))
+                {
+                    //get enterPoint of table
+                    enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    //1.if sqlstatement key exist,quick return!
+                    if (!string.IsNullOrEmpty(sqlstatement))
+                    {
+                        if (enterPointDic.ContainsKey(SqlKey))
+                        {
+                            fromCache = true;
+                            return enterPointDic[SqlKey];
+                        }
+                    }
+                    //1/2.if filter key exist,quick return!
+                    if (filter != null)
+                    {
+                        if (enterPointDic.ContainsKey(FilterKey))
+                        {
+                            fromCache = true;
+                            return enterPointDic[FilterKey];
+                        }
+                    }
+                    //2.if sqlstatement key not exist,search in table cache.
+                    if (enterPointDic.ContainsKey(TableKey))
+                    {
+                        List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                        if (list != null && list.Any())
+                        {
+                            fromCache = true;
+                            return list.Where(filter.Compile()).Count();
+                        }
+                    }
+                }
+                else
+                {
+                    enterPointDic = new Dictionary<string, object>();
+                }
+
+                //3.search in db,but start a thread to cache table at the sametime
+                if (!string.IsNullOrEmpty(sqlstatement))
+                {
+                    result = func();
+                    enterPointDic.Add(SqlKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
+                }
+                if (filter != null)
+                {
+                    result = func();
+                    enterPointDic.Add(FilterKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
+                }
+            }
+            return func();
+        }
+
+        public static TEntity GetFromCacheIfNotExistReStoreEntity<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<TEntity> func, out bool fromCache) where TEntity : class
+        {
+            //mark if value from cache ?
+            fromCache = false;
+            //first call must!
+            SetKeys(tableName, sqlstatement, filter);
+
+            if (localCache)
+            {
+                TEntity result = default(TEntity);
+
+                //0
+                GetTableBackground<TEntity>(tableName);
+
+                Dictionary<string, object> enterPointDic;
+
+                if (cache.Exist(EnterPoint))
+                {
+                    //get enterPoint of table
+                    enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+
+                    //1.if sqlstatement key exist,quick return!
+                    if (!string.IsNullOrEmpty(sqlstatement))
+                    {
+                        if (enterPointDic.ContainsKey(SqlKey))
+                        {
+                            fromCache = true;
+                            return enterPointDic[SqlKey] as TEntity;
+                        }
+                    }
+                    //1/2.if filter key exist,quick return!
+                    if (filter != null)
+                    {
+                        if (enterPointDic.ContainsKey(FilterKey))
+                        {
+                            fromCache = true;
+                            return enterPointDic[FilterKey] as TEntity;
+                        }
+                        //2.if sqlstatement key not exist,search in table cache.
+                        if (enterPointDic.ContainsKey(TableKey))
+                        {
+                            List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                            if (list != null && list.Any())
+                            {
+                                fromCache = true;
+                                return list.FirstOrDefault(filter.Compile());
+                            }
+                        }
+                    }
+                }
+
+                //3.search in db,but start a thread to cache table at the sametime
+                if (!string.IsNullOrEmpty(sqlstatement))
+                {
+                    result = func();
+                    if (cache.Exist(EnterPoint))
+                    {
+                        enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    }
+                    else
+                    {
+                        enterPointDic = new Dictionary<string, object>();
+                    }
+                    enterPointDic.Add(SqlKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
+                }
+                if (filter != null)
+                {
+                    result = func();
+                    if (cache.Exist(EnterPoint))
+                    {
+                        enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    }
+                    else
+                    {
+                        enterPointDic = new Dictionary<string, object>();
+                    }
+                    enterPointDic.Add(FilterKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
                 }
                 return result;
             }
             return func();
         }
 
-        public static List<TEntity> GetInCacheIfNotExistReStoreEntities<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<List<TEntity>> func) where TEntity : class
+        public static List<TEntity> GetFromCacheIfNotExistReStoreEntities<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<List<TEntity>> func, out bool fromCache) where TEntity : class
         {
+            //mark if value from cache ?
+            fromCache = false;
+            //first call must!
+            SetKeys(tableName, sqlstatement, filter);
+
             if (localCache)
             {
-                List<TEntity> result;
-                //check if table data has be changed
-                string mcTableKey = $"{MCTable}{tableName}";
-                int sqlstatementKey = sqlstatement.GetHashCode();
+                List<TEntity> result = default(List<TEntity>);
 
-                lock (locker)
+                //0
+                GetTableBackground<TEntity>(tableName);
+
+                Dictionary<string, object> enterPointDic;
+
+                if (cache.Exist(EnterPoint))
                 {
-                    if (cache.Exist(mcTableKey))
+                    //get enterPoint of table
+                    enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+
+                    //1.if sqlstatement key exist,quick return!
+                    if (!string.IsNullOrEmpty(sqlstatement))
                     {
-                        result = cache.Put(sqlstatementKey, func(), ExpiredTime);
-                        cache.Delete(mcTableKey);
-                    }
-                    else
-                    {
-                        //1.if sqlstatement key exist,quick return!
-                        if (cache.Exist(sqlstatementKey))
+                        if (enterPointDic.ContainsKey(SqlKey))
                         {
-                            return result = cache.Get<object, List<TEntity>>(sqlstatementKey);
+                            fromCache = true;
+                            return enterPointDic[SqlKey] as List<TEntity>;
+                        }
+                    }
+                    //1/2.if filter key exist,quick return!
+                    if (filter != null)
+                    {
+                        if (enterPointDic.ContainsKey(FilterKey))
+                        {
+                            fromCache = true;
+                            return enterPointDic[FilterKey] as List<TEntity>;
                         }
                         //2.if sqlstatement key not exist,search in table cache.
-
-                        List<TEntity> list = GetTableListInCache<TEntity>(tableName);
-                        if (filter != null)
+                        if (enterPointDic.ContainsKey(TableKey))
                         {
+                            List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
                             if (list != null && list.Any())
                             {
-                                return result = list.Where(filter.Compile()).ToList();
+                                fromCache = true;
+                                return list.Where(filter.Compile()).ToList();
                             }
                         }
-                        //3.search in db,but start a thread to cache table at the sametime
-                        Task.Run(() =>
-                        {
-                            MCache.PutTableListIntoCache(tableName, DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}"));
-                        });
-                        return result = cache.Put(sqlstatementKey, func(), ExpiredTime);
                     }
+                    //3.search in db,but start a thread to cache table at the sametime
+                    if (!string.IsNullOrEmpty(sqlstatement))
+                    {
+                        enterPointDic.Add(SqlKey, func());
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                    }
+                    if (filter != null)
+                    {
+                        enterPointDic.Add(FilterKey, func());
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                    }
+                }
+                else
+                {
+                    enterPointDic = new Dictionary<string, object>();
+                }
+
+                //3.search in db,but start a thread to cache table at the sametime
+                if (!string.IsNullOrEmpty(sqlstatement))
+                {
+                    result = func();
+                    enterPointDic.Add(SqlKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
+                }
+                if (filter != null)
+                {
+                    result = func();
+                    enterPointDic.Add(FilterKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
                 }
                 return result;
             }
             return func();
         }
+        public static List<TEntity> GetFromCacheIfNotExistReStoreEntitiesPaging<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC, Func<List<TEntity>> func, out int count, out bool fromCache) where TEntity : class
+        {
+            count = 0;
+            //mark if value from cache ?
+            fromCache = false;
+            //first call must!
+            SetKeys(tableName, sqlstatement, filter);
 
-        private static List<TEntity> GetTableListInCache<TEntity>(string tableName) where TEntity : class
-        {
-            string key = $"{MC2}{tableName}";
-            return cache.Get<object, List<TEntity>>(key);
+            if (localCache)
+            {
+                List<TEntity> result = default(List<TEntity>);
+
+                //0
+                GetTableBackground<TEntity>(tableName);
+
+                Dictionary<string, object> enterPointDic;
+
+                if (cache.Exist(EnterPoint))
+                {
+                    //get enterPoint of table
+                    enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+
+                    //1.if sqlstatement key exist,quick return!
+                    if (!string.IsNullOrEmpty(sqlstatement))
+                    {
+                        if (enterPointDic.ContainsKey(SqlKey))
+                        {
+                            fromCache = true;
+                            List<TEntity> list = enterPointDic[SqlKey] as List<TEntity>;
+                            count = list.Count;
+                            return list;
+                        }
+                    }
+                    //2.if sqlstatement key not exist,search in table cache.
+                    if (enterPointDic.ContainsKey(TableKey))
+                    {
+                        List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                        if (list != null && list.Any())
+                        {
+                            fromCache = true;
+                            count = list.Count;
+                            //filter
+                            if (filter != null && enterPointDic.ContainsKey(FilterKey))
+                            {
+                                list = list.Where(filter.Compile()).ToList();
+                            }
+                            //desc orderby
+                            if (isDESC)
+                            {
+                                list = list.OrderByDescending(orderBy.Compile()).ToList();
+                            }
+                            else
+                            {
+                                list = list.OrderBy(orderBy.Compile()).ToList();
+                            }
+                            //page
+                            list = list.Skip(pageIndex * pageSize).Take(pageSize).ToList();
+                            return list;
+                        }
+                    }
+                    //3.search in db,but start a thread to cache table at the sametime
+                    if (!string.IsNullOrEmpty(sqlstatement))
+                    {
+                        result = func();
+                        enterPointDic.Add(SqlKey, result);
+                        count = result.Count;
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                    }
+                }
+                else
+                {
+                    enterPointDic = new Dictionary<string, object>();
+                }
+
+                //3.search in db,but start a thread to cache table at the sametime
+                if (!string.IsNullOrEmpty(sqlstatement))
+                {
+                    result = func();
+                    count = result.Count;
+                    enterPointDic.Add(SqlKey, result);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    return result;
+                }
+
+                return result;
+            }
+            var re = func();
+            count = re.Count;
+            return func();
         }
-        private static void PutTableListIntoCache<TEntity>(string tableName, List<TEntity> listOfTable) where TEntity : class
-        {
-            string key = $"{MC2}{tableName}";
-            cache.Put(key, listOfTable, ExpiredTime);
-        }
+
+        #endregion
     }
 }
