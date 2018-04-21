@@ -24,7 +24,7 @@ namespace SevenTiny.Bantina.AutoMapper
         public static string GetName(Type type)
         {
             var attr = type.GetCustomAttributes(typeof(MapperClassAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as MapperClassAttribute).Name ?? default(string) : default(string);
+            return attr != null ? (attr as MapperClassAttribute).Name ?? type.Name: type.Name;
         }
     }
 }
