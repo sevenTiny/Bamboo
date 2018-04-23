@@ -38,7 +38,7 @@ namespace SevenTiny.Bantina.Bankinate
 
         public string SqlStatement { get; set; }
         public string TableName { get; set; }
-        public bool LocalCache { get; set; } = true;
+        public bool LocalCache { get; set; } = false;
         public bool IsFromCache { get; set; } = false;
 
         //Cache properties by type
