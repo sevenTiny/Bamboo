@@ -49,7 +49,7 @@ namespace SevenTiny.Bantina.Bankinate
         //cache level 2 key prefix
         public const string MC2 = "BankinateCache_MC2_";
         //cache time
-        public static TimeSpan ExpiredTime => TimeSpan.FromDays(1);
+        public static TimeSpan ExpiredTimeSpan { get; set; } = TimeSpan.FromDays(1);
 
         private static string EnterPoint { get; set; }
         private static string SqlKey { get; set; }
@@ -190,7 +190,7 @@ namespace SevenTiny.Bantina.Bankinate
                             cache.Put(EnterPoint, new Dictionary<string, object>
                                  {
                                      {TableKey,list }
-                                 }, ExpiredTime);
+                                 }, ExpiredTimeSpan);
                         }
                         else
                         {
@@ -198,7 +198,7 @@ namespace SevenTiny.Bantina.Bankinate
                             if (!enterPointDicInCache.ContainsKey(TableKey))
                             {
                                 enterPointDicInCache[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTime);
+                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
                             }
                         }
                     }
@@ -224,7 +224,7 @@ namespace SevenTiny.Bantina.Bankinate
                             if (!enterPointDicInCache.ContainsKey(TableKey))
                             {
                                 enterPointDicInCache[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTime);
+                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
                             }
                         }
                     });
@@ -292,14 +292,14 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     result = func();
                     enterPointDic.Add(SqlKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
                 if (filter != null)
                 {
                     result = func();
                     enterPointDic.Add(FilterKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
             }
@@ -370,7 +370,7 @@ namespace SevenTiny.Bantina.Bankinate
                         enterPointDic = new Dictionary<string, object>();
                     }
                     enterPointDic.Add(SqlKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
                 if (filter != null)
@@ -385,7 +385,7 @@ namespace SevenTiny.Bantina.Bankinate
                         enterPointDic = new Dictionary<string, object>();
                     }
                     enterPointDic.Add(FilterKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
                 return result;
@@ -446,12 +446,12 @@ namespace SevenTiny.Bantina.Bankinate
                     if (!string.IsNullOrEmpty(sqlstatement))
                     {
                         enterPointDic.Add(SqlKey, func());
-                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan) as List<TEntity>;
                     }
                     if (filter != null)
                     {
                         enterPointDic.Add(FilterKey, func());
-                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan) as List<TEntity>;
                     }
                 }
                 else
@@ -464,14 +464,14 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     result = func();
                     enterPointDic.Add(SqlKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
                 if (filter != null)
                 {
                     result = func();
                     enterPointDic.Add(FilterKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
                 return result;
@@ -544,7 +544,7 @@ namespace SevenTiny.Bantina.Bankinate
                         result = func();
                         enterPointDic.Add(SqlKey, result);
                         count = result.Count;
-                        return cache.Put(EnterPoint, enterPointDic, ExpiredTime) as List<TEntity>;
+                        return cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan) as List<TEntity>;
                     }
                 }
                 else
@@ -558,7 +558,7 @@ namespace SevenTiny.Bantina.Bankinate
                     result = func();
                     count = result.Count;
                     enterPointDic.Add(SqlKey, result);
-                    cache.Put(EnterPoint, enterPointDic, ExpiredTime);
+                    cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
 
