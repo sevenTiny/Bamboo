@@ -47,7 +47,9 @@ namespace SevenTiny.Bantina.Bankinate
     {
         void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null);
         void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null);
-        object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null);
+        object ExecuteQueryObjectSql(string sqlStatement, IDictionary<string, object> parms = null);
+        TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
+        List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
     }
 
     public interface IQueryOperate

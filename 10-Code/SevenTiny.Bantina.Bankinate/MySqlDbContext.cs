@@ -337,9 +337,19 @@ namespace SevenTiny.Bantina.Bankinate
             DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
-        public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
+        public object ExecuteQueryObjectSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
+            return DbHelper.ExecuteScalar(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
+        public TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
+        {
+            return DbHelper.ExecuteEntity<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
+        public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity:class
+        {
+            return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
         public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
