@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>SevenTiny.Bantina.Bankinate</title>
+    <authors>7tiny</authors>
+    <owners>www.7tiny.com</owners>
+    <licenseUrl>https://github.com/sevenTiny/SevenTiny.Bantina</licenseUrl>
+    <projectUrl>https://github.com/sevenTiny/SevenTiny.Bantina</projectUrl>
+    <iconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>Bankinate SevenTiny.Bantina</tags>
+  </metadata>
+</package>
