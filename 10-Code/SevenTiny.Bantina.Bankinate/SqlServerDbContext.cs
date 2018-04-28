@@ -41,7 +41,7 @@ namespace SevenTiny.Bantina.Bankinate
         public string SqlStatement { get; set; }
         public string TableName { get; set; }
         public bool LocalCache { get; set; } = false;
-        public TimeSpan CacheExpiredTimeSpan { get; set; }= TimeSpan.FromDays(1);
+        public TimeSpan CacheExpiredTimeSpan { get; set; } = TimeSpan.FromDays(1);
         public bool IsFromCache { get; set; } = false;
 
         //Cache properties by type
@@ -340,6 +340,21 @@ namespace SevenTiny.Bantina.Bankinate
         public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
         {
             return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
+        public object ExecuteQueryObjectSql(string sqlStatement, IDictionary<string, object> parms = null)
+        {
+            return DbHelper.ExecuteScalar(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
+        public TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
+        {
+            return DbHelper.ExecuteEntity<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+
+        public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
+        {
+            return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
         public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
