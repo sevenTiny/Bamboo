@@ -66,6 +66,7 @@ namespace SevenTiny.Bantina.Bankinate
             builder_behind.Append(" VALUES (");
 
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+            string columnName = string.Empty;
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 //if not column mark exist,jump to next
@@ -84,12 +85,13 @@ namespace SevenTiny.Bantina.Bankinate
                     builder_front.Append(keyAttr.GetName(propertyInfo.Name));
                     builder_front.Append(",");
                     builder_behind.Append("@");
-                    builder_behind.Append(keyAttr.GetName(propertyInfo.Name));
+                    columnName = keyAttr.GetName(propertyInfo.Name).Replace("`", "");
+                    builder_behind.Append(columnName);
                     builder_behind.Append(",");
 
-                    if (!paramsDic.ContainsKey(keyAttr.GetName(propertyInfo.Name)))
+                    if (!paramsDic.ContainsKey(columnName))
                     {
-                        paramsDic.Add(keyAttr.GetName(propertyInfo.Name), propertyInfo.GetValue(entity));
+                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
                     }
                 }
                 //Column :
@@ -97,13 +99,13 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     builder_front.Append(column.GetName(propertyInfo.Name));
                     builder_front.Append(",");
-
                     builder_behind.Append("@");
-                    builder_behind.Append(column.GetName(propertyInfo.Name));
+                    columnName = column.GetName(propertyInfo.Name).Replace("`", "");
+                    builder_behind.Append(columnName);
                     builder_behind.Append(",");
-                    if (!paramsDic.ContainsKey(column.GetName(propertyInfo.Name)))
+                    if (!paramsDic.ContainsKey(columnName))
                     {
-                        paramsDic.Add(column.GetName(propertyInfo.Name), propertyInfo.GetValue(entity));
+                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
                     }
                 }
                 //the end
@@ -188,6 +190,7 @@ namespace SevenTiny.Bantina.Bankinate
             builder_front.Append(" SET ");
 
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+            string columnName = string.Empty;
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 //AutoIncrease : if property is auto increase attribute skip this column.
@@ -201,12 +204,13 @@ namespace SevenTiny.Bantina.Bankinate
                     builder_front.Append(keyAttr.GetName(propertyInfo.Name));
                     builder_front.Append("=");
                     builder_front.Append("@");
-                    builder_front.Append(keyAttr.GetName(propertyInfo.Name));
+                    columnName = keyAttr.GetName(propertyInfo.Name).Replace("`", "");
+                    builder_front.Append(columnName);
                     builder_front.Append(",");
 
-                    if (!paramsDic.ContainsKey(keyAttr.GetName(propertyInfo.Name)))
+                    if (!paramsDic.ContainsKey(columnName))
                     {
-                        paramsDic.Add(keyAttr.GetName(propertyInfo.Name), propertyInfo.GetValue(entity));
+                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
                     }
                 }
                 //Column :
@@ -215,12 +219,13 @@ namespace SevenTiny.Bantina.Bankinate
                     builder_front.Append(columnAttr.GetName(propertyInfo.Name));
                     builder_front.Append("=");
                     builder_front.Append("@");
-                    builder_front.Append(columnAttr.GetName(propertyInfo.Name));
+                    columnName = columnAttr.GetName(propertyInfo.Name).Replace("`", "");
+                    builder_front.Append(columnName);
                     builder_front.Append(",");
 
-                    if (!paramsDic.ContainsKey(columnAttr.GetName(propertyInfo.Name)))
+                    if (!paramsDic.ContainsKey(columnName))
                     {
-                        paramsDic.Add(columnAttr.GetName(propertyInfo.Name), propertyInfo.GetValue(entity));
+                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
                     }
                 }
                 //the end
@@ -272,11 +277,45 @@ namespace SevenTiny.Bantina.Bankinate
             return result;
         }
 
+        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
+
+            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, null, () =>
+            {
+                return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            }, out bool fromCache);
+
+            IsFromCache = fromCache;
+
+            return result;
+        }
+
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
 
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+
+            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, filter, () =>
+            {
+                return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            }, out bool fromCache);
+
+            IsFromCache = fromCache;
+
+            return result;
+        }
+
+        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
+        {
+            TableName = TableAttribute.GetName(typeof(TEntity));
+
+            string desc = isDESC ? "DESC" : "ASC";
+            this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
 
             var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, filter, () =>
             {
@@ -347,7 +386,7 @@ namespace SevenTiny.Bantina.Bankinate
             return DbHelper.ExecuteEntity<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
-        public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity:class
+        public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
         {
             return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
