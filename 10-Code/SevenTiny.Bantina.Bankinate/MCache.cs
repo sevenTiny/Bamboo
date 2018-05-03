@@ -4,7 +4,7 @@
  * Author: 7tiny
  * Address: Earth
  * Create: 2018-04-20 17:05:42
- * Modify: 2018-04-20 17:05:42
+ * Modify: 2018-5-3 16:26:16
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -42,37 +42,44 @@ namespace SevenTiny.Bantina.Bankinate
      * */
     internal class MCache
     {
+        private MCache() { }
+        public static MCache Instance = new MCache();
         //cache entry point,also used to check table modify
         public const string MC0 = "BankinateCache_MC0_";
         //cache level 1 key prefix
         public const string MC1 = "BankinateCache_MC1_";
         //cache level 2 key prefix
         public const string MC2 = "BankinateCache_MC2_";
+        //mark if table scaning...
+        public const string MCScaning = "BankinateCacheScaning_";
         //cache time
-        public static TimeSpan ExpiredTimeSpan { get; set; } = TimeSpan.FromDays(1);
+        public TimeSpan ExpiredTimeSpan { get; set; } = TimeSpan.FromDays(1);
 
-        private static string EnterPoint { get; set; }
-        private static string SqlKey { get; set; }
-        private static string FilterKey { get; set; }
-        private static string TableKey { get; set; }
+        private string EnterPoint { get; set; }
+        private string SqlKey { get; set; }
+        private string FilterKey { get; set; }
+        private string TableKey { get; set; }
+        private string ScaningKey { get; set; }
 
-        private static void SetKeys<TEntity>(string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter)
+        private void SetKeys<TEntity>(string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter)
         {
             SetEnterPoint(tableName);
             SqlKey = $"{MC1}{sqlstatement?.Trim() ?? string.Empty}";
             FilterKey = $"{MC1}{filter?.ToString()?.Trim() ?? string.Empty}";
             TableKey = $"{MC2}{tableName}";
+            ScaningKey = $"{MCScaning}{tableName}";
         }
-        private static void SetEnterPoint(string tableName)
+        private void SetEnterPoint(string tableName)
         {
             EnterPoint = $"{MC0}{tableName}";
         }
 
-        private static readonly object locker = new object();
-        private static readonly object tableQueryLocker = new object();
+        //locker
+        private readonly object tableScaningLocker = new object();
+        private readonly object tableModifyLocker = new object();
 
         //clear all cache about table
-        public static void MarkTableModify(string tableName)
+        public void MarkTableModify(string tableName)
         {
             SetEnterPoint(tableName);
             if (cache.Exist(EnterPoint))
@@ -81,160 +88,196 @@ namespace SevenTiny.Bantina.Bankinate
             }
         }
         //if tableKey exist,update tableKey,no clear cache all about table.
-        public static void MarkTableModifyAdd<TEntity>(string tableName, TEntity entity) where TEntity : class
+        public void MarkTableModifyAdd<TEntity>(string tableName, TEntity entity) where TEntity : class
         {
             SetEnterPoint(tableName);
-            if (cache.Exist(EnterPoint))
+            //one thread modify
+            lock (tableModifyLocker)
             {
-                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                if (enterPointDic.ContainsKey(TableKey))
+                if (cache.Exist(EnterPoint))
                 {
-                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
-                    if (list != null)
+                    var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    if (enterPointDic.ContainsKey(TableKey))
                     {
-                        list.Add(entity);
-                        enterPointDic[TableKey] = list;
-                        cache.Put(EnterPoint, enterPointDic);
-                    }
-                    else
-                    {
-                        list = new List<TEntity>();
-                        list.Add(entity);
-                        enterPointDic[TableKey] = list;
-                        cache.Put(EnterPoint, enterPointDic);
-                    }
-                }
-                else
-                {
-                    cache.Delete(EnterPoint);
-                }
-            }
-        }
-        //if tableKey exist,update tableKey,no clear cache all about table.
-        public static void MarkTableModifyUpdate<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
-        {
-            SetEnterPoint(tableName);
-            if (cache.Exist(EnterPoint))
-            {
-                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                if (enterPointDic.ContainsKey(TableKey))
-                {
-                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
-                    if (list != null && list.Any())
-                    {
-                        var t = list.FirstOrDefault(filter.Compile());
-                        if (t != null)
+                        List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                        if (list != null)
                         {
-                            list.Remove(t);
-                            //modify property without autocrease key!
-                            foreach (var item in typeof(TEntity).GetProperties())
-                            {
-                                if (item.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
-                                {
-                                    item.SetValue(entity, item.GetValue(t));
-                                }
-                            }
+                            list.Add(entity);
+                            enterPointDic[TableKey] = list;
+                            cache.Put(EnterPoint, enterPointDic);
+                        }
+                        else
+                        {
+                            list = new List<TEntity>();
                             list.Add(entity);
                             enterPointDic[TableKey] = list;
                             cache.Put(EnterPoint, enterPointDic);
                         }
                     }
-                }
-                else
-                {
-                    cache.Delete(EnterPoint);
+                    else
+                    {
+                        //if table full cache not exist,remove others level-1 keys,re-get next;
+                        cache.Delete(EnterPoint);
+                    }
                 }
             }
         }
         //if tableKey exist,update tableKey,no clear cache all about table.
-        public static void MarkTableModifyDelete<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public void MarkTableModifyUpdate<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             SetEnterPoint(tableName);
-            if (cache.Exist(EnterPoint))
+            //one thread modify
+            lock (tableModifyLocker)
             {
-                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                if (enterPointDic.ContainsKey(TableKey))
+                if (cache.Exist(EnterPoint))
                 {
-                    List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
-                    if (list != null && list.Any())
+                    var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    if (enterPointDic.ContainsKey(TableKey))
                     {
-                        var t = list.FirstOrDefault(filter.Compile());
-                        if (t != null)
+                        List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                        if (list != null && list.Any())
                         {
-                            list.Remove(t);
-                            enterPointDic[TableKey] = list;
-                            cache.Put(EnterPoint, enterPointDic);
+                            var t = list.FirstOrDefault(filter.Compile());
+                            if (t != null)
+                            {
+                                list.Remove(t);
+                                //modify property without autocrease key!
+                                foreach (var item in typeof(TEntity).GetProperties())
+                                {
+                                    if (item.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
+                                    {
+                                        item.SetValue(entity, item.GetValue(t));
+                                    }
+                                }
+                                list.Add(entity);
+                                enterPointDic[TableKey] = list;
+                                cache.Put(EnterPoint, enterPointDic);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    cache.Delete(EnterPoint);
+                    else
+                    {
+                        //if table full cache not exist,remove others level-1 keys,re-get next;
+                        cache.Delete(EnterPoint);
+                    }
                 }
             }
         }
-
-        //get table int a new thread in background
-        private static void GetTableBackground<TEntity>(string tableName) where TEntity : class
+        //if tableKey exist,update tableKey,no clear cache all about table.
+        public void MarkTableModifyDelete<TEntity>(string tableName, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            //if enter point not exist,get table async
-            if (!cache.Exist(EnterPoint))
+            SetEnterPoint(tableName);
+            //one thread modify
+            lock (tableModifyLocker)
             {
-                Task.Run(() =>
+                if (cache.Exist(EnterPoint))
                 {
-                    lock (tableQueryLocker)
+                    var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    if (enterPointDic.ContainsKey(TableKey))
                     {
-                        List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
-                        if (!cache.Exist(EnterPoint))
+                        List<TEntity> list = enterPointDic[TableKey] as List<TEntity>;
+                        if (list != null && list.Any())
                         {
-                            cache.Put(EnterPoint, new Dictionary<string, object>
-                                 {
-                                     {TableKey,list }
-                                 }, ExpiredTimeSpan);
-                        }
-                        else
-                        {
-                            var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                            if (!enterPointDicInCache.ContainsKey(TableKey))
+                            var t = list.FirstOrDefault(filter.Compile());
+                            if (t != null)
                             {
-                                enterPointDicInCache[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
+                                list.Remove(t);
+                                enterPointDic[TableKey] = list;
+                                cache.Put(EnterPoint, enterPointDic);
                             }
                         }
                     }
-                });
-            }
-            else if (!cache.Get<string, Dictionary<string, object>>(EnterPoint).ContainsKey(TableKey))
-            {
-                //check if has query all table sql
-                var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                if (enterPointDic.ContainsKey($"{MC1}{$"SELECT * FROM {tableName}".Trim()}"))
-                {
-                    enterPointDic[TableKey] = enterPointDic[SqlKey];
+                    else
+                    {
+                        //if table full cache not exist,remove others level-1 keys,re-get next;
+                        cache.Delete(EnterPoint);
+                    }
                 }
-                else
+            }
+        }
+        //get table int a new thread in background
+        private void GetTableBackground<TEntity>(string tableName) where TEntity : class
+        {
+            /**
+             * 2018-5-3 16:28:01
+             * add scaningkey support,if one thread scaning,others use sql quick query.
+             * */
+            //if scaning... wait background thread and query by sql first;
+            if (!cache.Exist(ScaningKey))
+            {
+                //if enter point not exist,get table async
+                if (!cache.Exist(EnterPoint))
                 {
                     Task.Run(() =>
                     {
-                        lock (tableQueryLocker)
+                        lock (tableScaningLocker)
                         {
-                            List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
-                            //thread safe(query agin)
-                            var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
-                            if (!enterPointDicInCache.ContainsKey(TableKey))
+                            if (!cache.Exist(ScaningKey) && !cache.Exist(EnterPoint))
                             {
-                                enterPointDicInCache[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
+                                //mark scaning...
+                                cache.Put(ScaningKey, 1, ExpiredTimeSpan);
+                                List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
+                                if (!cache.Exist(EnterPoint))
+                                {
+                                    cache.Put(EnterPoint, new Dictionary<string, object>
+                                 {
+                                     {TableKey,list }
+                                 }, ExpiredTimeSpan);
+                                }
+                                else
+                                {
+                                    var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                                    if (!enterPointDicInCache.ContainsKey(TableKey))
+                                    {
+                                        enterPointDicInCache[TableKey] = list;
+                                        cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
+                                    }
+                                }
+                                //remove scaing mark
+                                cache.Delete(ScaningKey);
                             }
                         }
                     });
+                }
+                else if (!cache.Get<string, Dictionary<string, object>>(EnterPoint).ContainsKey(TableKey))
+                {
+                    //check if has query all table sql
+                    var enterPointDic = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                    if (enterPointDic.ContainsKey($"{MC1}{$"SELECT * FROM {tableName}".Trim()}"))
+                    {
+                        enterPointDic[TableKey] = enterPointDic[SqlKey];
+                    }
+                    else
+                    {
+                        Task.Run(() =>
+                        {
+                            lock (tableScaningLocker)
+                            {
+                                if (!cache.Exist(ScaningKey) && !cache.Get<string, Dictionary<string, object>>(EnterPoint).ContainsKey(TableKey))
+                                {
+                                    //mark scaning...
+                                    cache.Put(ScaningKey, 1, ExpiredTimeSpan);
+                                    //start scaning...
+                                    List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
+                                    //thread safe(query agin)
+                                    var enterPointDicInCache = cache.Get<string, Dictionary<string, object>>(EnterPoint);
+                                    if (!enterPointDicInCache.ContainsKey(TableKey))
+                                    {
+                                        enterPointDicInCache[TableKey] = list;
+                                        cache.Put(EnterPoint, enterPointDicInCache, ExpiredTimeSpan);
+                                    }
+                                }
+                                //remove scaing mark
+                                cache.Delete(ScaningKey);
+                            }
+                        });
+                    }
                 }
             }
         }
 
         #region Get in cache
-
-        public static object GetFromCacheIfNotExistReStoreCount<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<object> func, out bool fromCache) where TEntity : class
+        public object GetFromCacheIfNotExistReStore_Count<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<object> func, out bool fromCache) where TEntity : class
         {
             //mark if value from cache ?
             fromCache = false;
@@ -305,8 +348,7 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return func();
         }
-
-        public static TEntity GetFromCacheIfNotExistReStoreEntity<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<TEntity> func, out bool fromCache) where TEntity : class
+        public TEntity GetFromCacheIfNotExistReStore_Entity<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<TEntity> func, out bool fromCache) where TEntity : class
         {
             //mark if value from cache ?
             fromCache = false;
@@ -392,8 +434,7 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return func();
         }
-
-        public static List<TEntity> GetFromCacheIfNotExistReStoreEntities<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<List<TEntity>> func, out bool fromCache) where TEntity : class
+        public List<TEntity> GetFromCacheIfNotExistReStore_Entities<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, Func<List<TEntity>> func, out bool fromCache) where TEntity : class
         {
             //mark if value from cache ?
             fromCache = false;
@@ -478,7 +519,7 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return func();
         }
-        public static List<TEntity> GetFromCacheIfNotExistReStoreEntitiesPaging<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC, Func<List<TEntity>> func, out int count, out bool fromCache) where TEntity : class
+        public List<TEntity> GetFromCacheIfNotExistReStoreEntitiesPaging<TEntity>(bool localCache, string tableName, string sqlstatement, Expression<Func<TEntity, bool>> filter, int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC, Func<List<TEntity>> func, out int count, out bool fromCache) where TEntity : class
         {
             count = 0;
             //mark if value from cache ?
@@ -561,14 +602,12 @@ namespace SevenTiny.Bantina.Bankinate
                     cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                     return result;
                 }
-
                 return result;
             }
             var re = func();
             count = re.Count;
             return func();
         }
-
         #endregion
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Test.SevenTiny.Bantina.Model;
 using static Newtonsoft.Json.JsonConvert;
@@ -13,7 +14,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         public static void Test()
         {
-            SqlServerTest();
+            BankinateCacheTest();
         }
 
         private static void MongoDbTest()
@@ -63,10 +64,11 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         private static void BankinateCacheTest()
         {
             int i = 0;
-            var result1 = StopwatchHelper.Caculate(3, () =>
+            var result1 = StopwatchHelper.Caculate(100, () =>
             {
                 using (var db = new MySqlTestDbContext())
                 {
+                    Thread.Sleep(1000);
                     i++;
                     //Task.Run(() =>
                     //{
@@ -94,28 +96,28 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
                     Console.WriteLine(db.IsFromCache);
 
-                    var stu4 = db.QueryOne<Student>(t => t.Id == 207);
+                    //var stu4 = db.QueryOne<Student>(t => t.Id == 207);
 
-                    Console.WriteLine(db.IsFromCache);
+                    //Console.WriteLine(db.IsFromCache);
 
-                    var stu5 = db.QueryList<Student>(t => t.Name.StartsWith("monk"));
+                    //var stu5 = db.QueryList<Student>(t => t.Name.StartsWith("monk"));
 
-                    Console.WriteLine(db.IsFromCache);
+                    //Console.WriteLine(db.IsFromCache);
 
-                    var stu6 = db.QueryOne<Student>(t => t.Name.Contains("m"));
+                    //var stu6 = db.QueryOne<Student>(t => t.Name.Contains("m"));
 
-                    Console.WriteLine(db.IsFromCache);
+                    //Console.WriteLine(db.IsFromCache);
 
-                    var c3 = db.QueryCount<Student>(t => t.Name.EndsWith("3"));
+                    //var c3 = db.QueryCount<Student>(t => t.Name.EndsWith("3"));
 
-                    Console.WriteLine(db.IsFromCache);
+                    //Console.WriteLine(db.IsFromCache);
 
-                    var stu7 = db.QueryOne<Student>(t => t.Name.Contains("k"));
+                    //var stu7 = db.QueryOne<Student>(t => t.Name.Contains("k"));
 
-                    Console.WriteLine(db.IsFromCache);
+                    //Console.WriteLine(db.IsFromCache);
 
-                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId, true);
-                    Console.WriteLine("paging " + db.IsFromCache);
+                    //var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId, true);
+                    //Console.WriteLine("paging " + db.IsFromCache);
                 }
             });
             Console.WriteLine();
