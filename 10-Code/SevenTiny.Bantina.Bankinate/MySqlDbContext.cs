@@ -27,7 +27,7 @@ namespace SevenTiny.Bantina.Bankinate
         {
             DbHelper.ConnString_Default = connectionString;
             DbHelper.DbType = DataBaseType.MySql;
-            MCache.ExpiredTimeSpan = CacheExpiredTimeSpan;
+            MCache.Instance.ExpiredTimeSpan = CacheExpiredTimeSpan;
         }
 
         public MySqlDbContext(string connectionString_Read, string connectionString_ReadWrite)
@@ -35,7 +35,7 @@ namespace SevenTiny.Bantina.Bankinate
             DbHelper.ConnString_R = connectionString_Read;
             DbHelper.ConnString_RW = connectionString_ReadWrite;
             DbHelper.DbType = DataBaseType.MySql;
-            MCache.ExpiredTimeSpan = CacheExpiredTimeSpan;
+            MCache.Instance.ExpiredTimeSpan = CacheExpiredTimeSpan;
         }
 
         public string SqlStatement { get; set; }
@@ -130,7 +130,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
 
-            MCache.MarkTableModifyAdd(TableName, entity);
+            MCache.Instance.MarkTableModifyAdd(TableName, entity);
 
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
@@ -141,7 +141,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateAddSqlAndGetParams(entity);
 
-            MCache.MarkTableModifyAdd(TableName, entity);
+            MCache.Instance.MarkTableModifyAdd(TableName, entity);
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
@@ -162,7 +162,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            MCache.MarkTableModifyDelete(TableName, filter);
+            MCache.Instance.MarkTableModifyDelete(TableName, filter);
 
             DbHelper.ExecuteNonQuery(SqlStatement);
         }
@@ -173,7 +173,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            MCache.MarkTableModifyDelete(TableName, filter);
+            MCache.Instance.MarkTableModifyDelete(TableName, filter);
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement);
         }
@@ -245,7 +245,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
 
-            MCache.MarkTableModifyUpdate(TableName, filter, entity);
+            MCache.Instance.MarkTableModifyUpdate(TableName, filter, entity);
 
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
@@ -256,7 +256,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             Dictionary<string, object> paramsDic = GenerateUpdateSqlAndGetParams(filter, entity);
 
-            MCache.MarkTableModifyUpdate(TableName, filter, entity);
+            MCache.Instance.MarkTableModifyUpdate(TableName, filter, entity);
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
@@ -267,7 +267,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"SELECT * FROM {TableName}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, null, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, null, () =>
               {
                   return DbHelper.ExecuteList<TEntity>(SqlStatement);
               }, out bool fromCache);
@@ -284,7 +284,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, null, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, null, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -300,7 +300,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -317,7 +317,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntities(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -333,7 +333,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntity(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entity(LocalCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -349,7 +349,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             this.SqlStatement = $"SELECT COUNT(0) FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
 
-            var result = Convert.ToInt32(MCache.GetFromCacheIfNotExistReStoreCount(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = Convert.ToInt32(MCache.Instance.GetFromCacheIfNotExistReStore_Count(LocalCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteScalar(SqlStatement);
             }, out bool fromCache));
@@ -366,13 +366,13 @@ namespace SevenTiny.Bantina.Bankinate
 
         public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            MCache.MarkTableModify(TableName);
+            MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQuery(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
         public void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            MCache.MarkTableModify(TableName);
+            MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
@@ -408,7 +408,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int count, out bool fromCache);
@@ -435,7 +435,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int count, out bool fromCache);
@@ -462,7 +462,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int cou, out bool fromCache);
@@ -481,7 +481,7 @@ namespace SevenTiny.Bantina.Bankinate
             string desc = isDESC ? "DESC" : "ASC";
             this.SqlStatement = $"SELECT * FROM {TableName} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
 
-            var result = MCache.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int cou, out bool fromCache);
