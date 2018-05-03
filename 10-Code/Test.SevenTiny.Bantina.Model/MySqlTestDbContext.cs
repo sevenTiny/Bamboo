@@ -7,7 +7,7 @@ namespace Test.SevenTiny.Bantina.Model
 {
     public class MySqlTestDbContext : MySqlDbContext<MySqlTestDbContext>
     {
-        public MySqlTestDbContext() : base("xxx")
+        public MySqlTestDbContext() : base("")
         {
             LocalCache = true;
         }
