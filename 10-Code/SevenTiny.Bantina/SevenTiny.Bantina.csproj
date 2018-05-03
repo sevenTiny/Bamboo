@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Copyright>7tiny</Copyright>
+    <Company>www.7tiny.com</Company>
+    <PackageLicenseUrl>https://github.com/sevenTiny/SevenTiny.Bantina</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/sevenTiny/SevenTiny.Bantina</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/sevenTiny/SevenTiny.Bantina.git</RepositoryUrl>
+    <RepositoryType>.net core</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>

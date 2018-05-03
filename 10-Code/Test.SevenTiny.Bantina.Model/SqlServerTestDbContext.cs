@@ -7,7 +7,7 @@ namespace Test.SevenTiny.Bantina.Model
 {
     public class SqlServerTestDbContext : SqlServerDbContext<SqlServerTestDbContext>
     {
-        public SqlServerTestDbContext() : base("Data Source=.;Initial Catalog=Test;Persist Security Info=True;User ID=Sa;Password=CYj(9yyz*8")
+        public SqlServerTestDbContext() : base("data source=.;initial catalog=DB_QX_Frame_MS_CMS;persist security info=True;user id=sa;password=CYj(9yyz*8;MultipleActiveResultSets=True;App=EntityFramework")
         {
             LocalCache = true;
         }

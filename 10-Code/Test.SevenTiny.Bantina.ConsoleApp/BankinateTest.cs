@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -185,6 +186,18 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             });
             Console.WriteLine();
             Console.WriteLine($"QueryOne {i} sec：{result1.TotalMilliseconds} ms");
+        }
+
+        private static void BugTest()
+        {
+            using (var db = new SqlServerTestDbContext())
+            {
+                Expression<Func<TB_Book, bool>> filter = t => t.IsDelete == 2;
+                int count2 = db.QueryCount(filter);
+
+                List<TB_Book> bookList = db.QueryListPaging<TB_Book>(1, 30, t => t.CreateTime, filter, true);
+                int count = db.QueryCount<TB_Book>(filter);
+            }
         }
     }
 }
