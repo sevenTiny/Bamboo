@@ -52,8 +52,10 @@ namespace SevenTiny.Bantina.Bankinate
         public const string MC2 = "BankinateCache_MC2_";
         //mark if table scaning...
         public const string MCScaning = "BankinateCacheScaning_";
-        //cache time
+        //cache expired time of level3
         public TimeSpan ExpiredTimeSpan { get; set; } = TimeSpan.FromDays(1);
+        //scan mark key expired time
+        private static TimeSpan ExpiredTimeSpanScaningKey = TimeSpan.FromMinutes(20);
 
         private string EnterPoint { get; set; }
         private string SqlKey { get; set; }
@@ -103,16 +105,16 @@ namespace SevenTiny.Bantina.Bankinate
                         if (list != null)
                         {
                             list.Add(entity);
-                            enterPointDic[TableKey] = list;
-                            cache.Put(EnterPoint, enterPointDic);
                         }
                         else
                         {
                             list = new List<TEntity>();
                             list.Add(entity);
-                            enterPointDic[TableKey] = list;
-                            cache.Put(EnterPoint, enterPointDic);
                         }
+                        //update tableKey,remove sql/filter key
+                        enterPointDic.Clear();
+                        enterPointDic.Add(TableKey, list);
+                        cache.Put(EnterPoint, enterPointDic,ExpiredTimeSpan);
                     }
                     else
                     {
@@ -150,8 +152,10 @@ namespace SevenTiny.Bantina.Bankinate
                                     }
                                 }
                                 list.Add(entity);
-                                enterPointDic[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDic);
+                                //update tableKey,remove sql/filter key
+                                enterPointDic.Clear();
+                                enterPointDic.Add(TableKey, list);
+                                cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                             }
                         }
                     }
@@ -182,8 +186,10 @@ namespace SevenTiny.Bantina.Bankinate
                             if (t != null)
                             {
                                 list.Remove(t);
-                                enterPointDic[TableKey] = list;
-                                cache.Put(EnterPoint, enterPointDic);
+                                //update tableKey,remove sql/filter key
+                                enterPointDic.Clear();
+                                enterPointDic.Add(TableKey, list);
+                                cache.Put(EnterPoint, enterPointDic, ExpiredTimeSpan);
                             }
                         }
                     }
@@ -215,7 +221,7 @@ namespace SevenTiny.Bantina.Bankinate
                             if (!cache.Exist(ScaningKey) && !cache.Exist(EnterPoint))
                             {
                                 //mark scaning...
-                                cache.Put(ScaningKey, 1, ExpiredTimeSpan);
+                                cache.Put(ScaningKey, 1, ExpiredTimeSpanScaningKey);
                                 List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
                                 if (!cache.Exist(EnterPoint))
                                 {
@@ -256,7 +262,7 @@ namespace SevenTiny.Bantina.Bankinate
                                 if (!cache.Exist(ScaningKey) && !cache.Get<string, Dictionary<string, object>>(EnterPoint).ContainsKey(TableKey))
                                 {
                                     //mark scaning...
-                                    cache.Put(ScaningKey, 1, ExpiredTimeSpan);
+                                    cache.Put(ScaningKey, 1, ExpiredTimeSpanScaningKey);
                                     //start scaning...
                                     List<TEntity> list = DbHelper.ExecuteList<TEntity>($"SELECT * FROM {tableName}");
                                     //thread safe(query agin)
