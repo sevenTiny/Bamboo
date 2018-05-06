@@ -13,7 +13,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="SevenTiny.Bantina.Bankinate" Version="1.0.32" />
   </ItemGroup>
 
   <ItemGroup>

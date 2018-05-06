@@ -6,13 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.AutoMapper\SevenTiny.Bantina.AutoMapper.csproj" />
-    <ProjectReference Include="..\SevenTiny.Bantina.Bankinate\SevenTiny.Bantina.Bankinate.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />

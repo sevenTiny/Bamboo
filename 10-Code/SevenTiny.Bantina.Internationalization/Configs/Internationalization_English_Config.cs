@@ -17,7 +17,7 @@ using System.Collections.Generic;
 
 namespace SevenTiny.Bantina.Internationalization.Configs
 {
-    [ConfigClass(Name = "Internationalization_English")]
+    [ConfigName(Name = "Internationalization_English")]
     public class Internationalization_English_Config : ConfigBase<Internationalization_English_Config>
     {
         public int ID { get; set; }

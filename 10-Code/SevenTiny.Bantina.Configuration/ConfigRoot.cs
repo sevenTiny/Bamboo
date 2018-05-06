@@ -1,11 +1,9 @@
 ﻿using SevenTiny.Bantina.Extensions;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace SevenTiny.Bantina.Configuration
 {
-    [ConfigClass(Name = "SevenTinyBantina")]
+    [ConfigName(Name = "SevenTinyBantina")]
     public class ConfigRoot : ConfigBase<ConfigRoot>
     {
         public string Key { get; set; }

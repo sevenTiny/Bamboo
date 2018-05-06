@@ -14,18 +14,31 @@
  *********************************************************/
 using System;
 using System.Linq;
+using System.Reflection;
 
 namespace SevenTiny.Bantina.Configuration
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = true)]
-    public class ConfigClassAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class, Inherited = true,AllowMultiple =false)]
+    public class ConfigNameAttribute : Attribute
     {
         public string Name { get; set; }
 
+        public ConfigNameAttribute()
+        {
+        }
+
+        public ConfigNameAttribute(string name)
+        {
+            this.Name = name;
+        }
+
         public static string GetName(Type type)
         {
-            var attr = type.GetCustomAttributes(typeof(ConfigClassAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as ConfigClassAttribute).Name ?? default(string) : default(string);
+            if (type.GetCustomAttribute(typeof(ConfigNameAttribute), true) is ConfigNameAttribute attr)
+            {
+                return attr?.Name ?? type.Name;
+            }
+            return type.Name;
         }
     }
 }
