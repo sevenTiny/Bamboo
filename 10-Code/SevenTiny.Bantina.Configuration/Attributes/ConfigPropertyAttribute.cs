@@ -13,20 +13,22 @@
  * Thx , Best Regards ~
  *********************************************************/
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace SevenTiny.Bantina.Configuration
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true,AllowMultiple =false)]
     public class ConfigPropertyAttribute : Attribute
     {
         public string Name { get; set; }
 
         public static string GetName(PropertyInfo property)
         {
-            var attr = property.GetCustomAttributes(typeof(ConfigPropertyAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as ConfigPropertyAttribute).Name ?? default(string) : default(string);
+            if (property.GetCustomAttribute(typeof(ConfigPropertyAttribute), true) is ConfigPropertyAttribute attr)
+            {
+                return attr?.Name ?? property.Name;
+            }
+            return property.Name;
         }
     }
 }

@@ -18,7 +18,7 @@ using System.Linq;
 
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
-    [ConfigClass(Name = "Logging")]
+    [ConfigName(Name = "Logging")]
     public class LoggingConfig : ConfigBase<LoggingConfig>
     {
         public string Group { get; set; }
@@ -38,12 +38,13 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Configs.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
-            return new LoggingConfig();
+            //if no config,return default
+            return new LoggingConfig() { Levels = new int[] { 5 }, StorageMediums = new int[] { 0 } };
         }
 
         public static LoggingConfig Get(string group)
@@ -53,18 +54,18 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //load group config
-            _loggingConfig = Configs.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Configs.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
-            return new LoggingConfig();
+            return new LoggingConfig() { Levels = new int[] { 5 }, StorageMediums = new int[] { 0 } };
         }
     }
     public static class ConfigExtension

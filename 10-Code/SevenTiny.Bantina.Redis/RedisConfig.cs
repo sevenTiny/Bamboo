@@ -20,7 +20,7 @@ using System.Linq;
 
 namespace SevenTiny.Bantina.Redis
 {
-    [ConfigClass(Name = "Redis")]
+    [ConfigName(Name = "Redis")]
     internal class RedisConfig : ConfigBase<RedisConfig>
     {
         public int ID { get; set; }

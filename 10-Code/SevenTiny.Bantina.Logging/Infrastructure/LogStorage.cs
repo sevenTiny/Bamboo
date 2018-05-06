@@ -22,7 +22,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
 {
     public sealed class LogStorage
     {
-        private const string FOLDER_NAME = "sevenTiny.logfiles";
+        private const string FOLDER_NAME = "SevenTiny.logfiles";
 
         private static string SavePath = Path.Combine(AppContext.BaseDirectory, FOLDER_NAME);
 
