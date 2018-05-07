@@ -12,4 +12,8 @@
     <RepositoryType>.net core</RepositoryType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SevenTiny.Bantina.Configuration" Version="1.0.9" />
+  </ItemGroup>
+
 </Project>
