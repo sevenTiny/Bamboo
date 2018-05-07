@@ -3,20 +3,21 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="SevenTiny.Bantina" Version="1.0.3" />
+    <PackageReference Include="SevenTiny.Bantina.Bankinate" Version="1.0.32" />
+    <PackageReference Include="SevenTiny.Bantina.Logging" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.AutoMapper\SevenTiny.Bantina.AutoMapper.csproj" />
-    <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj" />
-    <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Redis\SevenTiny.Bantina.Redis.csproj" />
-    <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
     <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
   </ItemGroup>
 

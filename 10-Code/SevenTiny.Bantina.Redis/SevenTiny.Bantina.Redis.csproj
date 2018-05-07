@@ -6,11 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="SevenTiny.Bantina.Configuration" Version="1.0.9" />
+    <PackageReference Include="SevenTiny.Bantina.Logging" Version="1.0.4" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj" />
   </ItemGroup>
 
 </Project>
