@@ -12,8 +12,4 @@
     <RepositoryType>.net core</RepositoryType>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
-  </ItemGroup>
-
 </Project>
