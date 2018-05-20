@@ -148,12 +148,18 @@ namespace SevenTiny.Bantina.Bankinate
 
         public void Add<TEntity>(IList<TEntity> entities) where TEntity : class
         {
-            throw new NotImplementedException();
+            foreach (var item in entities)
+            {
+                Add(item);
+            }
         }
 
         public void AddAsync<TEntity>(IList<TEntity> entities) where TEntity : class
         {
-            throw new NotImplementedException();
+            foreach (var item in entities)
+            {
+                AddAsync(item);
+            }
         }
 
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
