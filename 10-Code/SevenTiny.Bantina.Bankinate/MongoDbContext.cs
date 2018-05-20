@@ -82,12 +82,12 @@ namespace SevenTiny.Bantina.Bankinate
             GetCollection<TEntity>().InsertOneAsync(entity);
         }
 
-        public void Add<TEntity>(IList<TEntity> entities) where TEntity : class
+        public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             GetCollection<TEntity>().InsertMany(entities);
         }
 
-        public void AddAsync<TEntity>(IList<TEntity> entities) where TEntity : class
+        public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             GetCollection<TEntity>().InsertManyAsync(entities);
         }

@@ -146,7 +146,7 @@ namespace SevenTiny.Bantina.Bankinate
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
 
-        public void Add<TEntity>(IList<TEntity> entities) where TEntity : class
+        public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var item in entities)
             {
@@ -154,7 +154,7 @@ namespace SevenTiny.Bantina.Bankinate
             }
         }
 
-        public void AddAsync<TEntity>(IList<TEntity> entities) where TEntity : class
+        public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var item in entities)
             {

@@ -18,17 +18,17 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public interface IDbContext : IDisposable,IAddOperate,IUpdateOperate,IDeleteOperate,IQueryOperate
+    public interface IDbContext : IDisposable, IAddOperate, IUpdateOperate, IDeleteOperate, IQueryOperate
     {
-        
+
     }
 
     public interface IAddOperate
     {
         void Add<TEntity>(TEntity entity) where TEntity : class;
         void AddAsync<TEntity>(TEntity entity) where TEntity : class;
-        void Add<TEntity>(IList<TEntity> entities) where TEntity : class;
-        void AddAsync<TEntity>(IList<TEntity> entities) where TEntity : class;
+        void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class;
+        void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class;
     }
 
     public interface IUpdateOperate
