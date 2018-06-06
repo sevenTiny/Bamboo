@@ -1,4 +1,5 @@
 ﻿using SevenTiny.Bantina;
+using SevenTiny.Bantina.Bankinate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
     {
         public static void Test()
         {
-            BankinateCacheTest();
+            LambdaToSqlTest();
+            //BankinateCacheTest();
         }
 
         private static void MongoDbTest()
@@ -198,6 +200,16 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                 List<TB_Book> bookList = db.QueryListPaging<TB_Book>(1, 30, t => t.CreateTime, filter, true);
                 int count = db.QueryCount<TB_Book>(filter);
             }
+        }
+
+        private static void LambdaToSqlTest()
+        {
+            List<int> ages = new List<int> { 1, 2, 3, 34, 5 };
+            //Expression<Func<Student, bool>> where = t => t.Name.Contains(ages.FirstOrDefault().ToString());
+           // Expression<Func<Student, bool>> where = t => t.Age == ages.FirstOrDefault();
+            Expression<Func<Student, bool>> where = t => true;
+
+           // var sql = LambdaToSql.ConvertWhere(where);
         }
     }
 }
