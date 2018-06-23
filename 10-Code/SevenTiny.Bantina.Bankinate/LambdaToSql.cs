@@ -28,17 +28,9 @@ namespace SevenTiny.Bantina.Bankinate
             builder.Append(" WHERE ");
             if (where.Body is BinaryExpression be)
             {
-                builder.Append(BinarExpressionProvider(be.Left, be.Right, be.NodeType));
+                builder.Append(BinarExpressionProvider(be.Left, be.Right, be.NodeType)).ToString();
             }
-            else if (where.Body is MethodCallExpression method)
-            {
-                builder.Append(ExpressionRouter(where.Body));
-            }
-            else
-            {
-                builder.Append("1=1");
-            }
-            return builder.ToString();
+            return builder.Append(ExpressionRouter(where.Body)).ToString();
         }
 
         public static string ConvertOrderBy<T>(Expression<Func<T, object>> orderby) where T : class
@@ -108,7 +100,17 @@ namespace SevenTiny.Bantina.Bankinate
             }
             else if (exp is MethodCallExpression mce)
             {
-                string value = ExpressionRouter(mce.Arguments[0]);
+                //get value
+                string value = null;
+                if (mce.Object == null)
+                {
+                    value = Expression.Lambda(mce).Compile().DynamicInvoke().ToString();
+                }
+                else
+                {
+                    value = Expression.Lambda(mce.Arguments[0]).Compile().DynamicInvoke().ToString();
+                }
+
                 if (mce.Method.Name.Equals("Equals"))
                 {
                     return $"{mce.Object.ToString()} = {value}";
@@ -125,7 +127,7 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     return $"{mce.Object.ToString()} LIKE '%{value.Replace("'", "")}'";
                 }
-                return " ";
+                return value;
             }
             else if (exp is ConstantExpression ce)
             {

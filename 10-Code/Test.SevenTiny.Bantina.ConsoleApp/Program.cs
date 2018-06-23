@@ -19,7 +19,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         static void Main(string[] args)
         {
 
-            ConfigurationTest.Test();
+            BankinateTest.Test();
 
             Console.WriteLine("any key to exit ...");
             Console.ReadKey();
