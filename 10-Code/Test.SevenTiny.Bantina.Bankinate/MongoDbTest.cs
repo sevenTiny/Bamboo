@@ -13,5 +13,11 @@ namespace Test.SevenTiny.Bantina.Bankinate
             var filter = Builders<BsonDocument>.Filter.Gt("counter", 100);
             //var resut = collection.DeleteManyAsync(filter).Result;
         }
+
+        [Fact]
+        public void Add()
+        {
+
+        }
     }
 }
