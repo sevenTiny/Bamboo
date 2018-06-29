@@ -27,9 +27,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Redis", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.AutoMapper", "..\10-Code\SevenTiny.Bantina.AutoMapper\SevenTiny.Bantina.AutoMapper.csproj", "{3938EBB5-1A12-4104-81BE-6B38D3DF1B01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bantina.ConsoleNetFramework", "..\10-Code\Test.SevenTiny.Bantina.ConsoleNetFramework\Test.SevenTiny.Bantina.ConsoleNetFramework.csproj", "{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina", "..\10-Code\Test.SevenTiny.Bantina\Test.SevenTiny.Bantina.csproj", "{2983D245-53DE-4B34-899B-17882258C457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bantina", "..\10-Code\Test.SevenTiny.Bantina\Test.SevenTiny.Bantina.csproj", "{2983D245-53DE-4B34-899B-17882258C457}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina.Bankinate", "..\10-Code\Test.SevenTiny.Bantina.Bankinate\Test.SevenTiny.Bantina.Bankinate.csproj", "{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,14 +81,14 @@ Global
 		{3938EBB5-1A12-4104-81BE-6B38D3DF1B01}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3938EBB5-1A12-4104-81BE-6B38D3DF1B01}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3938EBB5-1A12-4104-81BE-6B38D3DF1B01}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,8 +96,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{89783111-4889-42B9-A26A-20D6AE5EE0D1} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{1C871AC0-0213-44CB-8D4D-72E017127DBA} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
-		{FFF6C7B8-7CEF-4F58-858A-51C6532F39BA} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{2983D245-53DE-4B34-899B-17882258C457} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
+		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {36AE3A79-F83B-4BBF-8599-4327AB1291F2}

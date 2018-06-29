@@ -1,8 +1,8 @@
+using SevenTiny.Bantina.Extensions;
 using System;
 using System.Linq.Expressions;
-using Test.SevenTiny.Bantina.Model;
+using Test.SevenTiny.Bantina.Models;
 using Xunit;
-using SevenTiny.Bantina.Extensions;
 
 namespace Test.SevenTiny.Bantina
 {

@@ -14,7 +14,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
+    <ProjectReference Include="..\SevenTiny.Bantina.Configuration\SevenTiny.Bantina.Configuration.csproj" />
+    <ProjectReference Include="..\Test.SevenTiny.Bantina.Model\Test.SevenTiny.Bantina.Model.csproj" />
   </ItemGroup>
 
 </Project>
