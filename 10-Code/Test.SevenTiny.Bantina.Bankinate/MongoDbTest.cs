@@ -1,6 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
-using System;
+using Test.SevenTiny.Bantina.Model;
 using Xunit;
 
 namespace Test.SevenTiny.Bantina.Bankinate
@@ -12,6 +12,12 @@ namespace Test.SevenTiny.Bantina.Bankinate
         {
             var filter = Builders<BsonDocument>.Filter.Gt("counter", 100);
             //var resut = collection.DeleteManyAsync(filter).Result;
+        }
+
+        [Fact]
+        public void GetConnectionString()
+        {
+            var conn = ConnectionStrings.Get("mongodb39911");
         }
 
         [Fact]
