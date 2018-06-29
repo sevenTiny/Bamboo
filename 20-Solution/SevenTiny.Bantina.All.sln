@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bankinate", "..\10-Code\Test.SevenTiny.Bankinate\Test.SevenTiny.Bankinate.csproj", "{C50262C9-E0C4-4997-BFF1-42FAF2BBD7E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bantina.Bankinate", "..\10-Code\Test.SevenTiny.Bantina.Bankinate\Test.SevenTiny.Bantina.Bankinate.csproj", "{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
