@@ -13,8 +13,6 @@
  * Thx , Best Regards ~
  *********************************************************/
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -28,7 +26,7 @@ namespace SevenTiny.Bantina.Bankinate
             builder.Append(" WHERE ");
             if (where.Body is BinaryExpression be)
             {
-                builder.Append(BinarExpressionProvider(be.Left, be.Right, be.NodeType)).ToString();
+                return builder.Append(BinarExpressionProvider(be.Left, be.Right, be.NodeType)).ToString();
             }
             return builder.Append(ExpressionRouter(where.Body)).ToString();
         }
