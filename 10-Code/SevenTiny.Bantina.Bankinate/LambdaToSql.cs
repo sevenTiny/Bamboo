@@ -111,7 +111,7 @@ namespace SevenTiny.Bantina.Bankinate
 
                 if (mce.Method.Name.Equals("Equals"))
                 {
-                    return $"{mce.Object.ToString()} = {value}";
+                    return $"{mce.Object.ToString()} = '{value}'";
                 }
                 else if (mce.Method.Name.Equals("Contains"))
                 {
