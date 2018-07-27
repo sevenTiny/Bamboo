@@ -1,7 +1,7 @@
 ﻿using SevenTiny.Bantina.AutoMapper;
 using System;
 
-namespace Test.SevenTiny.Bantina.Model
+namespace Test.Model
 {
     [MapperClassAttribute(Name = "Student1")]
     public class Student1

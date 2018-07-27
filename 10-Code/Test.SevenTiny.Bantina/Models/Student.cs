@@ -1,4 +1,4 @@
-﻿namespace Test.SevenTiny.Bantina.Models
+﻿namespace Test.Models
 {
     public class Student
     {

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Test.SevenTiny.Bantina.Model
+namespace Test.Model
 {
     [Table("Grade")]
     public class Grade2

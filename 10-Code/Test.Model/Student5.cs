@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Test.SevenTiny.Bantina.Model
+namespace Test.Model
 {
     public class Student5
     {

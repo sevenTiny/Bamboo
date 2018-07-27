@@ -23,35 +23,33 @@ namespace SevenTiny.Bantina.Redis
     [ConfigName(Name = "Redis")]
     internal class RedisConfig : ConfigBase<RedisConfig>
     {
-        public int ID { get; set; }
-        public string InstanceName { get; set; }
-        public string Server { get; set; }
-        public int Port { get; set; }
+        public string Key { get; set; }
+        public string Value { get; set; }
 
-        private static Dictionary<int, RedisConfig> dictionary;
+        private static Dictionary<string, string> dictionary;
 
         private static void Initial()
         {
-            dictionary = new Dictionary<int, RedisConfig>();
+            dictionary = new Dictionary<string, string>();
             foreach (var item in Configs)
             {
-                dictionary.AddOrUpdate(item.ID, item);
+                dictionary.AddOrUpdate(item.Key, item.Value);
             }
         }
 
-        public static RedisConfig Get(int key)
+        /// <summary>
+        /// get redis config value
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static string Get(string key)
         {
             if (dictionary != null && dictionary.ContainsKey(key))
             {
                 return dictionary[key];
             }
             Initial();
-            return dictionary.SafeGet(key);
+            return dictionary.SafeGet(key) ?? throw new NullReferenceException("Redis Config Empty!");
         }
-
-        /// <summary>
-        /// if redis config only 1 line,means the first config is default.
-        /// </summary>
-        public static RedisConfig Default => Configs.FirstOrDefault() ?? throw new NullReferenceException("Redis Config Empty!");
     }
 }

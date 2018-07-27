@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Test.SevenTiny.Bantina.Model;
+using Test.Model;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp

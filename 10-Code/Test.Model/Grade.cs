@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Test.SevenTiny.Bantina.Model
+namespace Test.Model
 {
     [Table("test")]
     public class Grade

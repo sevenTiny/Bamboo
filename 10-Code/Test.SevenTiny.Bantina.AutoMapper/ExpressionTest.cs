@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
-using Test.SevenTiny.Bantina.Model;
+using Test.Model;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
 {
