@@ -1,8 +1,8 @@
 ﻿using SevenTiny.Bantina;
 using SevenTiny.Bantina.AutoMapper;
 using System;
-using Test.SevenTiny.Bantina.Model;
-using Test.SevenTiny.Bantina.Model.DTO;
+using Test.Model;
+using Test.Model.DTO;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp

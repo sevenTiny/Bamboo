@@ -18,7 +18,7 @@ using System;
 
 namespace SevenTiny.Bantina.Redis
 {
-    public class RedisManager : IRedisCache
+    public class RedisCacheManager : IRedisCache
     {
         private ConnectionMultiplexer Redis { get; set; }
         private IDatabase Db { get; set; }
@@ -43,7 +43,7 @@ namespace SevenTiny.Bantina.Redis
                     {
                         if (_instance == null)
                         {
-                            _instance = new RedisManager();
+                            _instance = new RedisCacheManager();
                         }
                     }
                 }
@@ -56,11 +56,11 @@ namespace SevenTiny.Bantina.Redis
         /// </summary>
         private static ILog log = new LogManager();
 
-        private RedisManager()
+        private RedisCacheManager()
         {
             try
             {
-                Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Default.Server}:{RedisConfig.Default.Port}");
+                Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
                 Db = Redis.GetDatabase();
             }
             catch (Exception ex)
@@ -69,45 +69,22 @@ namespace SevenTiny.Bantina.Redis
             }
         }
 
-        public string Get(string key) => SafeProcess(() => { return Db.StringGet(key); });
+        public string Get(string key) => Db.StringGet(key);
 
-        public void Post(string key, string value) => SafeProcess(() => { Db.StringSet(key, value, TimeSpan.FromMinutes(30)); });
+        public void Post(string key, string value) => Db.StringSet(key, value, TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get("DefaultExpirySeconds"))));
 
-        public void Post(string key, string value, TimeSpan absoluteExpirationRelativeToNow) => SafeProcess(() => { Db.StringSet(key, value, absoluteExpirationRelativeToNow); });
+        public void Post(string key, string value, TimeSpan absoluteExpirationRelativeToNow) => Db.StringSet(key, value, absoluteExpirationRelativeToNow);
 
-        public void Post(string key, string value, DateTime absoluteExpiration) => SafeProcess(() => { Db.StringSet(key, value, absoluteExpiration - DateTime.Now); });
+        public void Post(string key, string value, DateTime absoluteExpiration) => Db.StringSet(key, value, absoluteExpiration - DateTime.Now);
 
-        public void Put(string key, string value) => SafeProcess(() => { Db.StringSet(key, value); });
+        public void Put(string key, string value) => Db.StringSet(key, value);
 
-        public void Delete(string key) => SafeProcess(() => { Db.KeyDelete(key); });
+        public void Delete(string key) => Db.KeyDelete(key);
 
-        public bool Exist(string key) => SafeProcess(() => { return Db.KeyExists(key); });
+        public bool Exist(string key) => Db.KeyExists(key);
 
-        #region SafeProcess
-        private void SafeProcess(Action action)
-        {
-            try
-            {
-                action();
-            }
-            catch (Exception ex)
-            {
-                log.Error("redis server error!", ex);
-            }
-        }
+        public long StringIncrement(string key) => Db.StringIncrement(key);
 
-        private T SafeProcess<T>(Func<T> func)
-        {
-            try
-            {
-                return func();
-            }
-            catch (Exception ex)
-            {
-                log.Error("redis server error!", ex);
-            }
-            return default(T);
-        }
-        #endregion
+        public double StringIncrement(string key,double incrementNumber) => Db.StringIncrement(key, incrementNumber);
     }
 }

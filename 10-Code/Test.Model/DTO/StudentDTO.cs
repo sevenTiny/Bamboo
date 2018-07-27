@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Test.SevenTiny.Bantina.Model.DTO
+namespace Test.Model.DTO
 {
     public class StudentDTO
     {
