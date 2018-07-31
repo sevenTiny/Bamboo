@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace SevenTiny.Bantina.Http
+namespace SevenTiny.Bantina.Net.Http
 {
     public class GetRequestArgs : CommonRequestArgs { public GetRequestArgs() : base(RequestType.GET) { } }
     public class PostRequestArgs : CommonRequestArgs

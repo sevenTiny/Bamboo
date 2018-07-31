@@ -1,4 +1,4 @@
-﻿namespace SevenTiny.Bantina.Http
+﻿namespace SevenTiny.Bantina.Net.Http
 {
     /// <summary>
     /// Request type

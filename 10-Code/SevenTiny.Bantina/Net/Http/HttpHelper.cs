@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SevenTiny.Bantina.Http
+namespace SevenTiny.Bantina.Net.Http
 {
     public abstract class HttpHelper
     {
@@ -57,7 +57,7 @@ namespace SevenTiny.Bantina.Http
         {
             return CommonProcess(args, client =>
             {
-                using (HttpContent content = new StringContent(args.Data ?? "", args.Encoding ?? Encoding.UTF8))
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
                 {
                     if (args.ContentType != null)
                     {
@@ -74,13 +74,83 @@ namespace SevenTiny.Bantina.Http
         {
             return await CommonProcessAsync(args, client =>
             {
-                using (HttpContent content = new StringContent(args.Data ?? "", args.Encoding ?? Encoding.UTF8))
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
                 {
                     if (args.ContentType != null)
                     {
                         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
                     }
                     using (HttpResponseMessage responseMessage = client.PostAsync(args.Url, content).Result)
+                    {
+                        return responseMessage.Content.ReadAsByteArrayAsync();
+                    }
+                }
+            });
+        }
+
+        public static string Put(PutRequestArgs args)
+        {
+            return CommonProcess(args, client =>
+            {
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
+                {
+                    if (args.ContentType != null)
+                    {
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
+                    }
+                    using (HttpResponseMessage responseMessage = client.PutAsync(args.Url, content).Result)
+                    {
+                        return responseMessage.Content.ReadAsByteArrayAsync().Result;
+                    }
+                }
+            });
+        }
+        public static async Task<string> PutAsync(PutRequestArgs args)
+        {
+            return await CommonProcessAsync(args, client =>
+            {
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
+                {
+                    if (args.ContentType != null)
+                    {
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
+                    }
+                    using (HttpResponseMessage responseMessage = client.PutAsync(args.Url, content).Result)
+                    {
+                        return responseMessage.Content.ReadAsByteArrayAsync();
+                    }
+                }
+            });
+        }
+
+        public static string Delete(DeleteRequestArgs args)
+        {
+            return CommonProcess(args, client =>
+            {
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
+                {
+                    if (args.ContentType != null)
+                    {
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
+                    }
+                    using (HttpResponseMessage responseMessage = client.DeleteAsync(args.Url).Result)
+                    {
+                        return responseMessage.Content.ReadAsByteArrayAsync().Result;
+                    }
+                }
+            });
+        }
+        public static async Task<string> DeleteAsync(DeleteRequestArgs args)
+        {
+            return await CommonProcessAsync(args, client =>
+            {
+                using (HttpContent content = new StringContent(args.Data ?? string.Empty, args.Encoding ?? Encoding.UTF8))
+                {
+                    if (args.ContentType != null)
+                    {
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
+                    }
+                    using (HttpResponseMessage responseMessage = client.DeleteAsync(args.Url).Result)
                     {
                         return responseMessage.Content.ReadAsByteArrayAsync();
                     }
