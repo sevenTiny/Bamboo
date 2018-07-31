@@ -8,102 +8,84 @@ namespace SevenTiny.Bantina.Http
 {
     public abstract class HttpHelper
     {
-        public static string Get(string url, Dictionary<string, string> headers = null, int timeout = 0)
+        private static string CommonProcess(CommonRequestArgs commonRequestArgs, Func<HttpClient, Byte[]> func)
         {
             using (HttpClient client = new HttpClient())
             {
-                if (headers != null)
+                if (commonRequestArgs.Headers != null)
                 {
-                    foreach (KeyValuePair<string, string> header in headers)
+                    foreach (KeyValuePair<string, string> header in commonRequestArgs.Headers)
                     {
                         client.DefaultRequestHeaders.Add(header.Key, header.Value);
                     }
                 }
-                if (timeout > 0)
+                if (commonRequestArgs.Timeout > 0)
                 {
-                    client.Timeout = new TimeSpan(0, 0, timeout);
+                    client.Timeout = new TimeSpan(0, 0, commonRequestArgs.Timeout);
                 }
-                Byte[] resultBytes = client.GetByteArrayAsync(url).Result;
-                return Encoding.UTF8.GetString(resultBytes);
+                Byte[] bytes = func(client);
+                return Encoding.UTF8.GetString(bytes);
             }
         }
-        public static async Task<string> GetAsync(string url, Dictionary<string, string> headers = null, int timeout = 0)
+        private static async Task<string> CommonProcessAsync(CommonRequestArgs commonRequestArgs, Func<HttpClient, Task<Byte[]>> func)
         {
             using (HttpClient client = new HttpClient())
             {
-                if (headers != null)
+                if (commonRequestArgs.Headers != null)
                 {
-                    foreach (KeyValuePair<string, string> header in headers)
+                    foreach (KeyValuePair<string, string> header in commonRequestArgs.Headers)
                     {
                         client.DefaultRequestHeaders.Add(header.Key, header.Value);
                     }
                 }
-                if (timeout > 0)
+                if (commonRequestArgs.Timeout > 0)
                 {
-                    client.Timeout = new TimeSpan(0, 0, timeout);
+                    client.Timeout = new TimeSpan(0, 0, commonRequestArgs.Timeout);
                 }
-                Byte[] resultBytes = await client.GetByteArrayAsync(url);
-                return Encoding.Default.GetString(resultBytes);
+                Byte[] bytes = await func(client);
+                return Encoding.UTF8.GetString(bytes);
             }
         }
 
-        public static string Post(string url, string postData, Dictionary<string, string> headers = null, string contentType = null, int timeout = 0, Encoding encoding = null)
+        public static string Get(GetRequestArgs args) => CommonProcess(args, client => client.GetByteArrayAsync(args.Url).Result);
+        public static async Task<string> GetAsync(GetRequestArgs args)
         {
-            using (HttpClient client = new HttpClient())
-            {
-                if (headers != null)
-                {
-                    foreach (KeyValuePair<string, string> header in headers)
-                    {
-                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
-                    }
-                }
-                if (timeout > 0)
-                {
-                    client.Timeout = new TimeSpan(0, 0, timeout);
-                }
-                using (HttpContent content = new StringContent(postData ?? "", encoding ?? Encoding.UTF8))
-                {
-                    if (contentType != null)
-                    {
-                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
-                    }
-                    using (HttpResponseMessage responseMessage = client.PostAsync(url, content).Result)
-                    {
-                        Byte[] resultBytes = responseMessage.Content.ReadAsByteArrayAsync().Result;
-                        return Encoding.UTF8.GetString(resultBytes);
-                    }
-                }
-            }
+            return await CommonProcessAsync(args, client => client.GetByteArrayAsync(args.Url));
         }
-        public static async Task<string> PostAsync(string url, string postData, Dictionary<string, string> headers = null, string contentType = null, int timeout = 0, Encoding encoding = null)
+
+        public static string Post(PostRequestArgs args)
         {
-            using (HttpClient client = new HttpClient())
+            return CommonProcess(args, client =>
             {
-                if (headers != null)
+                using (HttpContent content = new StringContent(args.Data ?? "", args.Encoding ?? Encoding.UTF8))
                 {
-                    foreach (KeyValuePair<string, string> header in headers)
+                    if (args.ContentType != null)
                     {
-                        client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
+                    }
+                    using (HttpResponseMessage responseMessage = client.PostAsync(args.Url, content).Result)
+                    {
+                        return responseMessage.Content.ReadAsByteArrayAsync().Result;
                     }
                 }
-                if (timeout > 0)
+            });
+        }
+        public static async Task<string> PostAsync(PostRequestArgs args)
+        {
+            return await CommonProcessAsync(args, client =>
+            {
+                using (HttpContent content = new StringContent(args.Data ?? "", args.Encoding ?? Encoding.UTF8))
                 {
-                    client.Timeout = new TimeSpan(0, 0, timeout);
-                }
-                using (HttpContent content = new StringContent(postData ?? "", encoding ?? Encoding.UTF8))
-                {
-                    if (contentType != null)
+                    if (args.ContentType != null)
                     {
-                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+                        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(args.ContentType);
                     }
-                    using (HttpResponseMessage responseMessage = await client.PostAsync(url, content))
+                    using (HttpResponseMessage responseMessage = client.PostAsync(args.Url, content).Result)
                     {
-                        Byte[] resultBytes = await responseMessage.Content.ReadAsByteArrayAsync();
-                        return Encoding.UTF8.GetString(resultBytes);
+                        return responseMessage.Content.ReadAsByteArrayAsync();
                     }
                 }
-            }
+            });
         }
     }
 }
