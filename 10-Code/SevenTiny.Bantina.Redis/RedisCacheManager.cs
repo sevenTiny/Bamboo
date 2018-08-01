@@ -15,6 +15,7 @@
 using SevenTiny.Bantina.Logging;
 using StackExchange.Redis;
 using System;
+using System.Threading;
 
 namespace SevenTiny.Bantina.Redis
 {
@@ -58,26 +59,39 @@ namespace SevenTiny.Bantina.Redis
 
         private RedisCacheManager()
         {
-            try
+            //set establish retry mechanism (3 times)
+            int retryCount = 2;
+            while (true)
             {
-                Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
-                Db = Redis.GetDatabase();
-            }
-            catch (Exception ex)
-            {
-                log.Error("Redis server connection error!", ex);
+                try
+                {
+                    Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
+                    Db = Redis.GetDatabase();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (retryCount > 0)
+                    {
+                        retryCount--;
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+                    log.Error("Redis server establish  connection error!", ex);
+                    throw new TimeoutException($"redis init timeout,server reject or other.ex{ex.ToString()}");
+                }
             }
         }
 
         public string Get(string key) => Db.StringGet(key);
 
-        public void Post(string key, string value) => Db.StringSet(key, value, TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get("DefaultExpirySeconds"))));
+        public void Set(string key, string value) => Db.StringSet(key, value, TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get("DefaultExpirySeconds"))));
 
-        public void Post(string key, string value, TimeSpan absoluteExpirationRelativeToNow) => Db.StringSet(key, value, absoluteExpirationRelativeToNow);
+        public void Set(string key, string value, TimeSpan absoluteExpirationRelativeToNow) => Db.StringSet(key, value, absoluteExpirationRelativeToNow);
 
-        public void Post(string key, string value, DateTime absoluteExpiration) => Db.StringSet(key, value, absoluteExpiration - DateTime.Now);
+        public void Set(string key, string value, DateTime absoluteExpiration) => Db.StringSet(key, value, absoluteExpiration - DateTime.Now);
 
-        public void Put(string key, string value) => Db.StringSet(key, value);
+        public void Update(string key, string value) => Db.StringSet(key, value);
 
         public void Delete(string key) => Db.KeyDelete(key);
 
@@ -85,6 +99,6 @@ namespace SevenTiny.Bantina.Redis
 
         public long StringIncrement(string key) => Db.StringIncrement(key);
 
-        public double StringIncrement(string key,double incrementNumber) => Db.StringIncrement(key, incrementNumber);
+        public double StringIncrement(string key, double incrementNumber) => Db.StringIncrement(key, incrementNumber);
     }
 }

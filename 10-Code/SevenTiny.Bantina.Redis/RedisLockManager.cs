@@ -1,6 +1,8 @@
 ﻿using SevenTiny.Bantina.Logging;
 using StackExchange.Redis;
 using System;
+using System.Diagnostics;
+using System.Threading;
 
 namespace SevenTiny.Bantina.Redis
 {
@@ -52,14 +54,27 @@ namespace SevenTiny.Bantina.Redis
 
         private RedisLockManager()
         {
-            try
+            //set establish retry mechanism (3 times)
+            int retryCount = 2;
+            while (true)
             {
-                Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
-                Db = Redis.GetDatabase();
-            }
-            catch (Exception ex)
-            {
-                log.Error("Redis server connection error!", ex);
+                try
+                {
+                    Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
+                    Db = Redis.GetDatabase();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (retryCount > 0)
+                    {
+                        retryCount--;
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+                    log.Error("Redis server establish  connection error!", ex);
+                    throw new TimeoutException($"redis init timeout,server reject or other.ex{ex.ToString()}");
+                }
             }
         }
 
@@ -71,7 +86,7 @@ namespace SevenTiny.Bantina.Redis
         /// <param name="refuseMethod">refuse into lock execute method</param>
         public void Lock(string lockName, Action accessLockMethod, Action refuseMethod)
         {
-            if (Db.LockTake("key", Token, LockExpirySeconds))
+            if (Db.LockTake(lockName, Token, LockExpirySeconds))
             {
                 try
                 {
@@ -79,12 +94,11 @@ namespace SevenTiny.Bantina.Redis
                 }
                 catch (Exception ex)
                 {
-                    log.Error($"redis lock method block exception.ex:{ex.ToString()}");
                     throw ex;
                 }
                 finally
                 {
-                    Db.LockRelease("key", Token);
+                    LockRelease(lockName);
                 }
             }
             else
@@ -103,7 +117,7 @@ namespace SevenTiny.Bantina.Redis
         /// <returns></returns>
         public T Lock<T>(string lockName, Func<T> accessLockMethod, Func<T> refuseMethod)
         {
-            if (Db.LockTake("key", Token, LockExpirySeconds))
+            if (Db.LockTake(lockName, Token, LockExpirySeconds))
             {
                 try
                 {
@@ -111,17 +125,89 @@ namespace SevenTiny.Bantina.Redis
                 }
                 catch (Exception ex)
                 {
-                    log.Error($"redis lock method block exception.ex:{ex.ToString()}");
                     throw ex;
                 }
                 finally
                 {
-                    Db.LockRelease("key", Token);
+                    LockRelease(lockName);
                 }
             }
             else
             {
                 return refuseMethod();
+            }
+        }
+
+        /// <summary>
+        /// Lock
+        /// </summary>
+        /// <param name="lockName"></param>
+        /// <returns></returns>
+        public bool Lock(string lockName)
+        {
+            //retry 3 times
+            int retryTime = 2;
+            while (true)
+            {
+                try
+                {
+                    var result = Db.LockTake(lockName, Token, LockExpirySeconds);
+                    ;
+                    if (!result && retryTime > 0)
+                    {
+                        retryTime--;
+                        Thread.Sleep(3000);
+                        continue;
+                    }
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    if (retryTime > 0)
+                    {
+                        retryTime--;
+                        Thread.Sleep(3000);
+                        continue;
+                    }
+                    log.Error($"redis lock release error,ex:{ex.ToString()}");
+                    throw ex;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Release Lock
+        /// </summary>
+        /// <param name="lockName"></param>
+        public bool LockRelease(string lockName)
+        {
+            //retry 3 times
+            int retryTime = 2;
+            while (true)
+            {
+                try
+                {
+                    var result = Db.LockRelease(lockName, Token);
+                    ;
+                    if (!result && retryTime > 0)
+                    {
+                        retryTime--;
+                        Thread.Sleep(3000);
+                        continue;
+                    }
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    if (retryTime > 0)
+                    {
+                        retryTime--;
+                        Thread.Sleep(3000);
+                        continue;
+                    }
+                    log.Error($"redis lock release error,ex:{ex.ToString()}");
+                    throw ex;
+                }
             }
         }
     }
