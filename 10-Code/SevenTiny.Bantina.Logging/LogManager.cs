@@ -36,7 +36,7 @@ namespace SevenTiny.Bantina.Logging
 
         public void Error(Exception exception) => ExceptionLog(LoggingLevel.Error, exception);
 
-        public void Error(string message, Exception exception) => ExceptionLog(LoggingLevel.Fatal, message, exception);
+        public void Error(string message, Exception exception) => ExceptionLog(LoggingLevel.Error, message, exception);
 
         public void Fatal(string message) => LogMessage(LoggingLevel.Fatal, message);
 

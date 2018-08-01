@@ -49,7 +49,7 @@ namespace SevenTiny.Bantina.Redis
                 return dictionary[key];
             }
             Initial();
-            return dictionary.SafeGet(key) ?? throw new NullReferenceException("Redis Config Empty!");
+            return dictionary.SafeGet(key) ?? throw new ArgumentNullException($"Redis Config of key ({key}) not exist or error value!");
         }
     }
 }

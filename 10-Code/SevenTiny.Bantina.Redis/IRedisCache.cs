@@ -20,10 +20,10 @@ namespace SevenTiny.Bantina.Redis
     {
         string Get(string key);
 
-        void Post(string key, string value);
-        void Post(string key, string value, TimeSpan absoluteExpirationRelativeToNow);
-        void Post(string key, string value, DateTime absoluteExpiration);
-        void Put(string key, string value);
+        void Set(string key, string value);
+        void Set(string key, string value, TimeSpan absoluteExpirationRelativeToNow);
+        void Set(string key, string value, DateTime absoluteExpiration);
+        void Update(string key, string value);
         void Delete(string key);
         bool Exist(string key);
         long StringIncrement(string key);

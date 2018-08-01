@@ -5,6 +5,8 @@ namespace SevenTiny.Bantina.Redis
     public interface IRedisLock
     {
         void Lock(string lockName, Action accessLockMethod, Action refuseMethod);
-         T Lock<T>(string lockName, Func<T> accessLockMethod, Func<T> refuseMethod);
+        T Lock<T>(string lockName, Func<T> accessLockMethod, Func<T> refuseMethod);
+        bool Lock(string lockName);
+        bool LockRelease(string lockName);
     }
 }
