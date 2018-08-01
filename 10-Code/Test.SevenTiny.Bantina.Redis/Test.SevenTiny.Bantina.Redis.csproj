@@ -13,4 +13,9 @@
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SevenTiny.Bantina.Redis\SevenTiny.Bantina.Redis.csproj" />
+    <ProjectReference Include="..\Test.Model\Test.Model.csproj" />
+  </ItemGroup>
+
 </Project>

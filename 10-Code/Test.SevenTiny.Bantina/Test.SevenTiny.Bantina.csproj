@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SevenTiny.Bantina\SevenTiny.Bantina.csproj" />
+    <ProjectReference Include="..\Test.Model\Test.Model.csproj" />
   </ItemGroup>
 
 </Project>
