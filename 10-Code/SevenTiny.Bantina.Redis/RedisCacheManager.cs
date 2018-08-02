@@ -12,80 +12,29 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-using SevenTiny.Bantina.Logging;
-using StackExchange.Redis;
 using System;
-using System.Threading;
 
 namespace SevenTiny.Bantina.Redis
 {
-    public class RedisCacheManager : IRedisCache
+    public class RedisCacheManager : RedisServerManager, IRedisCache
     {
-        private ConnectionMultiplexer Redis { get; set; }
-        private IDatabase Db { get; set; }
+        private TimeSpan AbsoluteExpirationRelativeToNow { get; set; }
 
-        private static IRedisCache _instance;
-
-        /// <summary>
-        /// lock
-        /// </summary>
-        private readonly static object lockObject = new object();
-
-        /// <summary>
-        /// Singleton pattern Instance
-        /// </summary>
-        public static IRedisCache Instance
+        public RedisCacheManager(string keySpace)
+            : base(keySpace, RedisConfig.Get(keySpace, "Server"), RedisConfig.Get(keySpace, "Port"))
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (lockObject)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new RedisCacheManager();
-                        }
-                    }
-                }
-                return _instance;
-            }
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get(keySpace, "DefaultExpirySeconds")));
         }
 
-        /// <summary>
-        /// logger
-        /// </summary>
-        private static ILog log = new LogManager();
-
-        private RedisCacheManager()
+        public RedisCacheManager(string server, string port, int defaultExpireSecond = 1800)
+            : base("Default", server, port)
         {
-            //set establish retry mechanism (3 times)
-            int retryCount = 2;
-            while (true)
-            {
-                try
-                {
-                    Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
-                    Db = Redis.GetDatabase();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (retryCount > 0)
-                    {
-                        retryCount--;
-                        Thread.Sleep(1000);
-                        continue;
-                    }
-                    log.Error("Redis server establish  connection error!", ex);
-                    throw new TimeoutException($"redis init timeout,server reject or other.ex{ex.ToString()}");
-                }
-            }
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(defaultExpireSecond);
         }
 
         public string Get(string key) => Db.StringGet(key);
 
-        public void Set(string key, string value) => Db.StringSet(key, value, TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get("DefaultExpirySeconds"))));
+        public void Set(string key, string value) => Db.StringSet(key, value, AbsoluteExpirationRelativeToNow);
 
         public void Set(string key, string value, TimeSpan absoluteExpirationRelativeToNow) => Db.StringSet(key, value, absoluteExpirationRelativeToNow);
 

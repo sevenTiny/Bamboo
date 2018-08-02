@@ -3,17 +3,20 @@ using SevenTiny.Bantina.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Xunit;
 
-namespace Test.SevenTiny.Bantina.ConsoleApp
+namespace Test.SevenTiny.Bantina.Configuration
 {
     public class ConfigurationTest
     {
-        public static void Test()
+        [Fact]
+        public void Get()
         {
-            GetConfigTest();
+            var result = SevenTinyConfig.Config;
         }
 
-        public static void GetConfigTest()
+        [Fact]
+        public void Performance()
         {
             var time = StopwatchHelper.Caculate(10000, () =>
             {

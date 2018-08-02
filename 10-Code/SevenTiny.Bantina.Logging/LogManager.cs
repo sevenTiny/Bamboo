@@ -102,7 +102,7 @@ namespace SevenTiny.Bantina.Logging
                 default:
                     break;
             }
-            LogStorage.Storage(loggingLevel, $"\r\n---- [{DateTime.Now.ToString()}]({loggingLevelString}):\r\n{message}");
+            LogStorage.Storage(loggingLevel, $"\r\n---- [{DateTime.Now.ToString()}] {loggingLevelString}:\r\n{message}");
         }
     }
 }
