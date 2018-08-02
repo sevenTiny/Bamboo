@@ -85,7 +85,12 @@ namespace SevenTiny.Bantina.Configuration
                         {
                             if (File.Exists(ConfigFileFullPath))
                             {
-                                return _Configs = JsonConvert.DeserializeObject<IEnumerable<T>>(File.ReadAllText(ConfigFileFullPath));
+                                //flush config file per 30 minutes.
+                                var lastWriteTime = File.GetLastWriteTime(ConfigFileFullPath);
+                                if (DateTime.Now - lastWriteTime < TimeSpan.FromMinutes(30))
+                                {
+                                    return _Configs = JsonConvert.DeserializeObject<IEnumerable<T>>(File.ReadAllText(ConfigFileFullPath));
+                                }
                             }
                         }
                         //2.from remote config server
@@ -96,7 +101,8 @@ namespace SevenTiny.Bantina.Configuration
                             {
                                 Directory.CreateDirectory(BaseConfigPath);
                             }
-                            using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, true))
+                            //false means overwrite the file
+                            using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, false))
                             {
                                 writer.AutoFlush = true;
                                 writer.WriteLine(JsonConvert.SerializeObject(_Configs));
