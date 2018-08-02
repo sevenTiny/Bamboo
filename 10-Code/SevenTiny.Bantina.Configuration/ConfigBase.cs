@@ -96,18 +96,33 @@ namespace SevenTiny.Bantina.Configuration
                         //2.from remote config server
                         using (var db = new ConfigDbContext(ConnectionString))
                         {
-                            _Configs = db.ExecuteQueryListSql<T>($"SELECT * FROM {ConfigName}");
-                            if (!Directory.Exists(BaseConfigPath))
+                            try
                             {
-                                Directory.CreateDirectory(BaseConfigPath);
+                                _Configs = db.ExecuteQueryListSql<T>($"SELECT * FROM {ConfigName}");
+                                if (!Directory.Exists(BaseConfigPath))
+                                {
+                                    Directory.CreateDirectory(BaseConfigPath);
+                                }
+                                //false means overwrite the file
+                                using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, false))
+                                {
+                                    writer.AutoFlush = true;
+                                    writer.WriteLine(JsonConvert.SerializeObject(_Configs));
+                                }
+                                return _Configs;
                             }
-                            //false means overwrite the file
-                            using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, false))
+                            catch (Exception ex)
                             {
-                                writer.AutoFlush = true;
-                                writer.WriteLine(JsonConvert.SerializeObject(_Configs));
+                                //3.if remote config get error,may be cause by server error...re-get from file if exist.
+                                if (Directory.Exists(BaseConfigPath))
+                                {
+                                    if (File.Exists(ConfigFileFullPath))
+                                    {
+                                        return _Configs = JsonConvert.DeserializeObject<IEnumerable<T>>(File.ReadAllText(ConfigFileFullPath));
+                                    }
+                                }
+                                throw ex;
                             }
-                            return _Configs;
                         }
                     }
                     catch (Exception ex)
@@ -121,7 +136,6 @@ namespace SevenTiny.Bantina.Configuration
                 }
             }
         }
-
 
         /// <summary>
         /// Connection string
