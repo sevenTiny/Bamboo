@@ -23,17 +23,25 @@ namespace SevenTiny.Bantina.Redis
     [ConfigName(Name = "Redis")]
     internal class RedisConfig : ConfigBase<RedisConfig>
     {
+        public string KeySpace { get; set; }
         public string Key { get; set; }
         public string Value { get; set; }
+        public string Description { get; set; }
 
-        private static Dictionary<string, string> dictionary;
+        private static Dictionary<string,Dictionary<string, string>> dictionary;
 
         private static void Initial()
         {
-            dictionary = new Dictionary<string, string>();
-            foreach (var item in Configs)
+            var group = Configs.GroupBy(t => t.KeySpace).Select(t=>new { KeySpace = t.Key, RedisConfig = t }).ToList();
+            dictionary = new Dictionary<string, Dictionary<string, string>>();
+            foreach (var item in group)
             {
-                dictionary.AddOrUpdate(item.Key, item.Value);
+                var innerDic = new Dictionary<string, string>();
+                foreach (var config in item.RedisConfig)
+                {
+                    innerDic.AddOrUpdate(config.Key, config.Value);
+                }
+                dictionary.AddOrUpdate(item.KeySpace, innerDic);
             }
         }
 
@@ -42,14 +50,29 @@ namespace SevenTiny.Bantina.Redis
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static string Get(string key)
+        public static string Get(string keySpace,string key)
         {
-            if (dictionary != null && dictionary.ContainsKey(key))
+            try
             {
-                return dictionary[key];
+                if (dictionary != null && dictionary.ContainsKey(keySpace))
+                {
+                    if (!dictionary[keySpace].ContainsKey(key))
+                    {
+                        Initial();
+                    }
+                    return dictionary[keySpace][key] ?? throw new ArgumentNullException($"Redis Config of keyspace({keySpace}), key ({key}) not exist or error value!");
+                }
+                Initial();
+                if (!dictionary.ContainsKey(keySpace))
+                {
+                    throw new ArgumentNullException($"Redis Config of keyspace({keySpace}) not exist or error value!");
+                }
+                return dictionary[keySpace][key];
             }
-            Initial();
-            return dictionary.SafeGet(key) ?? throw new ArgumentNullException($"Redis Config of key ({key}) not exist or error value!");
+            catch (Exception)
+            {
+                throw new ArgumentNullException($"Redis Config of keyspace({keySpace}), key ({key}) not exist or error value!");
+            }
         }
     }
 }

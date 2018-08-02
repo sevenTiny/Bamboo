@@ -11,14 +11,18 @@ namespace Test.SevenTiny.Bantina.Redis
 {
     public class RedisLockTest
     {
+        private IRedisLock Instance { get; set; }
+        private void Init()
+        {
+            Instance = new RedisLockManager("Default");
+        }
+
         [Fact]
         public void Lock()
         {
-            IRedisLock locker = RedisLockManager.Instance;
-
             string lockName = "lock";
 
-            locker.Lock(lockName,
+            Instance.Lock(lockName,
             () =>
             {
                 Trace.WriteLine("lock success! time out 3 second");
@@ -33,15 +37,13 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void Lock2()
         {
-            IRedisLock locker = RedisLockManager.Instance;
-
             string lockName = "lock";
 
             string successMsg = "lock execute succeed!";
 
             string result;
 
-            result = locker.Lock<string>(lockName,
+            result = Instance.Lock<string>(lockName,
             () =>
             {
                 Trace.WriteLine("lock success!");
@@ -61,14 +63,12 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void LockThread()
         {
-            IRedisLock locker = RedisLockManager.Instance;
-
             string lockName = "lock";
             for (int i = 0; i < 3; i++)
             {
                 Task.Run(() =>
                 {
-                    locker.Lock(lockName,
+                    Instance.Lock(lockName,
                     () =>
                     {
                         Trace.WriteLine("-------- lock success!");
@@ -84,11 +84,9 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void LockNoRelease()
         {
-            IRedisLock locker = RedisLockManager.Instance;
-
             string lockName = "lock";
 
-            bool result = locker.Lock(lockName);
+            bool result = Instance.Lock(lockName);
 
             Assert.True(result);
         }
@@ -96,11 +94,9 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void LockRelease()
         {
-            IRedisLock locker = RedisLockManager.Instance;
-
             string lockName = "lock";
 
-            bool result = locker.LockRelease(lockName);
+            bool result = Instance.LockRelease(lockName);
 
             Assert.True(result);
         }

@@ -8,16 +8,30 @@ namespace Test.SevenTiny.Bantina.Redis
 {
     public class RedisCacheTest
     {
+        private IRedisCache Instance { get; set; }
+        private void Init()
+        {
+            Instance = new RedisCacheManager("Default");
+        }
+
+        [Fact]
+        public void CacheExist()
+        {
+            Init();
+            string key = "testKey";
+            var result = Instance.Exist(key);
+        }
+
         [Fact]
         public void CacheSet()
         {
+            Init();
             string key = "testKey";
             string value = "testValue";
 
-            IRedisCache instance = RedisCacheManager.Instance;
-            instance.Set(key, value);
+            Instance.Set(key, value);
 
-            var getValue = instance.Get(key);
+            var getValue = Instance.Get(key);
 
             Assert.Equal(value, getValue);
         }
@@ -25,12 +39,12 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void CacheDelete()
         {
+            Init();
             string key = "testKey";
 
-            IRedisCache instance = RedisCacheManager.Instance;
-            instance.Delete(key);
+            Instance.Delete(key);
 
-            var isExist = instance.Exist(key);
+            var isExist = Instance.Exist(key);
 
             Assert.False(isExist);
         }
@@ -38,13 +52,13 @@ namespace Test.SevenTiny.Bantina.Redis
         [Fact]
         public void CacheUpdate()
         {
+            Init();
             string key = "testKey";
             string value = "updateValue";
 
-            IRedisCache instance = RedisCacheManager.Instance;
-            instance.Update(key, value);
+            Instance.Update(key, value);
 
-            var getValue = instance.Get(key);
+            var getValue = Instance.Get(key);
 
             Assert.Equal(value, getValue);
         }

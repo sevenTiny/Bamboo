@@ -1,7 +1,5 @@
-﻿using SevenTiny.Bantina.Logging;
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 using System;
-using System.Diagnostics;
 using System.Threading;
 
 namespace SevenTiny.Bantina.Redis
@@ -9,73 +7,21 @@ namespace SevenTiny.Bantina.Redis
     /// <summary>
     /// Redis Lock Manager
     /// </summary>
-    public class RedisLockManager : IRedisLock
+    public class RedisLockManager : RedisServerManager, IRedisLock
     {
-        private ConnectionMultiplexer Redis { get; set; }
-
-        private IDatabase Db { get; set; }
-
         private static readonly RedisValue Token = Environment.MachineName;
+        private TimeSpan LockExpirySeconds { get; set; }
 
-        private TimeSpan LockExpirySeconds => TimeSpan.FromSeconds(double.Parse(RedisConfig.Get("RedisLockExpirySeconds")));
-
-        private static IRedisLock _instance;
-
-        /// <summary>
-        /// lock
-        /// </summary>
-        private readonly static object lockObject = new object();
-
-        /// <summary>
-        /// Singleton pattern Instance
-        /// </summary>
-        public static IRedisLock Instance
+        public RedisLockManager(string keySpace)
+            : base(keySpace, RedisConfig.Get(keySpace, "Server"), RedisConfig.Get(keySpace, "Port"))
         {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (lockObject)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new RedisLockManager();
-                        }
-                    }
-                }
-                return _instance;
-            }
+            LockExpirySeconds = TimeSpan.FromSeconds(Convert.ToDouble(RedisConfig.Get(keySpace, "RedisLockExpirySeconds")));
         }
 
-        /// <summary>
-        /// logger
-        /// </summary>
-        private static ILog log = new LogManager();
-
-        private RedisLockManager()
+        public RedisLockManager(string server, string port, int lockExpirySeconds = 600)
+            : base("Default", server, port)
         {
-            //set establish retry mechanism (3 times)
-            int retryCount = 2;
-            while (true)
-            {
-                try
-                {
-                    Redis = ConnectionMultiplexer.Connect($"{RedisConfig.Get("Server")}:{RedisConfig.Get("Port")}");
-                    Db = Redis.GetDatabase();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    if (retryCount > 0)
-                    {
-                        retryCount--;
-                        Thread.Sleep(1000);
-                        continue;
-                    }
-                    log.Error("Redis server establish  connection error!", ex);
-                    throw new TimeoutException($"redis init timeout,server reject or other.ex{ex.ToString()}");
-                }
-            }
+            LockExpirySeconds = TimeSpan.FromSeconds(lockExpirySeconds);
         }
 
         /// <summary>
