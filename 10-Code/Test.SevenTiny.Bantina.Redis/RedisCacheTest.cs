@@ -11,7 +11,7 @@ namespace Test.SevenTiny.Bantina.Redis
         private IRedisCache Instance { get; set; }
         private void Init()
         {
-            Instance = new RedisCacheManager("Default");
+            Instance = new RedisCacheManager("104");
         }
 
         [Fact]
