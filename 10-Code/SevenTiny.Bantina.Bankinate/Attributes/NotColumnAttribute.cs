@@ -18,11 +18,11 @@ using System.Linq;
 namespace SevenTiny.Bantina.Bankinate.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class NotColumnAttribute : Attribute
+    public class ColumnIgnoreAttributeAttribute : Attribute
     {
         public static bool Exist(Type type)
         {
-            var attr = type.GetCustomAttributes(typeof(NotColumnAttribute), true).FirstOrDefault();
+            var attr = type.GetCustomAttributes(typeof(ColumnIgnoreAttributeAttribute), true).FirstOrDefault();
             return attr != null ? true : false;
         }
     }

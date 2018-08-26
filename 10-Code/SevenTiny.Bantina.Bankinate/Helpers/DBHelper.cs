@@ -30,7 +30,8 @@ namespace SevenTiny.Bantina.Bankinate
     {
         SqlServer,
         MySql,
-        Oracle
+        Oracle,
+        MongoDB
     }
     public abstract class DbHelper
     {
