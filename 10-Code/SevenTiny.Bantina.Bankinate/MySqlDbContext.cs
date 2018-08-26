@@ -18,6 +18,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.Cache;
+using SevenTiny.Bantina.Bankinate.SqlStatementManager;
 
 namespace SevenTiny.Bantina.Bankinate
 {
@@ -134,7 +137,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
-
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
@@ -145,7 +147,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
-
         public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var item in entities)
@@ -153,7 +154,6 @@ namespace SevenTiny.Bantina.Bankinate
                 Add(item);
             }
         }
-
         public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             foreach (var item in entities)
@@ -172,7 +172,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             DbHelper.ExecuteNonQuery(SqlStatement);
         }
-
         public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
@@ -255,7 +254,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
         }
-
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
@@ -265,39 +263,6 @@ namespace SevenTiny.Bantina.Bankinate
             MCache.Instance.MarkTableModifyUpdate(TableName, filter, entity);
 
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
-        }
-
-        public List<TEntity> QueryList<TEntity>() where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            this.SqlStatement = $"SELECT * FROM {TableName}";
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, null, () =>
-              {
-                  return DbHelper.ExecuteList<TEntity>(SqlStatement);
-              }, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
-        }
-
-        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            string desc = isDESC ? "DESC" : "ASC";
-            this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, null, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
         }
 
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
@@ -315,7 +280,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             return result;
         }
-
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
@@ -348,7 +312,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             return result;
         }
-
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));
@@ -364,7 +327,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             return result;
         }
-
         public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return QueryCount(filter) > 0;
@@ -375,53 +337,26 @@ namespace SevenTiny.Bantina.Bankinate
             MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQuery(sqlStatement, System.Data.CommandType.Text, parms);
         }
-
         public void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null)
         {
             MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
         }
-
-        public object ExecuteQueryObjectSql(string sqlStatement, IDictionary<string, object> parms = null)
+        public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
+        {
+            return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
+        }
+        public object ExecuteQueryOneDataSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
             return DbHelper.ExecuteScalar(sqlStatement, System.Data.CommandType.Text, parms);
         }
-
         public TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
         {
             return DbHelper.ExecuteEntity<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
-
         public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
         {
             return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
-        }
-
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            if (pageIndex < 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize < 0)
-            {
-                pageSize = 0;
-            }
-
-            string desc = isDESC ? "DESC" : "ASC";
-            this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out int count, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
         }
 
         public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class
@@ -450,36 +385,6 @@ namespace SevenTiny.Bantina.Bankinate
 
             return result;
         }
-
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, out int count, bool isDESC = false) where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            if (pageIndex < 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize < 0)
-            {
-                pageSize = 0;
-            }
-
-            string desc = isDESC ? "DESC" : "ASC";
-            this.SqlStatement = $"SELECT * FROM {TableName} {orderBy.Parameters[0].Name} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}";
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, null, pageIndex, pageSize, orderBy, isDESC, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out int cou, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            count = cou;
-
-            return result;
-        }
-
         public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class
         {
             TableName = TableAttribute.GetName(typeof(TEntity));

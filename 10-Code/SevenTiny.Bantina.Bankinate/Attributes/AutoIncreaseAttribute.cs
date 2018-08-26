@@ -14,7 +14,7 @@
  *********************************************************/
 using System;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class AutoIncreaseAttribute : Attribute

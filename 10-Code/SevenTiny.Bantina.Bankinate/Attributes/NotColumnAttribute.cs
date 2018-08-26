@@ -15,7 +15,7 @@
 using System;
 using System.Linq;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class NotColumnAttribute : Attribute

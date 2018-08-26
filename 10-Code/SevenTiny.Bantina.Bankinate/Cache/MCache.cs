@@ -12,15 +12,16 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using cache = SevenTiny.Bantina.Bankinate.MemoryCacheHelper;
+using cache = SevenTiny.Bantina.Bankinate.Helpers.MemoryCacheHelper;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.Cache
 {
     /**
      * The cache memory1,quick memory value from sql statement.

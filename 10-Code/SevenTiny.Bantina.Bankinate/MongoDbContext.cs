@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using SevenTiny.Bantina.Bankinate.Attributes;
 
 namespace SevenTiny.Bantina.Bankinate
 {
@@ -179,11 +180,6 @@ namespace SevenTiny.Bantina.Bankinate
             return GetCollectionBson<TEntity>().Find(filter).FirstOrDefault();
         }
 
-
-        public List<TEntity> QueryList<TEntity>() where TEntity : class
-        {
-            return GetCollection<TEntity>().Find(t => true).ToList();
-        }
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return GetCollection<TEntity>().Find(filter).ToList();

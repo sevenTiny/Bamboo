@@ -68,7 +68,7 @@ namespace SevenTiny.Bantina.Bankinate
         #region ExcuteNonQuery 执行sql语句或者存储过程,返回影响的行数---ExcuteNonQuery
         public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -79,7 +79,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -90,7 +90,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -101,7 +101,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -115,7 +115,7 @@ namespace SevenTiny.Bantina.Bankinate
         #region ExecuteScalar 执行sql语句或者存储过程,执行单条语句，返回单个结果---ScalarExecuteScalar
         public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -126,7 +126,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -138,7 +138,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -149,7 +149,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -165,7 +165,7 @@ namespace SevenTiny.Bantina.Bankinate
         public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
-            SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW);
+            SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW);
             DbCommandCommon cmd = new DbCommandCommon(DbType);
             PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
             return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
@@ -173,7 +173,7 @@ namespace SevenTiny.Bantina.Bankinate
         public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
             //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
-            SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW);
+            SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW);
             DbCommandCommon cmd = new DbCommandCommon(DbType);
             PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
             return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
@@ -188,7 +188,7 @@ namespace SevenTiny.Bantina.Bankinate
          **/
         public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -208,7 +208,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -231,7 +231,7 @@ namespace SevenTiny.Bantina.Bankinate
         #region ExecuteDataSet 执行sql语句或者存储过程,返回一个DataSet---DataSet
         public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -247,7 +247,7 @@ namespace SevenTiny.Bantina.Bankinate
         }
         public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
         {
-            using (SqlConnection_WR_Safe conn = new SqlConnection_WR_Safe(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
             {
                 using (DbCommandCommon cmd = new DbCommandCommon(DbType))
                 {
@@ -464,7 +464,7 @@ namespace SevenTiny.Bantina.Bankinate
     /// Auto Fill Adapter
     /// </summary>
     /// <typeparam name="Entity"></typeparam>
-    public class FillAdapter<Entity>
+    internal class FillAdapter<Entity>
     {
         private static readonly Func<DataRow, Entity> funcCache = GetFactory();
         public static Entity AutoFill(DataRow row)
@@ -522,21 +522,21 @@ namespace SevenTiny.Bantina.Bankinate
     * time:2017-9-18 18:02:23
     * description:safe create sqlconnection support
     * */
-    internal class SqlConnection_WR_Safe : IDisposable
+    internal class SqlConnection_RW : IDisposable
     {
         /// <summary>
         /// SqlConnection
         /// </summary>
         public DbConnection DbConnection { get; set; }
 
-        public SqlConnection_WR_Safe(DataBaseType dataBaseType, string ConnString_RW)
+        public SqlConnection_RW(DataBaseType dataBaseType, string ConnString_RW)
         {
             this.DbConnection = GetDbConnection(dataBaseType, ConnString_RW);
         }
         /**
          * if read db disabled,switchover to read write db immediately
          * */
-        public SqlConnection_WR_Safe(DataBaseType dataBaseType, string ConnString_R, string ConnString_RW)
+        public SqlConnection_RW(DataBaseType dataBaseType, string ConnString_R, string ConnString_RW)
         {
             try
             {

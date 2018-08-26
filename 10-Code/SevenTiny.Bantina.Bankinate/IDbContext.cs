@@ -47,7 +47,8 @@ namespace SevenTiny.Bantina.Bankinate
     {
         void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null);
         void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null);
-        object ExecuteQueryObjectSql(string sqlStatement, IDictionary<string, object> parms = null);
+        object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null);
+        object ExecuteQueryOneDataSql(string sqlStatement, IDictionary<string, object> parms = null);
         TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
         List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
     }
@@ -57,15 +58,12 @@ namespace SevenTiny.Bantina.Bankinate
         bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
-        List<TEntity> QueryList<TEntity>() where TEntity : class;
         List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
     }
 
     public interface IQueryPagingOperate
     {
-        List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class;
         List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class;
-        List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, out int count, bool isDESC = false) where TEntity : class;
         List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class;
     }
 }
