@@ -85,17 +85,6 @@ namespace SevenTiny.Bantina.Bankinate
                 //key :
                 if (propertyInfo.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute keyAttr)
                 {
-                    builder_front.Append(keyAttr.GetName(propertyInfo.Name));
-                    builder_front.Append(",");
-                    builder_behind.Append("@");
-                    columnName = keyAttr.GetName(propertyInfo.Name).Replace("`", "");
-                    builder_behind.Append(columnName);
-                    builder_behind.Append(",");
-
-                    if (!paramsDic.ContainsKey(columnName))
-                    {
-                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
-                    }
                 }
                 //Column :
                 else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute column)
@@ -206,17 +195,6 @@ namespace SevenTiny.Bantina.Bankinate
                 //key :
                 if (propertyInfo.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute keyAttr)
                 {
-                    builder_front.Append(keyAttr.GetName(propertyInfo.Name));
-                    builder_front.Append("=");
-                    builder_front.Append("@");
-                    columnName = keyAttr.GetName(propertyInfo.Name).Replace("`", "");
-                    builder_front.Append(columnName);
-                    builder_front.Append(",");
-
-                    if (!paramsDic.ContainsKey(columnName))
-                    {
-                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
-                    }
                 }
                 //Column :
                 else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
