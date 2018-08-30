@@ -3,19 +3,14 @@ using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.SqlStatementManager;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
     public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, IExecuteSqlOperate, IQueryPagingOperate where TDataBase : class
     {
-        public SqlDbContext(string connectionString, DataBaseType dataBaseType) : base(dataBaseType)
+        public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType)
         {
-            DbHelper.ConnString_Default = connectionString;
-            DbHelper.DbType = dataBaseType;
         }
 
         public SqlDbContext(string connectionString_Read, string connectionString_ReadWrite, DataBaseType dataBaseType) : base(dataBaseType)
@@ -45,17 +40,33 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         }
         public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
+            List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
-                Add(item);
+                SqlStatement = SqlGenerator.Add(DataBaseType, item, out string tableName, out Dictionary<string, object> paramsDic);
+                TableName = tableName;
+                batchExecuteModels.Add(new BatchExecuteModel
+                {
+                    CommandTextOrSpName = SqlStatement,
+                    ParamsDic = paramsDic
+                });
             }
+            DbHelper.BatchExecuteNonQuery(batchExecuteModels);
         }
         public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
+            List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
-                AddAsync(item);
+                SqlStatement = SqlGenerator.Add(DataBaseType, item, out string tableName, out Dictionary<string, object> paramsDic);
+                TableName = tableName;
+                batchExecuteModels.Add(new BatchExecuteModel
+                {
+                    CommandTextOrSpName = SqlStatement,
+                    ParamsDic = paramsDic
+                });
             }
+            DbHelper.BatchExecuteNonQueryAsync(batchExecuteModels);
         }
 
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class

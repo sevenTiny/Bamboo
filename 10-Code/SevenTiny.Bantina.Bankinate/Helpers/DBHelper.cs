@@ -60,7 +60,7 @@ namespace SevenTiny.Bantina.Bankinate
         /// </summary>
         public static string ConnString_R { get; set; } = _connString;
         /// <summary>
-        /// DataBaseType Select default:sqlserver
+        /// DataBaseType Select default:mysql
         /// </summary>
         public static DataBaseType DbType { get; set; } = DataBaseType.MySql;
 
@@ -89,6 +89,20 @@ namespace SevenTiny.Bantina.Bankinate
                 }
             }
         }
+        public static void BatchExecuteNonQuery(IEnumerable<BatchExecuteModel> batchExecuteModels)
+        {
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    foreach (var item in batchExecuteModels)
+                    {
+                        PreparCommand(conn.DbConnection, cmd.DbCommand, item.CommandTextOrSpName, item.CommandType, item.ParamsDic);
+                        cmd.DbCommand.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
         public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
         {
             using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
@@ -108,6 +122,20 @@ namespace SevenTiny.Bantina.Bankinate
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);//参数增加了commandType 可以自己编辑执行方式
                     return cmd.DbCommand.ExecuteNonQueryAsync();
+                }
+            }
+        }
+        public static void BatchExecuteNonQueryAsync(IEnumerable<BatchExecuteModel> batchExecuteModels)
+        {
+            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
+            {
+                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                {
+                    foreach (var item in batchExecuteModels)
+                    {
+                        PreparCommand(conn.DbConnection, cmd.DbCommand, item.CommandTextOrSpName, item.CommandType, item.ParamsDic);
+                        cmd.DbCommand.ExecuteNonQueryAsync();
+                    }
                 }
             }
         }
@@ -497,7 +525,7 @@ namespace SevenTiny.Bantina.Bankinate
                     //Id,Id is a property of Entity
                     var propertyName = Expression.Constant(propertyInfo.Name, typeof(string));
                     //row.Table.Columns.Contains("Id")
-                    var checkIfContainsColumn =Expression.Call(columns, containsMethod, propertyName);
+                    var checkIfContainsColumn = Expression.Call(columns, containsMethod, propertyName);
                     //t.Id
                     var propertyExpression = Expression.Property(instanceDeclare, propertyInfo);
                     //row.get_Item("Id")
@@ -661,5 +689,24 @@ namespace SevenTiny.Bantina.Bankinate
                 this.DbDataAdapter.Dispose();
             }
         }
+    }
+
+    /// <summary>
+    /// 用于批量操作的批量操作实体
+    /// </summary>
+    public class BatchExecuteModel
+    {
+        /// <summary>
+        /// 执行的语句或者存储过程名称
+        /// </summary>
+        public string CommandTextOrSpName { get; set; }
+        /// <summary>
+        /// 执行类别，默认执行sql语句
+        /// </summary>
+        public CommandType CommandType { get; set; } = CommandType.Text;
+        /// <summary>
+        /// 执行语句的参数字典
+        /// </summary>
+        public IDictionary<string, object> ParamsDic { get; set; }
     }
 }

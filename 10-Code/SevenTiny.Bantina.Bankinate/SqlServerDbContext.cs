@@ -18,11 +18,11 @@ namespace SevenTiny.Bantina.Bankinate
 {
     public abstract class SqlServerDbContext<TDataBase> : SqlDbContext<TDataBase> where TDataBase : class
     {
-        public SqlServerDbContext(string connectionString, DataBaseType dataBaseType) : base(connectionString, dataBaseType)
+        public SqlServerDbContext(string connectionString) : base(connectionString, DataBaseType.SqlServer)
         {
         }
 
-        public SqlServerDbContext(string connectionString_Read, string connectionString_ReadWrite, DataBaseType dataBaseType) : base(connectionString_Read, connectionString_ReadWrite, dataBaseType)
+        public SqlServerDbContext(string connectionString_Read, string connectionString_ReadWrite) : base(connectionString_Read, connectionString_ReadWrite, DataBaseType.SqlServer)
         {
         }
     }

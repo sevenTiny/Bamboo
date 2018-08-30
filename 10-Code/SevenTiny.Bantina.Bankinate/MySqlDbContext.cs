@@ -26,11 +26,8 @@ namespace SevenTiny.Bantina.Bankinate
 {
     public abstract class MySqlDbContext<TDataBase> : IDbContext, IExecuteSqlOperate, IQueryPagingOperate where TDataBase : class
     {
-        public MySqlDbContext(string connectionString)
+        public MySqlDbContext(string connectionString) : this(connectionString, connectionString)
         {
-            DbHelper.ConnString_Default = connectionString;
-            DbHelper.DbType = DataBaseType.MySql;
-            MCache.Instance.ExpiredTimeSpan = CacheExpiredTimeSpan;
         }
 
         public MySqlDbContext(string connectionString_Read, string connectionString_ReadWrite)
