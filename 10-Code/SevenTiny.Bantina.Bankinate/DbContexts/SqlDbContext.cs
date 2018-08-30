@@ -114,7 +114,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.Query(DataBaseType, filter, out string tableName);
             TableName = tableName;
 
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(TableCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -128,7 +128,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.QueryOrderBy(DataBaseType, filter, orderBy, isDESC, out string tableName);
             TableName = tableName;
 
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(TableCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -143,7 +143,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.QueryOne(DataBaseType, filter, out string tableName);
             TableName = tableName;
 
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entity(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entity(TableCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
             }, out bool fromCache);
@@ -157,7 +157,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.QueryCount(DataBaseType, filter, out string tableName);
             TableName = tableName;
 
-            var result = Convert.ToInt32(MCache.Instance.GetFromCacheIfNotExistReStore_Count(LocalCache, TableName, SqlStatement, filter, () =>
+            var result = Convert.ToInt32(MCache.Instance.GetFromCacheIfNotExistReStore_Count(TableCache, TableName, SqlStatement, filter, () =>
             {
                 return DbHelper.ExecuteScalar(SqlStatement);
             }, out bool fromCache));
@@ -215,7 +215,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.QueryPaging(DataBaseType, pageIndex, pageSize, filter, orderBy, isDESC, out string tableName);
             TableName = tableName;
 
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(TableCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int count, out bool fromCache);
@@ -241,7 +241,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             SqlStatement = SqlGenerator.QueryPaging(DataBaseType, pageIndex, pageSize, filter, orderBy, isDESC, out string tableName);
             TableName = tableName;
 
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(LocalCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
+            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(TableCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
             }, out int cou, out bool fromCache);
