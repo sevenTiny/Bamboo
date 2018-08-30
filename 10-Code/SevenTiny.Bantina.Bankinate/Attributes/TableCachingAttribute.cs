@@ -17,6 +17,5 @@ namespace SevenTiny.Bantina.Bankinate.Attributes
             var attr = type.GetCustomAttributes(typeof(ColumnAttribute), true).FirstOrDefault();
             return (attr as TableCachingAttribute)?.ExpiredTime ?? DefaultValue.CacheExpiredTime;
         }
-
     }
 }
