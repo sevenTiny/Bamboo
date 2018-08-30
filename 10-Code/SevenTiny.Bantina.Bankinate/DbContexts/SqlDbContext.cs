@@ -22,29 +22,23 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
-            SqlStatement = SqlGenerator.Add(DataBaseType, entity, out string tableName, out Dictionary<string, object> paramsDic);
-            TableName = tableName;
-
-            MCache.Instance.MarkTableModifyAdd(TableName, entity);
-
+            SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic);
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
+            DbCacheManager.Add(this, entity);
         }
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
         {
-            SqlStatement = SqlGenerator.Add(DataBaseType, entity, out string tableName, out Dictionary<string, object> paramsDic);
-            TableName = tableName;
-
-            MCache.Instance.MarkTableModifyAdd(TableName, entity);
-
+            SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic);
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
+            DbCacheManager.Add(this, entity);
         }
         public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
-                SqlStatement = SqlGenerator.Add(DataBaseType, item, out string tableName, out Dictionary<string, object> paramsDic);
-                TableName = tableName;
+                SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic);
+
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
                     CommandTextOrSpName = SqlStatement,
@@ -52,14 +46,15 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
                 });
             }
             DbHelper.BatchExecuteNonQuery(batchExecuteModels);
+            DbCacheManager.Add(this, entities);
         }
         public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
-                SqlStatement = SqlGenerator.Add(DataBaseType, item, out string tableName, out Dictionary<string, object> paramsDic);
-                TableName = tableName;
+                SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic);
+
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
                     CommandTextOrSpName = SqlStatement,
@@ -67,104 +62,105 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
                 });
             }
             DbHelper.BatchExecuteNonQueryAsync(batchExecuteModels);
+            DbCacheManager.Add(this, entities);
         }
 
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
-
-            MCache.Instance.MarkTableModifyDelete(TableName, filter);
-
+            SqlGenerator.Delete(this, filter);
             DbHelper.ExecuteNonQuery(SqlStatement);
+            DbCacheManager.Delete(this, filter);
         }
         public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            this.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
-
-            MCache.Instance.MarkTableModifyDelete(TableName, filter);
-
+            SqlGenerator.Delete(this, filter);
             DbHelper.ExecuteNonQueryAsync(SqlStatement);
+            DbCacheManager.Delete(this, filter);
         }
 
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            SqlStatement = SqlGenerator.Update(DataBaseType, filter, entity, out string tableName, out Dictionary<string, object> paramsDic);
-            TableName = tableName;
-
-            MCache.Instance.MarkTableModifyUpdate(TableName, filter, entity);
-
+            SqlGenerator.Update(this, filter, entity, out Dictionary<string, object> paramsDic);
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
+            DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            SqlStatement = SqlGenerator.Update(DataBaseType, filter, entity, out string tableName, out Dictionary<string, object> paramsDic);
-            TableName = tableName;
-
-            MCache.Instance.MarkTableModifyUpdate(TableName, filter, entity);
-
+            SqlGenerator.Update(this, filter, entity, out Dictionary<string, object> paramsDic);
             DbHelper.ExecuteNonQueryAsync(SqlStatement, System.Data.CommandType.Text, paramsDic);
+            DbCacheManager.Update(this, entity, filter);
         }
 
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            SqlStatement = SqlGenerator.Query(DataBaseType, filter, out string tableName);
-            TableName = tableName;
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(TableCache, TableName, SqlStatement, filter, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
+            SqlGenerator.Query(this, filter);
+            return DbCacheManager.GetEntities(this, filter, () =>
+              {
+                  return DbHelper.ExecuteList<TEntity>(SqlStatement);
+              });
         }
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
         {
-            SqlStatement = SqlGenerator.QueryOrderBy(DataBaseType, filter, orderBy, isDESC, out string tableName);
-            TableName = tableName;
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entities(TableCache, TableName, SqlStatement, filter, () =>
+            SqlGenerator.QueryOrderBy(this, filter, orderBy, isDESC);
+            return DbCacheManager.GetEntities(this, filter, () =>
             {
                 return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out bool fromCache);
+            });
+        }
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class
+        {
+            if (pageIndex <= 0)
+            {
+                pageIndex = 1;
+            }
 
-            IsFromCache = fromCache;
+            if (pageSize <= 0)
+            {
+                pageSize = 10;
+            }
 
+            SqlGenerator.QueryPaging(this, pageIndex, pageSize, filter, orderBy, isDESC);
+            return DbCacheManager.GetEntities(this, filter, () =>
+            {
+                return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            });
+        }
+        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class
+        {
+            if (pageIndex <= 0)
+            {
+                pageIndex = 1;
+            }
+
+            if (pageSize <= 0)
+            {
+                pageSize = 10;
+            }
+
+            SqlGenerator.QueryPaging(this, pageIndex, pageSize, filter, orderBy, isDESC);
+            var result = DbCacheManager.GetEntities(this, filter, () =>
+            {
+                return DbHelper.ExecuteList<TEntity>(SqlStatement);
+            });
+            count = result?.Count ?? default(int);
             return result;
         }
 
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            SqlStatement = SqlGenerator.QueryOne(DataBaseType, filter, out string tableName);
-            TableName = tableName;
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStore_Entity(TableCache, TableName, SqlStatement, filter, () =>
-            {
-                return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
-            }, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
+            SqlGenerator.QueryOne(this, filter);
+            return DbCacheManager.GetEntity(this, filter, () =>
+             {
+                 return DbHelper.ExecuteEntity<TEntity>(SqlStatement);
+             });
         }
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            SqlStatement = SqlGenerator.QueryCount(DataBaseType, filter, out string tableName);
-            TableName = tableName;
-
-            var result = Convert.ToInt32(MCache.Instance.GetFromCacheIfNotExistReStore_Count(TableCache, TableName, SqlStatement, filter, () =>
+            SqlGenerator.QueryCount(this, filter);
+            return DbCacheManager.GetCount(this, filter, () =>
             {
-                return DbHelper.ExecuteScalar(SqlStatement);
-            }, out bool fromCache));
-
-            IsFromCache = fromCache;
-
-            return result;
+                return int.TryParse(Convert.ToString(DbHelper.ExecuteScalar(SqlStatement)), out int result) ? result : default(int);
+            });
         }
         public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
@@ -173,12 +169,10 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQuery(sqlStatement, System.Data.CommandType.Text, parms);
         }
         public void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            MCache.Instance.MarkTableModify(TableName);
             DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
         }
         public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
@@ -198,63 +192,9 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
         }
 
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            if (pageIndex <= 0)
-            {
-                pageIndex = 1;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            SqlStatement = SqlGenerator.QueryPaging(DataBaseType, pageIndex, pageSize, filter, orderBy, isDESC, out string tableName);
-            TableName = tableName;
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(TableCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out int count, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            return result;
-        }
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class
-        {
-            TableName = TableAttribute.GetName(typeof(TEntity));
-
-            if (pageIndex <= 0)
-            {
-                pageIndex = 1;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            SqlStatement = SqlGenerator.QueryPaging(DataBaseType, pageIndex, pageSize, filter, orderBy, isDESC, out string tableName);
-            TableName = tableName;
-
-            var result = MCache.Instance.GetFromCacheIfNotExistReStoreEntitiesPaging(TableCache, TableName, SqlStatement, filter, pageIndex, pageSize, orderBy, isDESC, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlStatement);
-            }, out int cou, out bool fromCache);
-
-            IsFromCache = fromCache;
-
-            count = cou;
-
-            return result;
-        }
-
         public void Dispose()
         {
+            GC.SuppressFinalize(this);
         }
     }
 }

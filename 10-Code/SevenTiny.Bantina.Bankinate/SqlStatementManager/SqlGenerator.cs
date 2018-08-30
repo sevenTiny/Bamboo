@@ -1,4 +1,5 @@
 ﻿using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.DbContexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,14 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return _propertiesDic[type];
         }
 
-        public static string Add<TEntity>(DataBaseType dataBaseType, TEntity entity, out string tableName, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static void Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder(), builder_behind = new StringBuilder();
             builder_front.Append("INSERT INTO ");
-            builder_front.Append(tableName);
+            builder_front.Append(dbContext.TableName);
             builder_front.Append(" (");
             builder_behind.Append(" VALUES (");
 
@@ -71,17 +72,17 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 }
             }
             //Generate SqlStatement
-            return builder_front.Append(builder_behind.ToString()).ToString();
+            dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
         }
 
-        public static string Update<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, TEntity entity, out string tableName, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static void Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder();
             builder_front.Append("UPDATE ");
-            builder_front.Append(tableName);
+            builder_front.Append(dbContext.TableName);
             builder_front.Append(" ");
             builder_front.Append(filter.Parameters[0].Name);
             builder_front.Append(" SET ");
@@ -119,116 +120,121 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 }
             }
             //Generate SqlStatement
-            return builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
+            dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static string Delete<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, out string tableName) where TEntity : class
+        public static void Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    return $"DELETE {filter.Parameters[0].Name} From {tableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty;
+                    break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty;
+                    break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty;
+                    break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty;
+                    break;
             }
         }
 
-        public static string QueryOne<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, out string tableName) where TEntity : class
+        public static void QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    return $"SELECT TOP 1 * FROM {tableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"SELECT TOP 1 * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
             }
         }
 
-        public static string QueryCount<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, out string tableName) where TEntity : class
+        public static void QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    return $"SELECT COUNT(0) FROM {tableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
             }
         }
 
-        public static string Query<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, out string tableName) where TEntity : class
+        public static void Query<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    return $"SELECT * FROM {tableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
             }
         }
 
-        public static string QueryOrderBy<TEntity>(DataBaseType dataBaseType, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC, out string tableName) where TEntity : class
+        public static void QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                     string desc = isDESC ? "DESC" : "ASC";
-                    return $"SELECT * FROM {tableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}";
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
             }
         }
 
-        public static string QueryPaging<TEntity>(DataBaseType dataBaseType, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC, out string tableName) where TEntity : class
+        public static void QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
-            tableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dataBaseType)
+            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                     string desc = isDESC ? "DESC" : "ASC";
-                    return $"SELECT TOP {pageSize} * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}) AS RowNumber,* FROM {tableName} {orderBy.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}";
+                    dbContext.SqlStatement = $"SELECT TOP {pageSize} * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}) AS RowNumber,* FROM {dbContext.TableName} {orderBy.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
                 case DataBaseType.MySql:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.MongoDB:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
                 default:
-                    return string.Empty;
+                    dbContext.SqlStatement = string.Empty; break;
             }
         }
     }

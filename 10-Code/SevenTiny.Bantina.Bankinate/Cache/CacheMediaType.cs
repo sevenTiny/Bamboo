@@ -5,6 +5,7 @@
     /// </summary>
     public enum CacheMediaType
     {
-        Local = 0
+        Local = 0,
+        Redis = 1
     }
 }
