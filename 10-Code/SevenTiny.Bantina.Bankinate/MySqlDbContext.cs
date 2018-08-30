@@ -70,7 +70,7 @@ namespace SevenTiny.Bantina.Bankinate
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 //if not column mark exist,jump to next
-                if (ColumnIgnoreAttributeAttribute.Exist(typeof(TEntity)))
+                if (ColumnIgnoreAttribute.Exist(typeof(TEntity)))
                 {
                     continue;
                 }

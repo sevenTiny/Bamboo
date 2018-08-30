@@ -20,23 +20,17 @@ namespace SevenTiny.Bantina.Bankinate.Attributes
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class DataBaseAttribute : Attribute
     {
-        public DataBaseAttribute()
-        { }
+        public DataBaseAttribute() { }
         public DataBaseAttribute(string databaseName)
         {
             this.Name = databaseName;
         }
-        public string Name { get; set; }
-
-        public string GetName(string @default)
-        {
-            return this.Name ?? @default;
-        }
+        public string Name { get; private set; }
 
         public static string GetName(Type type)
         {
             var attr = type.GetCustomAttributes(typeof(DataBaseAttribute), true).FirstOrDefault();
-            return attr != null ? (attr as DataBaseAttribute).Name ?? type.Name : type.Name;
+            return (attr as DataBaseAttribute).Name ?? type.Name;
         }
     }
 }
