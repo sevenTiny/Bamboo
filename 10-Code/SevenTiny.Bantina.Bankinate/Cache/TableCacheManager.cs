@@ -59,7 +59,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="entity"></param>
         internal static void AddCache<TEntity>(DbContext dbContext, TEntity entity)
         {
-            if (dbContext.IsTableCache)
+            if (dbContext.OpenTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
                 if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
@@ -83,7 +83,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="values"></param>
         internal static void AddCache<TEntity>(DbContext dbContext, IEnumerable<TEntity> values)
         {
-            if (dbContext.IsTableCache)
+            if (dbContext.OpenTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
                 if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
@@ -108,7 +108,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="filter"></param>
         internal static void UpdateCache<TEntity>(DbContext dbContext, TEntity entity, Expression<Func<TEntity, bool>> filter)
         {
-            if (dbContext.IsTableCache)
+            if (dbContext.OpenTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
                 if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
@@ -137,7 +137,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="filter"></param>
         internal static void DeleteCache<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter)
         {
-            if (dbContext.IsTableCache)
+            if (dbContext.OpenTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
                 if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
@@ -169,7 +169,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         internal static List<TEntity> GetEntitiesFromCache<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             //1.检查是否开启了Table缓存
-            if (!dbContext.IsTableCache)
+            if (!dbContext.OpenTableCache)
             {
                 return null;
             }

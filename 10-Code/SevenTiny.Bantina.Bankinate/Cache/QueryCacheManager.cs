@@ -60,7 +60,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         internal static T GetEntitiesFromCache<T>(DbContext dbContext)
         {
             //1.检查是否开启了Query缓存
-            if (dbContext.IsQueryCache)
+            if (dbContext.OpenQueryCache)
             {
                 //2.如果QueryCache里面有该缓存键，则直接获取，并从单个表单位中获取到对应sql的值
                 if (CacheStorageManager.IsExist(dbContext, GetQueryCacheKey(dbContext), out Dictionary<int, T> t))
@@ -84,7 +84,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="cacheValue"></param>
         internal static void CacheData<T>(DbContext dbContext, T cacheValue)
         {
-            if (dbContext.IsQueryCache)
+            if (dbContext.OpenQueryCache)
             {
                 if (cacheValue != null)
                 {
