@@ -8,16 +8,19 @@ namespace SevenTiny.Bantina.Bankinate.Cache
 {
     /// <summary>
     /// 数据库缓存管理器
+    /// Bankinate的缓存是分为两级的，每级都有对应的开关
+    /// 一级缓存（QueryCache查询缓存），缓存简短查询中的缓存数据
+    /// 二级缓存（TableCache表缓存），缓存整张表，需要标签配合使用
     /// </summary>
     internal abstract class DbCacheManager
     {
         /// <summary>
         /// 清空所有缓存
         /// </summary>
-        internal static void FlushAllCache()
+        internal static void FlushAllCache(DbContext dbContext)
         {
-            QueryCacheManager.FlushAllCache();
-            TableCacheManager.FlushAllCache();
+            QueryCacheManager.FlushAllCache(dbContext);
+            TableCacheManager.FlushAllCache(dbContext);
         }
         /// <summary>
         /// 清空单个表相关的所有缓存

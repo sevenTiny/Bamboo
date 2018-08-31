@@ -8,12 +8,13 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
     {
         public DbContext(DataBaseType dataBaseType)
         {
-            MCache.Instance.ExpiredTimeSpan = DefalutCacheExpiredTimeSpan;
+            DataBaseType = dataBaseType;
         }
 
         public DataBaseType DataBaseType { get; private set; }
-        public string SqlStatement { get; internal set; }
+        public string DataBaseName { get; protected set; }
         public string TableName { get; internal set; }
+        public string SqlStatement { get; internal set; }
 
         //Cache Control
         /// <summary>
@@ -27,9 +28,38 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// 配置表缓存标签对整张数据库表进行缓存
         /// </summary>
         public bool IsTableCache { get; protected set; } = false;
-        public TimeSpan QueryCacheExpiredTimeSpan { get; protected set; } = DefaultValue.QueryCacheExpiredTimeSpan;
-        public TimeSpan TableCacheExpiredTimeSpan { get; protected set; } = DefaultValue.TableCacheExpiredTimeSpan;
-        public TimeSpan DefalutCacheExpiredTimeSpan { get; protected set; } = DefaultValue.CacheExpiredTime;
+        /// <summary>
+        /// 查询缓存的默认缓存时间
+        /// </summary>
+        private TimeSpan _QueryCacheExpiredTimeSpan = DefaultValue.QueryCacheExpiredTimeSpan;
+        public TimeSpan QueryCacheExpiredTimeSpan
+        {
+            get { return _QueryCacheExpiredTimeSpan; }
+            protected set
+            {
+                if (value > MaxExpiredTimeSpan)
+                {
+                    MaxExpiredTimeSpan = value;
+                }
+                _QueryCacheExpiredTimeSpan = value;
+            }
+        }
+        /// <summary>
+        /// 表缓存的缓存时间
+        /// </summary>
+        private TimeSpan _TableCacheExpiredTimeSpan = DefaultValue.TableCacheExpiredTimeSpan;
+        public TimeSpan TableCacheExpiredTimeSpan
+        {
+            get { return _TableCacheExpiredTimeSpan; }
+            protected set
+            {
+                if (value > MaxExpiredTimeSpan)
+                {
+                    MaxExpiredTimeSpan = value;
+                }
+                _TableCacheExpiredTimeSpan = value;
+            }
+        }
         /// <summary>
         /// 数据是否从缓存中获取
         /// </summary>
@@ -42,5 +72,23 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// Cache 第三方存储媒介服务地址
         /// </summary>
         public string CacheMediaServer { get; protected set; }
+
+        /// <summary>
+        /// 最大的缓存时间（用于缓存缓存键）
+        /// </summary>
+        internal TimeSpan MaxExpiredTimeSpan { get; set; } = DefaultValue.CacheKeysMaxExpiredTime;
+
+        /// <summary>
+        /// 清空全部缓存
+        /// </summary>
+        public void FlushAllCache()=> DbCacheManager.FlushAllCache(this);
+        /// <summary>
+        /// 清空一级缓存
+        /// </summary>
+        public void FlushQueryCache()=> QueryCacheManager.FlushAllCache(this);
+        /// <summary>
+        /// 清空二级缓存
+        /// </summary>
+        public void FlushTableCache()=> TableCacheManager.FlushAllCache(this);
     }
 }

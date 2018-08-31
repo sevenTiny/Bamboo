@@ -17,9 +17,15 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <summary>
         /// 清空所有缓存
         /// </summary>
-        internal static void FlushAllCache()
+        internal static void FlushAllCache(DbContext dbContext)
         {
-
+            if (CacheStorageManager.IsExist(dbContext, DefaultValue.GetTableCacheKeysCacheKey(dbContext.DataBaseName), out HashSet<string> keys))
+            {
+                foreach (var item in keys)
+                {
+                    CacheStorageManager.Delete(dbContext, item);
+                }
+            }
         }
 
         /// <summary>
@@ -28,12 +34,20 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="dbContext"></param>
         internal static void FlushTableCache(DbContext dbContext)
         {
-            CacheStorage.Delete(dbContext, GetTableCacheKey(dbContext));
+            CacheStorageManager.Delete(dbContext, GetTableCacheKey(dbContext));
         }
 
         private static string GetTableCacheKey(DbContext dbContext)
         {
-            return $"{DefaultValue.CacheKey_TableCache}{dbContext.TableName}";
+            string key = $"{DefaultValue.CacheKey_TableCache}{dbContext.TableName}";
+            //缓存键更新
+            if (!CacheStorageManager.IsExist(dbContext, DefaultValue.GetTableCacheKeysCacheKey(dbContext.DataBaseName), out HashSet<string> keys))
+            {
+                keys = new HashSet<string>();
+            }
+            keys.Add(key);
+            CacheStorageManager.Put(dbContext, DefaultValue.GetTableCacheKeysCacheKey(dbContext.DataBaseName), keys, dbContext.MaxExpiredTimeSpan);
+            return key;
         }
 
         /// <summary>
@@ -47,7 +61,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             if (dbContext.IsTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
-                if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+                if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
                 {
                     if (TableCachingAttribute.IsExistTaleCaching(typeof(TEntity), out TimeSpan tableCacheTimeSpan))
                     {
@@ -55,7 +69,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         TimeSpan timeSpan = tableCacheTimeSpan == TimeSpan.Zero ? dbContext.TableCacheExpiredTimeSpan : tableCacheTimeSpan;
 
                         entities.Add(entity);
-                        CacheStorage.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                        CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
                     }
                 }
             }
@@ -71,7 +85,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             if (dbContext.IsTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
-                if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+                if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
                 {
                     if (TableCachingAttribute.IsExistTaleCaching(typeof(TEntity), out TimeSpan tableCacheTimeSpan))
                     {
@@ -79,7 +93,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         TimeSpan timeSpan = tableCacheTimeSpan == TimeSpan.Zero ? dbContext.TableCacheExpiredTimeSpan : tableCacheTimeSpan;
 
                         entities.AddRange(values);
-                        CacheStorage.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                        CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
                     }
                 }
             }
@@ -96,7 +110,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             if (dbContext.IsTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
-                if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+                if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
                 {
 
                     if (TableCachingAttribute.IsExistTaleCaching(typeof(TEntity), out TimeSpan tableCacheTimeSpan))
@@ -108,7 +122,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         if (val != null)
                         {
                             val = entity;
-                            CacheStorage.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                            CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
                         }
                     }
                 }
@@ -125,7 +139,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             if (dbContext.IsTableCache)
             {
                 //如果存在表级别缓存，则更新数据到缓存
-                if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+                if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
                 {
 
                     if (TableCachingAttribute.IsExistTaleCaching(typeof(TEntity), out TimeSpan tableCacheTimeSpan))
@@ -137,14 +151,12 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         if (val != null)
                         {
                             entities.Remove(val);
-                            CacheStorage.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                            CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
                         }
                     }
                 }
             }
         }
-
-
 
         /// <summary>
         /// 从缓存中获取数据，如果没有，则后台执行扫描表任务
@@ -162,7 +174,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             }
 
             //2.如果TableCache里面有该缓存键，则直接获取
-            if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+            if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
             {
                 dbContext.IsFromCache = true;
                 return entities.Where(filter.Compile()).ToList();
@@ -189,7 +201,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         {
             string scanKey = $"{DefaultValue.CacheKey_TableScanning}{dbContext.TableName}";
             //1.判断正在扫描键是否存在，如果存在，则返回null，继续等待扫描任务完成
-            if (CacheStorage.IsExist(dbContext, scanKey))
+            if (CacheStorageManager.IsExist(dbContext, scanKey))
             {
                 return;
             }
@@ -197,12 +209,12 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             Task.Run(() =>
             {
                 //设置扫描键，标识当前正在进行扫描
-                CacheStorage.Put(dbContext, scanKey, 1, DefaultValue.SpanScaningKeyExpiredTime);
+                CacheStorageManager.Put(dbContext, scanKey, 1, DefaultValue.SpanScaningKeyExpiredTime);
                 //对扫描任务加锁，防止多线程环境多次执行任务
                 lock (tableScaningLocker)
                 {
                     //双重校验当前缓存是否存在TableCache，防止多个进程在锁外等待，所释放后再次执行
-                    if (CacheStorage.IsExist(dbContext, GetTableCacheKey(dbContext)))
+                    if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext)))
                     {
                         return;
                     }
@@ -212,11 +224,11 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                     var data = GetFullTableData<TEntity>(dbContext);
                     if (data != null)
                     {
-                        CacheStorage.Put(dbContext, GetTableCacheKey(dbContext), data, dbContext.TableCacheExpiredTimeSpan);
+                        CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), data, dbContext.TableCacheExpiredTimeSpan);
                     }
                 }
                 //将扫描键移除，表示已经扫描完成
-                CacheStorage.Delete(dbContext, scanKey);
+                CacheStorageManager.Delete(dbContext, scanKey);
             });
         }
         /// <summary>
@@ -235,8 +247,6 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                     return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
                 case DataBaseType.Oracle:
                     return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
-                case DataBaseType.MongoDB:
-                    return null;
                 default:
                     return null;
             }

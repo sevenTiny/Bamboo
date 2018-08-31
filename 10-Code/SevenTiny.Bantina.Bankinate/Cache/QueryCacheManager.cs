@@ -6,24 +6,27 @@ namespace SevenTiny.Bantina.Bankinate.Cache
 {
     /// <summary>
     /// 查询缓存管理器（一级缓存管理器）
+    ///QueryCache存储结构，以表为缓存单位，便于在对单个表进行操作以后释放单个表的缓存，每个表的缓存以hash字典的方式存储
+    ///Key(表相关Key)
+    ///Dictionary<int, T>
+    ///{
+    ///     sql.HashCode(),值
+    ///}
     /// </summary>
     internal abstract class QueryCacheManager
     {
-        /**
-         * QueryCache存储结构，以表为缓存单位，便于在对单个表进行操作以后释放单个表的缓存，每个表的缓存以hash字典的方式存储
-         * Key(表相关Key)
-         * Dictionary<int,T>
-         * {
-         *     sql.HashCode(),值
-         * }
-         * */
-
         /// <summary>
         /// 清空所有缓存
         /// </summary>
-        internal static void FlushAllCache()
+        internal static void FlushAllCache(DbContext dbContext)
         {
-
+            if (CacheStorageManager.IsExist(dbContext, DefaultValue.GetQueryCacheKeysCacheKey(dbContext.DataBaseName), out HashSet<string> keys))
+            {
+                foreach (var item in keys)
+                {
+                    CacheStorageManager.Delete(dbContext, item);
+                }
+            }
         }
 
         /// <summary>
@@ -32,16 +35,24 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <param name="dbContext"></param>
         internal static void FlushTableCache(DbContext dbContext)
         {
-            CacheStorage.Delete(dbContext, GetQueryCacheKey(dbContext));
+            CacheStorageManager.Delete(dbContext, GetQueryCacheKey(dbContext));
         }
 
         private static string GetQueryCacheKey(DbContext dbContext)
         {
-            return $"{DefaultValue.CacheKey_QueryCache}{dbContext.TableName}";
+            string key = $"{DefaultValue.CacheKey_QueryCache}{dbContext.TableName}";
+            //缓存键更新
+            if (!CacheStorageManager.IsExist(dbContext, DefaultValue.GetQueryCacheKeysCacheKey(dbContext.DataBaseName), out HashSet<string> keys))
+            {
+                keys = new HashSet<string>();
+            }
+            keys.Add(key);
+            CacheStorageManager.Put(dbContext, DefaultValue.GetQueryCacheKeysCacheKey(dbContext.DataBaseName), keys, dbContext.MaxExpiredTimeSpan);
+            return key;
         }
 
         /// <summary>
-        /// 从缓存中获取数据，如果
+        /// 从缓存中获取数据
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="dbContext"></param>
@@ -52,7 +63,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             if (dbContext.IsQueryCache)
             {
                 //2.如果QueryCache里面有该缓存键，则直接获取，并从单个表单位中获取到对应sql的值
-                if (CacheStorage.IsExist(dbContext, GetQueryCacheKey(dbContext), out Dictionary<int, T> t))
+                if (CacheStorageManager.IsExist(dbContext, GetQueryCacheKey(dbContext), out Dictionary<int, T> t))
                 {
                     if (t.ContainsKey(dbContext.SqlStatement.GetHashCode()))
                     {
@@ -79,7 +90,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                 {
                     int sqlQueryCacheKey = dbContext.SqlStatement.GetHashCode();
                     //如果缓存中存在，则拿到表单位的缓存并更新
-                    if (CacheStorage.IsExist(dbContext, GetQueryCacheKey(dbContext), out Dictionary<int, T> t))
+                    if (CacheStorageManager.IsExist(dbContext, GetQueryCacheKey(dbContext), out Dictionary<int, T> t))
                     {
                         if (t.ContainsKey(sqlQueryCacheKey))
                             t[sqlQueryCacheKey] = cacheValue;
@@ -91,7 +102,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                     {
                         var dic = new Dictionary<int, T>();
                         dic.Add(sqlQueryCacheKey, cacheValue);
-                        CacheStorage.Put(dbContext, GetQueryCacheKey(dbContext), dic, dbContext.QueryCacheExpiredTimeSpan);
+                        CacheStorageManager.Put(dbContext, GetQueryCacheKey(dbContext), dic, dbContext.QueryCacheExpiredTimeSpan);
                     }
                 }
             }

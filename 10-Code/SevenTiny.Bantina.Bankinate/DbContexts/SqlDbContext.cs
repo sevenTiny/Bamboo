@@ -9,15 +9,14 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
     public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, IExecuteSqlOperate, IQueryPagingOperate where TDataBase : class
     {
-        public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType)
-        {
-        }
+        public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType) { }
 
         public SqlDbContext(string connectionString_Read, string connectionString_ReadWrite, DataBaseType dataBaseType) : base(dataBaseType)
         {
             DbHelper.ConnString_R = connectionString_Read;
             DbHelper.ConnString_RW = connectionString_ReadWrite;
             DbHelper.DbType = dataBaseType;
+            DataBaseName = DataBaseAttribute.GetName(typeof(TDataBase));
         }
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
@@ -93,7 +92,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            SqlGenerator.Query(this, filter);
+            SqlGenerator.QueryList(this, filter);
             return DbCacheManager.GetEntities(this, filter, () =>
               {
                   return DbHelper.ExecuteList<TEntity>(SqlStatement);

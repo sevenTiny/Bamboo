@@ -24,7 +24,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder(), builder_behind = new StringBuilder();
@@ -45,14 +45,26 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 else if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
                 {
                 }
-                //Column :
+                //Column
                 else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute column)
                 {
                     builder_front.Append(column.GetName(propertyInfo.Name));
                     builder_front.Append(",");
-
                     builder_behind.Append("@");
-                    columnName = column.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                    //multitype database support
+                    switch (dbContext.DataBaseType)
+                    {
+                        case DataBaseType.SqlServer:
+                            columnName = column.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                            break;
+                        case DataBaseType.MySql:
+                            columnName = column.GetName(propertyInfo.Name).Replace("`", "");
+                            break;
+                        default:
+                            //default 兼容mysql和sqlserver的系统字段
+                            columnName = column.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "").Replace("`", "");
+                            break;
+                    }
                     builder_behind.Append(columnName);
                     builder_behind.Append(",");
                     if (!paramsDic.ContainsKey(columnName))
@@ -77,7 +89,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder();
@@ -105,7 +117,20 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     builder_front.Append(columnAttr.GetName(propertyInfo.Name));
                     builder_front.Append("=");
                     builder_front.Append("@");
-                    columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                    //multitype database support
+                    switch (dbContext.DataBaseType)
+                    {
+                        case DataBaseType.SqlServer:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                            break;
+                        case DataBaseType.MySql:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("`", "");
+                            break;
+                        default:
+                            //default 兼容mysql和sqlserver的系统字段
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "").Replace("`", "");
+                            break;
+                    }
                     builder_front.Append(columnName);
                     builder_front.Append(",");
                     if (!paramsDic.ContainsKey(columnName))
@@ -125,19 +150,14 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
+                case DataBaseType.MySql:
                     dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
                     break;
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty;
-                    break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty;
-                    break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty;
                     break;
                 default:
@@ -148,16 +168,14 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                     dbContext.SqlStatement = $"SELECT TOP 1 * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty; break;
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1"; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;
@@ -166,34 +184,28 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty; break;
+                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
         }
 
-        public static void Query<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static void QueryList<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty; break;
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;
@@ -202,17 +214,14 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
+                case DataBaseType.MySql:
                     string desc = isDESC ? "DESC" : "ASC";
                     dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;
@@ -221,17 +230,15 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
         public static void QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
-            dbContext.TableName =TableAttribute.GetName(typeof(TEntity));
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            string desc = isDESC ? "DESC" : "ASC";
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    string desc = isDESC ? "DESC" : "ASC";
                     dbContext.SqlStatement = $"SELECT TOP {pageSize} * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}) AS RowNumber,* FROM {dbContext.TableName} {orderBy.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = string.Empty; break;
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}"; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                case DataBaseType.MongoDB:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;

@@ -28,17 +28,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             Client = new MongoClient(connectionString);
         }
-        public MongoDbContext(string connectionString_Read, string connectionString_ReadWrite)
-        {
-            try
-            {
-                Client = new MongoClient(connectionString_Read);
-            }
-            catch (Exception)
-            {
-                Client = new MongoClient(connectionString_ReadWrite);
-            }
-        }
         public MongoDbContext(MongoClientSettings mongoClientSettings)
         {
             Client = new MongoClient(mongoClientSettings);
@@ -75,7 +64,6 @@ namespace SevenTiny.Bantina.Bankinate
             }
             return DataBase.GetCollection<BsonDocument>(collectionName);
         }
-
 
         public void Dispose()
         {
@@ -115,7 +103,6 @@ namespace SevenTiny.Bantina.Bankinate
             GetCollectionBson<TEntity>().InsertManyAsync(bsonDocuments);
         }
 
-
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             GetCollection<TEntity>().ReplaceOne(filter, entity);
@@ -132,7 +119,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             GetCollectionBson<TEntity>().ReplaceOneAsync(filter, replacement);
         }
-
 
         public void DeleteOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
@@ -158,7 +144,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             GetCollectionBson<TEntity>().DeleteManyAsync(filter);
         }
-
 
         public TEntity QueryOne<TEntity>(string _id) where TEntity : class
         {
@@ -193,7 +178,6 @@ namespace SevenTiny.Bantina.Bankinate
         {
             return GetCollectionBson<TEntity>().Find(filter).ToList();
         }
-
 
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {

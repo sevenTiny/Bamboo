@@ -5,9 +5,24 @@ using System;
 namespace SevenTiny.Bantina.Bankinate.Cache
 {
     /// <summary>
+    /// 缓存存储媒介
+    /// </summary>
+    public enum CacheMediaType
+    {
+        /// <summary>
+        /// 本地缓存
+        /// </summary>
+        Local = 0,
+        /// <summary>
+        /// Redis缓存
+        /// </summary>
+        Redis = 1
+    }
+
+    /// <summary>
     /// 缓存存储管理器
     /// </summary>
-    public abstract class CacheStorage
+    internal abstract class CacheStorageManager
     {
         public static bool IsExist(DbContext dbContext, string key)
         {

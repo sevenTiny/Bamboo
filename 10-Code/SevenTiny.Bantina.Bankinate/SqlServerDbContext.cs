@@ -5,6 +5,7 @@
  * Address: Earth
  * Create: 2018-04-19 23:57:48
  * Modify: 2018-04-19 23:57:48
+ * Modify: 2018-08-31 15:57:00
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -18,12 +19,7 @@ namespace SevenTiny.Bantina.Bankinate
 {
     public abstract class SqlServerDbContext<TDataBase> : SqlDbContext<TDataBase> where TDataBase : class
     {
-        public SqlServerDbContext(string connectionString) : base(connectionString, DataBaseType.SqlServer)
-        {
-        }
-
-        public SqlServerDbContext(string connectionString_Read, string connectionString_ReadWrite) : base(connectionString_Read, connectionString_ReadWrite, DataBaseType.SqlServer)
-        {
-        }
+        protected SqlServerDbContext(string connectionString) : base(connectionString, DataBaseType.SqlServer) { }
+        protected SqlServerDbContext(string connectionString_Read, string connectionString_ReadWrite) : base(connectionString_Read, connectionString_ReadWrite, DataBaseType.SqlServer) { }
     }
 }
