@@ -1,4 +1,5 @@
-﻿using SevenTiny.Bantina.Bankinate.Attributes;
+﻿using MongoDB.Driver;
+using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.Configs;
 using SevenTiny.Bantina.Bankinate.DbContexts;
 using System;
@@ -247,6 +248,8 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                     return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
                 case DataBaseType.Oracle:
                     return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
+                case DataBaseType.MongoDB:
+                    return (dbContext.NoSqlCollection as IMongoCollection<TEntity>).Find(t => true).ToList();//获取MongoDb全文档记录
                 default:
                     return null;
             }

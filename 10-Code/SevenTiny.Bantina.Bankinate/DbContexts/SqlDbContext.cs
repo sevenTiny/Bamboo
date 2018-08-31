@@ -3,6 +3,7 @@ using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.SqlStatementManager;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
@@ -25,6 +26,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             DbHelper.ExecuteNonQuery(SqlStatement, System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Add(this, entity);
         }
+
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
         {
             SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic);
@@ -174,7 +176,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         {
             DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
         }
-        public object ExecuteQuerySql(string sqlStatement, IDictionary<string, object> parms = null)
+        public DataSet ExecuteQueryDataSetSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
             return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
         }

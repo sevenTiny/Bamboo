@@ -1,4 +1,5 @@
-﻿using SevenTiny.Bantina.Bankinate.Cache;
+﻿using MongoDB.Driver;
+using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.Configs;
 using System;
 
@@ -90,5 +91,9 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// 清空二级缓存
         /// </summary>
         public void FlushTableCache()=> TableCacheManager.FlushAllCache(this);
+        /// <summary>
+        /// NoSql的文档集合
+        /// </summary>
+        internal dynamic NoSqlCollection { get; set; }
     }
 }

@@ -14,78 +14,27 @@
  *********************************************************/
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.DbContexts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using SevenTiny.Bantina.Bankinate.Attributes;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public abstract class MongoDbContext<TDataBase> : IDbContext where TDataBase : class
+    public abstract class MongoDbContext<TDataBase> : NoSqlDbContext<TDataBase> where TDataBase : class
     {
-        public MongoDbContext(string connectionString)
-        {
-            Client = new MongoClient(connectionString);
-        }
-        public MongoDbContext(MongoClientSettings mongoClientSettings)
-        {
-            Client = new MongoClient(mongoClientSettings);
-        }
+        protected MongoDbContext(string connectionString) : base(DataBaseType.MongoDB, connectionString) { }
+        protected MongoDbContext(MongoClientSettings mongoClientSettings) : base(mongoClientSettings) { }
 
-        private MongoClient Client { get; set; }
-        private IMongoDatabase DataBase
-        {
-            get
-            {
-                string dbName = DataBaseAttribute.GetName(typeof(TDataBase));
-                if (string.IsNullOrEmpty(dbName))
-                {
-                    dbName = typeof(TDataBase).Name;
-                }
-                return Client.GetDatabase(dbName);
-            }
-        }
-        private IMongoCollection<TEntity> GetCollection<TEntity>() where TEntity : class
-        {
-            string collectionName = TableAttribute.GetName(typeof(TEntity));
-            if (string.IsNullOrEmpty(collectionName))
-            {
-                collectionName = typeof(TEntity).Name;
-            }
-            return DataBase.GetCollection<TEntity>(collectionName);
-        }
-        private IMongoCollection<BsonDocument> GetCollectionBson<TEntity>() where TEntity : class
-        {
-            string collectionName = TableAttribute.GetName(typeof(TEntity));
-            if (string.IsNullOrEmpty(collectionName))
-            {
-                collectionName = typeof(TEntity).Name;
-            }
-            return DataBase.GetCollection<BsonDocument>(collectionName);
-        }
+        /// <summary>
+        /// MongoDb Bson集合
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        private IMongoCollection<BsonDocument> GetCollectionBson<TEntity>() where TEntity : class => DataBase.GetCollection<BsonDocument>(TableAttribute.GetName(typeof(TEntity)));
 
-        public void Dispose()
-        {
-
-        }
-
-        public void Add<TEntity>(TEntity entity) where TEntity : class
-        {
-            GetCollection<TEntity>().InsertOne(entity);
-        }
-        public void AddAsync<TEntity>(TEntity entity) where TEntity : class
-        {
-            GetCollection<TEntity>().InsertOneAsync(entity);
-        }
-        public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        {
-            GetCollection<TEntity>().InsertMany(entities);
-        }
-        public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
-        {
-            GetCollection<TEntity>().InsertManyAsync(entities);
-        }
         public void Add<TEntity>(BsonDocument bsonDocument) where TEntity : class
         {
             GetCollectionBson<TEntity>().InsertOne(bsonDocument);
@@ -103,14 +52,6 @@ namespace SevenTiny.Bantina.Bankinate
             GetCollectionBson<TEntity>().InsertManyAsync(bsonDocuments);
         }
 
-        public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
-        {
-            GetCollection<TEntity>().ReplaceOne(filter, entity);
-        }
-        public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
-        {
-            GetCollection<TEntity>().ReplaceOneAsync(filter, entity);
-        }
         public void Update<TEntity>(FilterDefinition<BsonDocument> filter, BsonDocument replacement) where TEntity : class
         {
             GetCollectionBson<TEntity>().ReplaceOne(filter, replacement);
@@ -122,15 +63,7 @@ namespace SevenTiny.Bantina.Bankinate
 
         public void DeleteOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            GetCollection<TEntity>().DeleteOne(filter);
-        }
-        public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            GetCollection<TEntity>().DeleteMany(filter);
-        }
-        public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            GetCollection<TEntity>().DeleteManyAsync(filter);
+            GetCollectionEntity<TEntity>().DeleteOne(filter);
         }
         public void DeleteOne<TEntity>(FilterDefinition<BsonDocument> filter) where TEntity : class
         {
@@ -149,11 +82,7 @@ namespace SevenTiny.Bantina.Bankinate
         {
             FilterDefinitionBuilder<TEntity> builderFilter = Builders<TEntity>.Filter;
             FilterDefinition<TEntity> filter = builderFilter.Eq("_id", _id);
-            return GetCollection<TEntity>().Find(filter).FirstOrDefault();
-        }
-        public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            return QueryList(filter).FirstOrDefault();
+            return GetCollectionEntity<TEntity>().Find(filter).FirstOrDefault();
         }
         public BsonDocument QueryOneBson<TEntity>(string _id) where TEntity : class
         {
@@ -165,10 +94,6 @@ namespace SevenTiny.Bantina.Bankinate
             return GetCollectionBson<TEntity>().Find(filter).FirstOrDefault();
         }
 
-        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            return GetCollection<TEntity>().Find(filter).ToList();
-        }
         public List<BsonDocument> QueryListBson<TEntity>() where TEntity : class
         {
             FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Where(t => true);
@@ -179,14 +104,6 @@ namespace SevenTiny.Bantina.Bankinate
             return GetCollectionBson<TEntity>().Find(filter).ToList();
         }
 
-        public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            return Convert.ToInt32(GetCollection<TEntity>().Count(filter));
-        }
-        public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            return QueryCount<TEntity>(filter) > 0;
-        }
         public int QueryCount<TEntity>(FilterDefinition<BsonDocument> filter) where TEntity : class
         {
             return Convert.ToInt32(GetCollectionBson<TEntity>().Count(filter));
