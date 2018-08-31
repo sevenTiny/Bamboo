@@ -9,7 +9,7 @@ namespace Test.Model
     {
         public SqlServerTestDbContext() : base("data source=.;initial catalog=DB_QX_Frame_MS_CMS;persist security info=True;user id=sa;password=CYj(9yyz*8;MultipleActiveResultSets=True;App=EntityFramework")
         {
-            LocalCache = true;
+            OpenTableCache = true;
         }
     }
 }

@@ -15,15 +15,15 @@
 using System;
 using System.Linq;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    public class NotColumnAttribute : Attribute
+    public class ColumnIgnoreAttribute : Attribute
     {
         public static bool Exist(Type type)
         {
-            var attr = type.GetCustomAttributes(typeof(NotColumnAttribute), true).FirstOrDefault();
-            return attr != null ? true : false;
+            var attr = type.GetCustomAttributes(typeof(ColumnIgnoreAttribute), true);
+            return (attr != null && attr.Any()) ? true : false;
         }
     }
 }

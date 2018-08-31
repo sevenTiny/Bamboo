@@ -16,7 +16,7 @@ using System;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 {
     internal class LambdaToSql
     {

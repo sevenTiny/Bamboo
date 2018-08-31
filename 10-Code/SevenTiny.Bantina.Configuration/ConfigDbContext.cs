@@ -6,7 +6,7 @@ namespace SevenTiny.Bantina.Configuration
     {
         public ConfigDbContext(string connectionString) : base(connectionString)
         {
-            LocalCache = false;
+            OpenTableCache = false;
         }
     }
 }
