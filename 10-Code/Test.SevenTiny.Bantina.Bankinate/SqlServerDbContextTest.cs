@@ -130,7 +130,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
                 using (var db = new SqlServerTestDbContext())
                 {
                     //查询单个
-                    var stu = db.QueryOne<Student>(t => t.Id == 1);
+                    var stu = db.QueryOne<Student>(t => t.Id == 2);
                     //修改单个属性
                     stu.Name = "test11-1";
                     db.Update<Student>(t => t.Id == 1, stu);
