@@ -1,4 +1,5 @@
 ﻿using SevenTiny.Bantina.Bankinate;
+using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Configuration;
 using SevenTiny.Bantina.Extensions;
 using System;

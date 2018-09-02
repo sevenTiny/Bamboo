@@ -94,8 +94,12 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
 
             StringBuilder builder_front = new StringBuilder();
             builder_front.Append("UPDATE ");
-            builder_front.Append(dbContext.TableName);
-            builder_front.Append(" ");
+            //Mysql和sqlserver的分别处理
+            if (dbContext.DataBaseType == DataBaseType.MySql)
+            {
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+            }
             builder_front.Append(filter.Parameters[0].Name);
             builder_front.Append(" SET ");
 
@@ -144,6 +148,16 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     builder_front.Remove(builder_front.Length - 1, 1);
                 }
             }
+
+            //SqlServer和Mysql的sql语句分别处理
+            if (dbContext.DataBaseType == DataBaseType.SqlServer)
+            {
+                builder_front.Append(" FROM ");
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+                builder_front.Append(filter.Parameters[0].Name);
+            }
+
             //Generate SqlStatement
             dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }

@@ -4,10 +4,11 @@ using System.Linq;
 
 namespace SevenTiny.Bantina.Bankinate.Attributes
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class TableCachingAttribute : Attribute
     {
         public TimeSpan ExpiredTime { get; private set; }
+        public TableCachingAttribute() { }
         public TableCachingAttribute(TimeSpan expiredTime)
         {
             ExpiredTime = expiredTime;
