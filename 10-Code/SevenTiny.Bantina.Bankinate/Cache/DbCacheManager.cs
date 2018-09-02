@@ -25,7 +25,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
         /// <summary>
         /// 清空单个表相关的所有缓存
         /// </summary>
-        internal static void FlushTableCache(DbContext dbContext)
+        internal static void FlushCurrentTableCache(DbContext dbContext)
         {
             QueryCacheManager.FlushTableCache(dbContext);
             TableCacheManager.FlushTableCache(dbContext);
