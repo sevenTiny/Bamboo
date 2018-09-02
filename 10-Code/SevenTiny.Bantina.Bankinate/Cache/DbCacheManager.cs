@@ -66,16 +66,19 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             var entities = TableCacheManager.GetEntitiesFromCache(dbContext, filter);
 
             //2.判断是否在一级QueryCahe中
-            if (entities == null || entities.Any())
+            if (entities == null || !entities.Any())
             {
                 entities = QueryCacheManager.GetEntitiesFromCache<List<TEntity>>(dbContext);
             }
 
             //3.如果都没有，则直接从逻辑中获取
-            entities = func();
-
-            //4.Query缓存存储逻辑（内涵缓存开启校验）
-            QueryCacheManager.CacheData(dbContext, entities);
+            if (entities == null || !entities.Any())
+            {
+                entities = func();
+                dbContext.IsFromCache = false;
+                //4.Query缓存存储逻辑（内涵缓存开启校验）
+                QueryCacheManager.CacheData(dbContext, entities);
+            }
 
             return entities;
         }
@@ -91,10 +94,13 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             }
 
             //3.如果都没有，则直接从逻辑中获取
-            result = func();
-
-            //4.Query缓存存储逻辑（内涵缓存开启校验）
-            QueryCacheManager.CacheData(dbContext, result);
+            if (result == null)
+            {
+                result = func();
+                dbContext.IsFromCache = false;
+                //4.Query缓存存储逻辑（内涵缓存开启校验）
+                QueryCacheManager.CacheData(dbContext, result);
+            }
 
             return result;
         }
@@ -110,10 +116,13 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             }
 
             //3.如果都没有，则直接从逻辑中获取
-            result = func();
-
-            //4.Query缓存存储逻辑（内涵缓存开启校验）
-            QueryCacheManager.CacheData(dbContext, result);
+            if (result == null || result == default(int))
+            {
+                result = func();
+                dbContext.IsFromCache = false;
+                //4.Query缓存存储逻辑（内涵缓存开启校验）
+                QueryCacheManager.CacheData(dbContext, result);
+            }
 
             return result ?? default(int);
         }
@@ -123,10 +132,13 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             var result = QueryCacheManager.GetEntitiesFromCache<T>(dbContext);
 
             //2.如果都没有，则直接从逻辑中获取
-            result = func();
-
-            //3.Query缓存存储逻辑（内涵缓存开启校验）
-            QueryCacheManager.CacheData(dbContext, result);
+            if (result == null)
+            {
+                result = func();
+                dbContext.IsFromCache = false;
+                //3.Query缓存存储逻辑（内涵缓存开启校验）
+                QueryCacheManager.CacheData(dbContext, result);
+            }
 
             return result;
         }

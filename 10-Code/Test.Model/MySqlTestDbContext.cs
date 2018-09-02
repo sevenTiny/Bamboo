@@ -9,7 +9,6 @@ namespace Test.Model
     {
         public MySqlTestDbContext() : base("")
         {
-            LocalCache = true;
         }
     }
 }

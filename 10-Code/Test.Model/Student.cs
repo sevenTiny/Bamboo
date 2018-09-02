@@ -1,4 +1,5 @@
 ﻿using SevenTiny.Bantina.Bankinate;
+using SevenTiny.Bantina.Bankinate.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Text;
 namespace Test.Model
 {
     [Table("Student")]
+    [TableCaching]
     public class Student
     {
         [AutoIncrease]

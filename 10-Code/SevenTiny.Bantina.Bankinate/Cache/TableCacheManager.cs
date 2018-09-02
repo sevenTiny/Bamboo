@@ -123,7 +123,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         if (val != null)
                         {
                             val = entity;
-                            CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                            CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, timeSpan);
                         }
                     }
                 }
