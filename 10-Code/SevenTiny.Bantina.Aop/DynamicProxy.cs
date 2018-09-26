@@ -3,11 +3,10 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace CodeArts.FrameworkKnowledge.EmitDynamicProxy
+namespace SevenTiny.Bantina.Aop
 {
     public class DynamicProxy
     {
-        private static readonly bool IsOutPutDLL = false;
         public static TInterface CreateProxyOfRealize<TInterface, TImp>() where TImp : class, new() where TInterface : class
         {
             return Invoke<TInterface, TImp>();
@@ -26,20 +25,8 @@ namespace CodeArts.FrameworkKnowledge.EmitDynamicProxy
             string nameOfModule = impType.Name + "ProxyModule";
             string nameOfType = impType.Name + "Proxy";
 
-            var assemblyName = new AssemblyName(nameOfAssembly);
-
-            AssemblyBuilder assembly;
-            ModuleBuilder moduleBuilder;
-            if (IsOutPutDLL)
-            {
-                assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.RunAndSave);
-                moduleBuilder = assembly.DefineDynamicModule(nameOfModule, nameOfAssembly + ".dll");
-            }
-            else
-            {
-                assembly = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-                moduleBuilder = assembly.DefineDynamicModule(nameOfModule);
-            }
+            AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(nameOfAssembly), AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assembly.DefineDynamicModule(nameOfModule);
 
             TypeBuilder typeBuilder;
             if (inheritMode)
@@ -47,19 +34,8 @@ namespace CodeArts.FrameworkKnowledge.EmitDynamicProxy
             else
                 typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { typeof(TInterface) });
 
-            InjectInterceptor<TImp>(typeBuilder, impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType(), inheritMode);
+            Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType();
 
-            var t = typeBuilder.CreateType();
-
-            if (IsOutPutDLL)
-                assembly.Save(nameOfAssembly + ".dll");
-
-            return Activator.CreateInstance(t) as TInterface;
-        }
-
-        private static void InjectInterceptor<TImp>(TypeBuilder typeBuilder, Type interceptorAttributeType, bool inheritMode = false)
-        {
-            var impType = typeof(TImp);
             // ---- define fields ----
             FieldBuilder fieldInterceptor = null;
             if (interceptorAttributeType != null)
@@ -88,7 +64,7 @@ namespace CodeArts.FrameworkKnowledge.EmitDynamicProxy
             {
                 //ignore method
                 if (ignoreMethodName.Contains(method.Name))
-                    return;
+                    continue;
 
                 var methodParameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
 
@@ -230,6 +206,10 @@ namespace CodeArts.FrameworkKnowledge.EmitDynamicProxy
                 // complete
                 ilMethod.Emit(OpCodes.Ret);
             }
+
+            var t = typeBuilder.CreateTypeInfo();
+
+            return Activator.CreateInstance(t) as TInterface;
         }
     }
 }
