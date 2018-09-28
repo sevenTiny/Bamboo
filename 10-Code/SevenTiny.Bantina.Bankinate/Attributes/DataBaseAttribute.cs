@@ -29,8 +29,8 @@ namespace SevenTiny.Bantina.Bankinate.Attributes
 
         public static string GetName(Type type)
         {
-            var attr = type.GetCustomAttributes(typeof(DataBaseAttribute), true).FirstOrDefault();
-            return (attr as DataBaseAttribute).Name ?? type.Name;
+            var attr = type.GetCustomAttributes(typeof(DataBaseAttribute), true)?.FirstOrDefault();
+            return (attr as DataBaseAttribute)?.Name ?? type.Name;
         }
     }
 }
