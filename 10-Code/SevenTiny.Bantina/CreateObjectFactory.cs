@@ -87,6 +87,5 @@ namespace SevenTiny.Bantina
                 return "null";
             return string.Concat(types.Select(t => t.Name));
         }
-
     }
 }
