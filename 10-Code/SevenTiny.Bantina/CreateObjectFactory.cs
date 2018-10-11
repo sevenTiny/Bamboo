@@ -5,7 +5,7 @@
 * Address: Earth
 * Create: 10/10/2018, 1:19:24 PM
 * Modify: 
-* E-mailGenerator: dong@7tiny.com | sevenTiny@foxmailGenerator.com 
+* E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
 * GitHub: https://github.com/sevenTiny 
 * Personal web site: http://www.7tiny.com 
 * Technical WebSit: http://www.cnblogs.com/7tiny/ 
