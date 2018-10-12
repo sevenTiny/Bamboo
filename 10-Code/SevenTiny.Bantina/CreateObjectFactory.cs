@@ -20,11 +20,12 @@ using System.Reflection.Emit;
 
 namespace SevenTiny.Bantina
 {
-    public delegate object CreateInstanceHandler(object[] parameters);
+    internal delegate object CreateInstanceHandler(object[] parameters);
 
     public class CreateObjectFactory
     {
         static Dictionary<string, CreateInstanceHandler> mHandlers = new Dictionary<string, CreateInstanceHandler>();
+
         public static T CreateInstance<T>() where T : class
         {
             return CreateInstance<T>(null);
@@ -80,7 +81,9 @@ namespace SevenTiny.Bantina
                 }
             }
         }
+
         static Type[] GetParameterTypes(params object[] parameters) => parameters?.Select(t => t.GetType())?.ToArray() ?? new Type[0];
+
         static string GetKey(params Type[] types)
         {
             if (types == null || types.Length == 0)
