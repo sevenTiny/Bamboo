@@ -7,6 +7,8 @@ namespace SevenTiny.Bantina.Aop
 {
     public class DynamicProxy
     {
+        private static readonly string[] _ignoreMethodName = new[] { "GetType", "ToString", "GetHashCode", "Equals" };
+
         public static TInterface CreateProxyOfRealize<TInterface, TImp>() where TImp : class, new() where TInterface : class
         {
             return Invoke<TInterface, TImp>();
@@ -17,23 +19,44 @@ namespace SevenTiny.Bantina.Aop
             return Invoke<TProxyClass, TProxyClass>(true);
         }
 
-        private static TInterface Invoke<TInterface, TImp>(bool inheritMode = false) where TImp : class, new() where TInterface : class
+        private static TInterface Invoke<TInterface, TImp>(bool inheritMode = false, Type interceptorType = null) where TImp : class where TInterface : class
         {
-            var impType = typeof(TImp);
+            if (inheritMode)
+                return CreateProxyOfInherit(typeof(TImp), interceptorType) as TInterface;
+            else
+                return CreateProxyOfRealize(typeof(TInterface), typeof(TImp), interceptorType) as TInterface;
+        }
 
+        public static object CreateProxyOfRealize(Type interfaceType, Type impType, Type interceptorType = null)
+        {
             string nameOfAssembly = impType.Name + "ProxyAssembly";
             string nameOfModule = impType.Name + "ProxyModule";
             string nameOfType = impType.Name + "Proxy";
 
             AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(nameOfAssembly), AssemblyBuilderAccess.Run);
             ModuleBuilder moduleBuilder = assembly.DefineDynamicModule(nameOfModule);
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { interfaceType });
+            MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
 
-            TypeBuilder typeBuilder;
-            if (inheritMode)
-                typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, impType);
-            else
-                typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { typeof(TInterface) });
+            return Invoke(impType, typeBuilder, methodAttributes, interceptorType);
+        }
 
+        public static object CreateProxyOfInherit(Type impType, Type interceptorType = null)
+        {
+            string nameOfAssembly = impType.Name + "ProxyAssembly";
+            string nameOfModule = impType.Name + "ProxyModule";
+            string nameOfType = impType.Name + "Proxy";
+
+            AssemblyBuilder assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(nameOfAssembly), AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assembly.DefineDynamicModule(nameOfModule);
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, impType);
+            MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.Virtual;
+
+            return Invoke(impType, typeBuilder, methodAttributes, interceptorType);
+        }
+
+        private static object Invoke(Type impType, TypeBuilder typeBuilder, MethodAttributes methodAttributes, Type interceptorType = null)
+        {
             Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType();
 
             // ---- define fields ----
@@ -58,22 +81,13 @@ namespace SevenTiny.Bantina.Aop
 
             var methodsOfType = impType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
 
-            string[] ignoreMethodName = new[] { "GetType", "ToString", "GetHashCode", "Equals" };
-
             foreach (var method in methodsOfType)
             {
                 //ignore method
-                if (ignoreMethodName.Contains(method.Name))
+                if (_ignoreMethodName.Contains(method.Name))
                     continue;
 
                 var methodParameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
-
-                MethodAttributes methodAttributes;
-
-                if (inheritMode)
-                    methodAttributes = MethodAttributes.Public | MethodAttributes.Virtual;
-                else
-                    methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
 
                 var methodBuilder = typeBuilder.DefineMethod(method.Name, methodAttributes, CallingConventions.Standard, method.ReturnType, methodParameterTypes);
 
@@ -209,7 +223,7 @@ namespace SevenTiny.Bantina.Aop
 
             var t = typeBuilder.CreateTypeInfo();
 
-            return Activator.CreateInstance(t) as TInterface;
+            return Activator.CreateInstance(t);
         }
     }
 }
