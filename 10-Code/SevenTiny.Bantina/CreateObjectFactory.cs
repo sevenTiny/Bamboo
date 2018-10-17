@@ -2,7 +2,7 @@
 * CopyRight: 7TINY CODE BUILDER. 
 * Version: 5.0.0
 * Author: 7tiny
-* Address: Earth
+* Address: Peking
 * Create: 10/10/2018, 1:19:24 PM
 * Modify: 
 * E-mailGenerator: dong@7tiny.com | sevenTiny@foxmailGenerator.com 
@@ -20,7 +20,7 @@ using System.Reflection.Emit;
 
 namespace SevenTiny.Bantina
 {
-    public delegate object CreateInstanceHandler(object[] parameters);
+    internal delegate object CreateInstanceHandler(object[] parameters);
 
     public class CreateObjectFactory
     {
@@ -37,8 +37,15 @@ namespace SevenTiny.Bantina
 
         public static object CreateInstance(Type instanceType, params object[] parameters)
         {
-            Type[] ptypes = GetParameterTypes(parameters);
-            string key = instanceType.FullName + "_" + GetKey(ptypes);
+            Type[] ptypes = new Type[0];
+            string key = instanceType.FullName;
+
+            if (parameters != null && parameters.Any())
+            {
+                ptypes = parameters.Select(t => t.GetType()).ToArray();
+                key = string.Concat(key, "_", string.Concat(ptypes.Select(t => t.Name)));
+            }
+
             if (!mHandlers.ContainsKey(key))
             {
                 CreateHandler(instanceType, key, ptypes);
@@ -73,6 +80,7 @@ namespace SevenTiny.Bantina
                         else
                             il.Emit(OpCodes.Castclass, ptypes[i]);
                     }
+
                     il.Emit(OpCodes.Newobj, cons);
                     il.Emit(OpCodes.Ret);
                     CreateInstanceHandler ci = (CreateInstanceHandler)dm.CreateDelegate(typeof(CreateInstanceHandler));
@@ -80,13 +88,5 @@ namespace SevenTiny.Bantina
                 }
             }
         }
-        static Type[] GetParameterTypes(params object[] parameters) => parameters?.Select(t => t.GetType())?.ToArray() ?? new Type[0];
-        static string GetKey(params Type[] types)
-        {
-            if (types == null || types.Length == 0)
-                return "null";
-            return string.Concat(types.Select(t => t.Name));
-        }
-
     }
 }
