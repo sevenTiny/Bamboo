@@ -5,7 +5,7 @@
 * Address: Peking
 * Create: 10/10/2018, 1:19:24 PM
 * Modify: 
-* E-mailGenerator: dong@7tiny.com | sevenTiny@foxmailGenerator.com 
+* E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
 * GitHub: https://github.com/sevenTiny 
 * Personal web site: http://www.7tiny.com 
 * Technical WebSit: http://www.cnblogs.com/7tiny/ 
@@ -25,6 +25,7 @@ namespace SevenTiny.Bantina
     public class CreateObjectFactory
     {
         static Dictionary<string, CreateInstanceHandler> mHandlers = new Dictionary<string, CreateInstanceHandler>();
+
         public static T CreateInstance<T>() where T : class
         {
             return CreateInstance<T>(null);
