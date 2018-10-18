@@ -26,7 +26,7 @@ namespace SevenTiny.Bantina.Extensions
         /// <param name="dictionary">dictionary</param>
         /// <param name="key">key</param>
         /// <param name="value">value</param>
-        public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
         {
             if (dictionary.ContainsKey(key))
                 dictionary[key] = value;
@@ -41,10 +41,10 @@ namespace SevenTiny.Bantina.Extensions
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static TValue SafeGet<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
+        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
         {
-            if (dictionary.ContainsKey(key))
-                return dictionary[key];
+            if (dictionary.TryGetValue(key,out TValue value))
+                return value;
             return default(TValue);
         }
     }
