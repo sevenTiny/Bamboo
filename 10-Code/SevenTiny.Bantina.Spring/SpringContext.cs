@@ -1,4 +1,6 @@
-﻿namespace SevenTiny.Bantina.Spring
+﻿using SevenTiny.Bantina.Spring.DependencyInjection;
+
+namespace SevenTiny.Bantina.Spring
 {
     public class SpringContext
     {
@@ -19,8 +21,10 @@
         public object[] Parameters { get; }
         public string Method { get; }
         public object Result { get; set; }
+        public string SessionId { get; set; }
 
-        public static IServiceProvider RequestServices { get; }
+        public static IServiceProvider RequestServices { get; } = new ServiceProvider();
+        internal static IServiceCollection ServiceCollection { get; } = new ServiceCollection();
         public static SpringContext Current { get; private set; }
     }
 }

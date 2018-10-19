@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Spring.Middleware;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ namespace SevenTiny.Bantina.Spring
 {
     public class ApplicationBuilder : IApplicationBuilder
     {
-        private readonly IList<Func<RequestDelegate, RequestDelegate>> _components = new List<Func<RequestDelegate, RequestDelegate>>();
+        private IList<Func<RequestDelegate, RequestDelegate>> _components = new List<Func<RequestDelegate, RequestDelegate>>();
 
         public RequestDelegate Build()
         {
@@ -16,7 +17,13 @@ namespace SevenTiny.Bantina.Spring
                 return Task.FromResult<object>(null);
             };
 
-            foreach (var component in _components.Reverse())
+            //reverse
+            _components = _components.Reverse().ToList();
+
+            //add dependency control middleware
+            this.UseDependencyControl();
+
+            foreach (var component in _components)
             {
                 app = component(app);
             }
