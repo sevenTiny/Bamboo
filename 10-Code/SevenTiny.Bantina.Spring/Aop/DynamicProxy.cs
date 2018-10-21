@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Spring.DependencyInjection;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,14 +10,14 @@ namespace SevenTiny.Bantina.Spring.Aop
     {
         private static readonly string[] _ignoreMethodName = new[] { "GetType", "ToString", "GetHashCode", "Equals" };
 
-        public static TInterface CreateProxyOfRealize<TInterface, TImp>() where TImp : class, new() where TInterface : class
+        public static TInterface CreateProxyOfRealize<TInterface, TImp>(Type interceptorType = null) where TImp : class, new() where TInterface : class
         {
-            return Invoke<TInterface, TImp>();
+            return Invoke<TInterface, TImp>(false, interceptorType);
         }
 
-        public static TProxyClass CreateProxyOfInherit<TProxyClass>() where TProxyClass : class, new()
+        public static TProxyClass CreateProxyOfInherit<TProxyClass>(Type interceptorType = null) where TProxyClass : class, new()
         {
-            return Invoke<TProxyClass, TProxyClass>(true);
+            return Invoke<TProxyClass, TProxyClass>(true, interceptorType);
         }
 
         private static TInterface Invoke<TInterface, TImp>(bool inheritMode = false, Type interceptorType = null) where TImp : class where TInterface : class
@@ -57,25 +58,50 @@ namespace SevenTiny.Bantina.Spring.Aop
 
         private static object Invoke(Type impType, TypeBuilder typeBuilder, MethodAttributes methodAttributes, Type interceptorType = null)
         {
-            Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType();
+            var serviceProviderType = typeof(ServiceProvider);
 
+            Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType() ?? interceptorType;
+
+            var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, null);
+            var ilOfCtor = constructorBuilder.GetILGenerator();
             // ---- define fields ----
             FieldBuilder fieldInterceptor = null;
             if (interceptorAttributeType != null)
             {
                 fieldInterceptor = typeBuilder.DefineField("_interceptor", interceptorAttributeType, FieldAttributes.Private);
-            }
-            // ---- define costructors ----
-            if (interceptorAttributeType != null)
-            {
-                var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, null);
-                var ilOfCtor = constructorBuilder.GetILGenerator();
-
                 ilOfCtor.Emit(OpCodes.Ldarg_0);
                 ilOfCtor.Emit(OpCodes.Newobj, interceptorAttributeType.GetConstructor(new Type[0]));
                 ilOfCtor.Emit(OpCodes.Stfld, fieldInterceptor);
-                ilOfCtor.Emit(OpCodes.Ret);
             }
+
+            //initial field of serviceProviderType
+            FieldBuilder _serviceProvider = typeBuilder.DefineField("_serviceProvider", serviceProviderType, FieldAttributes.Private);
+            ilOfCtor.Emit(OpCodes.Ldarg_0);
+            ilOfCtor.Emit(OpCodes.Newobj, serviceProviderType.GetConstructor(new Type[0]));
+            ilOfCtor.Emit(OpCodes.Stfld, _serviceProvider);
+
+            //initial field of impObj
+            FieldBuilder _serviceImpObj = typeBuilder.DefineField("_serviceImpObj", impType, FieldAttributes.Private);
+            //ilOfCtor.Emit(OpCodes.Ldarg_0);
+            //ilOfCtor.Emit(OpCodes.Newobj, impType.GetConstructor(new Type[0]));
+            //ilOfCtor.Emit(OpCodes.Stfld, _serviceImpObj);
+
+            //get service from serviceProvider
+            ilOfCtor.Emit(OpCodes.Ldarg_0);//this
+            ilOfCtor.Emit(OpCodes.Ldarg_0);//this
+            ilOfCtor.Emit(OpCodes.Ldfld, _serviceProvider);
+            ilOfCtor.Emit(OpCodes.Ldstr, impType.Assembly.FullName);
+            ilOfCtor.Emit(OpCodes.Ldstr, impType.FullName);
+            ilOfCtor.Emit(OpCodes.Callvirt, serviceProviderType.GetMethod("GetService", new Type[2] { typeof(string), typeof(string) }));
+
+            if (impType.IsValueType)
+                ilOfCtor.Emit(OpCodes.Unbox_Any, impType);
+            else
+                ilOfCtor.Emit(OpCodes.Castclass, impType);
+
+            ilOfCtor.Emit(OpCodes.Stfld, _serviceImpObj);
+
+            ilOfCtor.Emit(OpCodes.Ret);
 
             // ---- define methods ----
 
@@ -94,7 +120,6 @@ namespace SevenTiny.Bantina.Spring.Aop
                 var ilMethod = methodBuilder.GetILGenerator();
 
                 // set local field
-                var impObj = ilMethod.DeclareLocal(impType);                //instance of imp object
                 var methodName = ilMethod.DeclareLocal(typeof(string));     //instance of method name
                 var parameters = ilMethod.DeclareLocal(typeof(object[]));   //instance of parameters
                 var result = ilMethod.DeclareLocal(typeof(object));         //instance of result
@@ -118,10 +143,6 @@ namespace SevenTiny.Bantina.Spring.Aop
                     ilMethod.Emit(OpCodes.Newobj, actionAttributeType.GetConstructor(new Type[0]));
                     ilMethod.Emit(OpCodes.Stloc, actionAttributeObj);
                 }
-
-                //instance imp
-                ilMethod.Emit(OpCodes.Newobj, impType.GetConstructor(new Type[0]));
-                ilMethod.Emit(OpCodes.Stloc, impObj);
 
                 //if no attribute
                 if (fieldInterceptor != null || actionAttributeObj != null)
@@ -160,7 +181,8 @@ namespace SevenTiny.Bantina.Spring.Aop
                     //load arguments
                     ilMethod.Emit(OpCodes.Ldarg_0);//this
                     ilMethod.Emit(OpCodes.Ldfld, fieldInterceptor);
-                    ilMethod.Emit(OpCodes.Ldloc, impObj);
+                    ilMethod.Emit(OpCodes.Ldarg_0);//this
+                    ilMethod.Emit(OpCodes.Ldfld, _serviceImpObj);
                     ilMethod.Emit(OpCodes.Ldloc, methodName);
                     ilMethod.Emit(OpCodes.Ldloc, parameters);
                     // call Invoke() method of Interceptor
@@ -174,7 +196,8 @@ namespace SevenTiny.Bantina.Spring.Aop
                         ilMethod.Emit(OpCodes.Ldnull);
                     }
 
-                    ilMethod.Emit(OpCodes.Ldloc, impObj);
+                    ilMethod.Emit(OpCodes.Ldarg_0);//this
+                    ilMethod.Emit(OpCodes.Ldfld, _serviceImpObj);
                     for (var j = 0; j < methodParameterTypes.Length; j++)
                     {
                         ilMethod.Emit(OpCodes.Ldarg, j + 1);

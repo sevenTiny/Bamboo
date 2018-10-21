@@ -4,8 +4,20 @@ using System.Reflection;
 
 namespace SevenTiny.Bantina.Spring.DependencyInjection
 {
-    internal class ServiceProvider : IServiceProvider
+    public class ServiceProvider : IServiceProvider
     {
+        /// <summary>
+        /// dynamic proxy get service via this method
+        /// </summary>
+        /// <param name="assemblyName"></param>
+        /// <param name="typeName"></param>
+        /// <returns></returns>
+        public object GetService(string assemblyName, string typeName)
+        {
+            Type type = Assembly.Load(assemblyName).GetType(typeName);
+            return GetService(type);
+        }
+
         public object GetService(Type serviceType)
         {
             ServiceDescriptor serviceDescriptor;
@@ -34,6 +46,11 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
 
         private object GetServiceScanField(Type serviceType, object serviceObj)
         {
+            //if dynamic proxy object,jump scan
+            if (serviceObj.GetType().Name.EndsWith("Proxy"))
+            {
+                return serviceObj;
+            }
             var fieldInfos = serviceType.GetRuntimeFields();
             foreach (var field in fieldInfos)
             {

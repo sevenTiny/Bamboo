@@ -3,11 +3,11 @@ using System.Linq;
 
 namespace SevenTiny.Bantina.Spring
 {
-    internal static class ServiceProviderExtension
+    public static class ServiceProviderExtension
     {
-        internal static TService GetService<TService>(this IServiceProvider serviceProvider) where TService : class
+        public static TService GetService<TService>(this IServiceProvider serviceProvider) where TService : class
         {
-            return serviceProvider.GetService(typeof(TService)) as TService;
+            return serviceProvider.GetService(typeof(TService)) as TService; ;
         }
 
         /// <summary>
