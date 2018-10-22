@@ -13,7 +13,6 @@ namespace SevenTiny.Bantina.Spring
         {
             Configure(Builder);
             ConfigureServices(new ServiceCollection());
-
             RequestDelegate = Builder.Build();
         }
     }
