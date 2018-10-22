@@ -7,14 +7,14 @@ namespace SevenTiny.Bantina.Spring
         public abstract void Configure(IApplicationBuilder app);
         public abstract void ConfigureServices(IServiceCollection services);
 
-        private static ApplicationBuilder ApplicationBuilder = new ApplicationBuilder();
+        private static ApplicationBuilder Builder = new ApplicationBuilder();
         public static RequestDelegate RequestDelegate { get; private set; }
         public virtual void Start()
         {
-            Configure(ApplicationBuilder);
+            Configure(Builder);
             ConfigureServices(new ServiceCollection());
 
-            RequestDelegate = ApplicationBuilder.Build();
+            RequestDelegate = Builder.Build();
         }
     }
 }
