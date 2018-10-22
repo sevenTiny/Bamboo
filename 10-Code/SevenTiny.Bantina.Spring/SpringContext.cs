@@ -23,8 +23,13 @@ namespace SevenTiny.Bantina.Spring
         public object Result { get; set; }
         public string SessionId { get; set; }
 
+        /// <summary>
+        /// container request adapter
+        /// </summary>
         public static IServiceProvider RequestServices { get; } = new ServiceProvider();
-        internal static IServiceCollection ServiceCollection { get; } = new ServiceCollection();
+        /// <summary>
+        /// service collection
+        /// </summary>
         public static SpringContext Current { get; private set; }
     }
 }

@@ -1,4 +1,18 @@
-﻿using SevenTiny.Bantina.Spring.DependencyInjection;
+﻿/*********************************************************
+* CopyRight: 7TINY CODE BUILDER. 
+* Version: 5.0.0
+* Author: 7tiny
+* Address: Earth
+* Create: 10/22/2018, 10:58:49 AM
+* Modify: 
+* E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+* GitHub: https://github.com/sevenTiny 
+* Personal web site: http://www.7tiny.com 
+* Technical WebSit: http://www.cnblogs.com/7tiny/ 
+* Description: 
+* Thx , Best Regards ~
+*********************************************************/
+using SevenTiny.Bantina.Spring.DependencyInjection;
 using System;
 using System.Linq;
 using System.Reflection;

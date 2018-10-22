@@ -1,4 +1,5 @@
-﻿using SevenTiny.Bantina.Spring.DependencyInjection;
+﻿using SevenTiny.Bantina.Spring.Aop;
+using SevenTiny.Bantina.Spring.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,6 +42,10 @@ namespace SevenTiny.Bantina.Spring
             return collection;
         }
 
+        public static IServiceCollection AddScoped<TService>(this IServiceCollection services) where TService : class
+        {
+            return services.Add(typeof(TService), typeof(TService), ServiceLifetime.Scoped);
+        }
         // Summary:
         //     Adds a scoped service of the type specified in serviceType with an implementation
         //     of the type specified in implementationType to the specified Microsoft.Extensions.DependencyInjection.IServiceCollection.
@@ -108,11 +113,21 @@ namespace SevenTiny.Bantina.Spring
         //
         // Returns:
         //     A reference to this instance after the operation has completed.
+        public static IServiceCollection AddScopedWithAop<TService, TImplementation>(this IServiceCollection services) where TService : class where TImplementation : class, TService, new()
+        {
+            services.Add(typeof(TImplementation), typeof(TImplementation), ServiceLifetime.Scoped);
+            services.Add(typeof(TService), typeof(TImplementation), p => DynamicProxy.CreateProxyOfRealize<TService, TImplementation>(), ServiceLifetime.Scoped);
+            return services;
+        }
         public static IServiceCollection AddScoped<TService, TImplementation>(this IServiceCollection services, Func<DependencyInjection.IServiceProvider, TService> implementationFactory) where TService : class where TImplementation : class, TService
         {
             return services.Add(typeof(TService), typeof(TImplementation), implementationFactory, ServiceLifetime.Scoped);
         }
 
+        public static IServiceCollection AddSingleton<TService>(this IServiceCollection services) where TService : class
+        {
+            return services.Add(typeof(TService), typeof(TService), ServiceLifetime.Singleton);
+        }
         //
         // Summary:
         //     Adds a singleton service of the type specified in TService with an implementation
@@ -181,11 +196,21 @@ namespace SevenTiny.Bantina.Spring
         //
         // Returns:
         //     A reference to this instance after the operation has completed.
+        public static IServiceCollection AddSingletonWithAop<TService, TImplementation>(this IServiceCollection services) where TService : class where TImplementation : class, TService, new()
+        {
+            services.Add(typeof(TImplementation), typeof(TImplementation), ServiceLifetime.Singleton);
+            services.Add(typeof(TService), typeof(TImplementation), p => DynamicProxy.CreateProxyOfRealize<TService, TImplementation>(), ServiceLifetime.Singleton);
+            return services;
+        }
         public static IServiceCollection AddSingleton(this IServiceCollection services, Type serviceType, Type implementationType)
         {
             return services.Add(serviceType, implementationType, ServiceLifetime.Singleton);
         }
 
+        public static IServiceCollection AddTransient<TService>(this IServiceCollection services) where TService : class
+        {
+            return services.Add(typeof(TService), typeof(TService), ServiceLifetime.Transient);
+        }
         //
         // Summary:
         //     Adds a singleton service of the type specified in TService with an instance specified
@@ -295,6 +320,12 @@ namespace SevenTiny.Bantina.Spring
         //
         // Returns:
         //     A reference to this instance after the operation has completed.
+        public static IServiceCollection AddTransientWithAop<TService, TImplementation>(this IServiceCollection services) where TService : class where TImplementation : class, TService, new()
+        {
+            services.Add(typeof(TImplementation), typeof(TImplementation), ServiceLifetime.Transient);
+            services.Add(typeof(TService), typeof(TImplementation), p => DynamicProxy.CreateProxyOfRealize<TService, TImplementation>(), ServiceLifetime.Transient);
+            return services;
+        }
         public static IServiceCollection AddTransient(this IServiceCollection services, Type serviceType, Type implementationType)
         {
             return services.Add(serviceType, implementationType, ServiceLifetime.Transient);

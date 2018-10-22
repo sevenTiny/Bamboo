@@ -10,15 +10,14 @@ namespace Test.SevenTiny.Bantina.Spring
     {
         public override void Configure(IApplicationBuilder app)
         {
+            app.UseDynamicProxy();
         }
 
         public override void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<AService, AService>();
-            services.AddSingleton<IAService, AService>(provider => DynamicProxy.CreateProxyOfRealize<IAService, AService>(typeof(InterceptorAttribute)));
+            services.AddSingletonWithAop<IAService, AService>();
             services.AddSingleton<IBusinessService, BusinessService>();
-            services.AddSingleton<DomainService, DomainService>();
-            services.AddSingleton<IDomainService, DomainService>(p => DynamicProxy.CreateProxyOfRealize<IDomainService, DomainService>());
+            services.AddSingletonWithAop<IDomainService, DomainService>();
         }
 
         public override void Start()

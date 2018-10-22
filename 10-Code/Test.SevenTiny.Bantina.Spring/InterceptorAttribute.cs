@@ -9,7 +9,7 @@ namespace Test.SevenTiny.Bantina.Spring
         {
             SpringContext context = new SpringContext(204233, 100373299, @object, method, parameters);
             StartUp.RequestDelegate(context);
-            return context.Result = base.Invoke(@object, method, parameters);
+            return context.Result;
         }
     }
 }
