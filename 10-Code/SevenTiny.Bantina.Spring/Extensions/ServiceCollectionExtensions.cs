@@ -51,6 +51,11 @@ namespace SevenTiny.Bantina.Spring
         {
             return services.Add(typeof(TService), typeof(TService), ServiceLifetime.Scoped);
         }
+        public static IServiceCollection AddScoped<TService>(this IServiceCollection services, Func<DependencyInjection.IServiceProvider, TService> implementationFactory) where TService : class
+        {
+            return services.Add(typeof(TService), implementationFactory, ServiceLifetime.Scoped);
+        }
+
         // Summary:
         //     Adds a scoped service of the type specified in serviceType with an implementation
         //     of the type specified in implementationType to the specified Microsoft.Extensions.DependencyInjection.IServiceCollection.
