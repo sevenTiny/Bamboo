@@ -41,6 +41,11 @@ namespace SevenTiny.Bantina.Spring
             collection.Add(serviceType, new ServiceDescriptor(serviceType, implementationType, implementationFactory, lifetime));
             return collection;
         }
+        private static IServiceCollection Add(this IServiceCollection collection, Type serviceType, Func<DependencyInjection.IServiceProvider, object> implementationFactory, ServiceLifetime lifetime)
+        {
+            collection.Add(serviceType, new ServiceDescriptor(serviceType, implementationFactory, lifetime));
+            return collection;
+        }
 
         public static IServiceCollection AddScoped<TService>(this IServiceCollection services) where TService : class
         {

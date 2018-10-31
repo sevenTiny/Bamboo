@@ -25,10 +25,6 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
             {
                 throw new KeyNotFoundException($"service of {serviceType.Name} not register into container!");
             }
-            if (serviceDescriptor.ImplementationType == null)
-            {
-                throw new KeyNotFoundException($"ImplementationType of {serviceType.Name} not register into container!");
-            }
 
             if (serviceDescriptor.ImplementationInstance != null)
             {
@@ -36,10 +32,18 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
             }
             else if (serviceDescriptor.ImplementationFactory != null)
             {
+                if (serviceDescriptor.ImplementationType == null)
+                {
+                    return serviceDescriptor.ImplementationInstance = serviceDescriptor.ImplementationFactory(this);
+                }
                 return serviceDescriptor.ImplementationInstance = GetServiceScanField(serviceDescriptor.ImplementationType, serviceDescriptor.ImplementationFactory(this));
             }
             else
             {
+                if (serviceDescriptor.ImplementationType == null)
+                {
+                    throw new KeyNotFoundException($"ImplementationType of {serviceType.Name} not register into container!");
+                }
                 return serviceDescriptor.ImplementationInstance = GetServiceScanField(serviceDescriptor.ImplementationType, Activator.CreateInstance(serviceDescriptor.ImplementationType));
             }
         }
