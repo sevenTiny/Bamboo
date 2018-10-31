@@ -22,11 +22,14 @@ namespace SevenTiny.Bantina.Spring
         public string Method { get; }
         public object Result { get; set; }
         public string SessionId { get; set; }
-
         /// <summary>
         /// container request adapter
         /// </summary>
         public static IServiceProvider RequestServices { get; } = new ServiceProvider();
+        /// <summary>
+        /// service collection
+        /// </summary>
+        internal static IServiceCollection ServiceCollection { get; } = new ServiceCollection();
         /// <summary>
         /// service collection
         /// </summary>
