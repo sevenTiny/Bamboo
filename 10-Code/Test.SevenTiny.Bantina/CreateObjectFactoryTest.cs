@@ -18,14 +18,6 @@ namespace Test.SevenTiny.Bantina
     {
         public int GetInt() => default(int);
     }
-    public class ClassD
-    {
-    }
-    public class ClassC
-    {
-        public ClassC(int a, string b) { }
-        public int GetInt() => default(int);
-    }
 
     /// <summary>
     /// 为了测试Expression实现方式和直接New/Emit方式的对比，这里写一个最简单的Demo进行对比
@@ -133,46 +125,91 @@ namespace Test.SevenTiny.Bantina
 
         [Theory]
         [InlineData(1000000)]
-        public void PerformanceReport(int count)
+        [Trait("description", "无参构造各方法调用性能对比")]
+        public void PerformanceReportWithNoArguments(int count)
         {
             Trace.WriteLine($"#{count} 次调用:");
 
             double time = StopwatchHelper.Caculate(count, () =>
             {
                 ClassB b = new ClassB();
-                //ClassA a = new ClassA(b);
             }).TotalMilliseconds;
             Trace.WriteLine($"‘New’耗时 {time} milliseconds");
 
             double time2 = StopwatchHelper.Caculate(count, () =>
             {
                 ClassB b = CreateObjectFactory.CreateInstance<ClassB>();
-                //ClassA a = CreateObjectFactory.CreateInstance<ClassA>(b);
             }).TotalMilliseconds;
             Trace.WriteLine($"‘Emit 工厂’耗时 {time2} milliseconds");
 
             double time3 = StopwatchHelper.Caculate(count, () =>
             {
-                //ClassB b = ExpressionCreateObjectFactory.CreateInstance<ClassB>();
                 ClassB b = ExpressionCreateObject.CreateInstance<ClassB>();
-                //ClassA a = ExpressionCreateObjectFactory.CreateInstance<ClassA>(b);
             }).TotalMilliseconds;
-            Trace.WriteLine($"‘Expression 工厂’耗时 {time3} milliseconds");
+            Trace.WriteLine($"‘Expression’耗时 {time3} milliseconds");
 
             double time4 = StopwatchHelper.Caculate(count, () =>
             {
-                ClassB b = Activator.CreateInstance<ClassB>();
-                //ClassA a = Activator.CreateInstance(typeof(ClassA), b) as ClassA;
+                ClassB b = ExpressionCreateObjectFactory.CreateInstance<ClassB>();
             }).TotalMilliseconds;
-            Trace.WriteLine($"‘Activator.CreateInstance’耗时 {time4} milliseconds");
+            Trace.WriteLine($"‘Expression 工厂’耗时 {time4} milliseconds");
+
+            double time5 = StopwatchHelper.Caculate(count, () =>
+            {
+                ClassB b = Activator.CreateInstance<ClassB>();
+                //ClassB b = Activator.CreateInstance(typeof(ClassB)) as ClassB;
+            }).TotalMilliseconds;
+            Trace.WriteLine($"‘Activator.CreateInstance’耗时 {time5} milliseconds");
 
 
             /**
               #1000000 次调用:
-                ‘New’耗时 25.2717 milliseconds
-                ‘Emit 工厂’耗时 157.0825 milliseconds
-                ‘Expression 工厂’耗时 147.3184 milliseconds --- 单独执行不带参数的方法耗时：35.7853 milliseconds
-                ‘Activator.CreateInstance’耗时 64.6714 milliseconds
+                ‘New’耗时 21.7474 milliseconds
+                ‘Emit 工厂’耗时 174.088 milliseconds
+                ‘Expression’耗时 42.9405 milliseconds
+                ‘Expression 工厂’耗时 162.548 milliseconds
+                ‘Activator.CreateInstance’耗时 67.3712 milliseconds
+             * */
+        }
+
+        [Theory]
+        [InlineData(1000000)]
+        [Trait("description", "带参构造各方法调用性能对比")]
+        public void PerformanceReportWithArguments(int count)
+        {
+            Trace.WriteLine($"#{count} 次调用:");
+
+            double time = StopwatchHelper.Caculate(count, () =>
+            {
+                ClassA a = new ClassA(new ClassB());
+            }).TotalMilliseconds;
+            Trace.WriteLine($"‘New’耗时 {time} milliseconds");
+
+            double time2 = StopwatchHelper.Caculate(count, () =>
+            {
+                ClassA a = CreateObjectFactory.CreateInstance<ClassA>(new ClassB());
+            }).TotalMilliseconds;
+            Trace.WriteLine($"‘Emit 工厂’耗时 {time2} milliseconds");
+
+            double time4 = StopwatchHelper.Caculate(count, () =>
+            {
+                ClassA a = ExpressionCreateObjectFactory.CreateInstance<ClassA>(new ClassB());
+            }).TotalMilliseconds;
+            Trace.WriteLine($"‘Expression 工厂’耗时 {time4} milliseconds");
+
+            double time5 = StopwatchHelper.Caculate(count, () =>
+            {
+                ClassA a = Activator.CreateInstance(typeof(ClassA), new ClassB()) as ClassA;
+            }).TotalMilliseconds;
+            Trace.WriteLine($"‘Activator.CreateInstance’耗时 {time5} milliseconds");
+
+
+            /**
+              #1000000 次调用:
+                ‘New’耗时 29.3612 milliseconds
+                ‘Emit 工厂’耗时 634.2714 milliseconds
+                ‘Expression 工厂’耗时 620.2489 milliseconds
+                ‘Activator.CreateInstance’耗时 588.0409 milliseconds
              * */
         }
     }
