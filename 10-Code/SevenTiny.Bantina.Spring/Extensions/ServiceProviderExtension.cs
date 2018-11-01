@@ -21,7 +21,7 @@ namespace SevenTiny.Bantina.Spring
             {
                 foreach (var item in collection)
                 {
-                    if (item.Value.LifeTime == ServiceLifetime.Transient)
+                    if (item.Value.LifeTime == ServiceLifetime.Scoped)
                     {
                         item.Value.ImplementationInstance = null;
                     }
