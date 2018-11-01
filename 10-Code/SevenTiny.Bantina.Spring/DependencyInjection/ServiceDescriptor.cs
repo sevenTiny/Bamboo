@@ -25,14 +25,15 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
         internal ServiceDescriptor(Type serviceType, Func<IServiceProvider, object> factory, ServiceLifetime lifetime)
         {
             ServiceType = serviceType;
+            ImplementationType = serviceType;
             ImplementationFactory = factory;
             LifeTime = lifetime;
         }
         internal ServiceDescriptor(Type serviceType, Type implementationType, Func<IServiceProvider, object> factory, ServiceLifetime lifetime)
         {
             ServiceType = serviceType;
-            ImplementationFactory = factory;
             ImplementationType = implementationType;
+            ImplementationFactory = factory;
             LifeTime = lifetime;
         }
 

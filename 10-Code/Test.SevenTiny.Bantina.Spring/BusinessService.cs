@@ -14,9 +14,19 @@ namespace Test.SevenTiny.Bantina.Spring
     {
         [Service]
         private IDomainService domainService;
+
+        [Service]
+        private IStorageProvider storage;
+
         public void Test()
         {
             domainService.WriteLog();
         }
+    }
+
+    public interface IStorageProvider { }
+    public class StorageProvider : IStorageProvider
+    {
+        public static IStorageProvider Storage = new StorageProvider();
     }
 }

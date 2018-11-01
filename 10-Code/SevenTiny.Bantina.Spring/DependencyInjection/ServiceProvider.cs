@@ -60,6 +60,10 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
 
         private object GetServiceScanField(Type serviceType, object serviceObj)
         {
+            if (serviceType.IsInterface)
+            {
+                return serviceObj;
+            }
             //if dynamic proxy object,jump scan
             if (serviceObj.GetType().Name.EndsWith("Proxy"))
             {
