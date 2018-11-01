@@ -25,10 +25,6 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
             {
                 throw new KeyNotFoundException($"service of {serviceType.Name} not register into container!");
             }
-            if (serviceDescriptor.ImplementationType == null)
-            {
-                throw new KeyNotFoundException($"ImplementationType of {serviceType.Name} not register into container!");
-            }
 
             if (serviceDescriptor.ImplementationInstance != null)
             {
@@ -36,11 +32,29 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
             }
             else if (serviceDescriptor.ImplementationFactory != null)
             {
-                return serviceDescriptor.ImplementationInstance = GetServiceScanField(serviceDescriptor.ImplementationType, serviceDescriptor.ImplementationFactory(this));
+                object instance;
+                if (serviceDescriptor.ImplementationType == null)
+                {
+                    instance = serviceDescriptor.ImplementationFactory(this);
+                }
+                instance = GetServiceScanField(serviceDescriptor.ImplementationType, serviceDescriptor.ImplementationFactory(this));
+
+                if (serviceDescriptor.LifeTime == ServiceLifetime.Transient)
+                    return instance;
+                else
+                    return serviceDescriptor.ImplementationInstance = instance;
             }
             else
             {
-                return serviceDescriptor.ImplementationInstance = GetServiceScanField(serviceDescriptor.ImplementationType, Activator.CreateInstance(serviceDescriptor.ImplementationType));
+                if (serviceDescriptor.ImplementationType == null)
+                {
+                    throw new KeyNotFoundException($"ImplementationType of {serviceType.Name} not register into container!");
+                }
+
+                if (serviceDescriptor.LifeTime == ServiceLifetime.Transient)
+                    return GetServiceScanField(serviceDescriptor.ImplementationType, Activator.CreateInstance(serviceDescriptor.ImplementationType));
+                else
+                    return serviceDescriptor.ImplementationInstance = GetServiceScanField(serviceDescriptor.ImplementationType, Activator.CreateInstance(serviceDescriptor.ImplementationType));
             }
         }
 
