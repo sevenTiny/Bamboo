@@ -13,6 +13,7 @@
 * Thx , Best Regards ~
 *********************************************************/
 using SevenTiny.Bantina.Spring.DependencyInjection;
+using SevenTiny.Bantina.Spring.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,7 +55,8 @@ namespace SevenTiny.Bantina.Spring.Aop
             TypeBuilder typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { interfaceType });
             MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
 
-            return Invoke(impType, typeBuilder, methodAttributes, interceptorType);
+            var result = Invoke(impType, typeBuilder, methodAttributes, interceptorType);
+            return result;
         }
 
         public static object CreateProxyOfInherit(Type impType, Type interceptorType = null)
@@ -147,11 +149,17 @@ namespace SevenTiny.Bantina.Spring.Aop
                     //method can override class attrubute
                     if (method.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionTypeBuilders = method.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder));
+                        foreach (var item in method.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
                     else if (impType.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionTypeBuilders = impType.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder));
+                        foreach (var item in impType.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
 
                     foreach (var item in actionTypeBuilders.Select(t => t.Key).ToArray())

@@ -15,6 +15,8 @@ namespace Test.SevenTiny.Bantina.Spring
         [Service]
         private IBusinessService businessService;
 
+        [Action2]
+        [Action1]
         public void ServiceTest()
         {
             businessService.Test();

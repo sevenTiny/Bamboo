@@ -12,4 +12,30 @@ namespace Test.SevenTiny.Bantina.Spring
             return context.Result;
         }
     }
+
+    public class Action1Attribute : ActionBaseAttribute
+    {
+        public override object After(string method, object result)
+        {
+            return base.After(method, result);
+        }
+
+        public override void Before(string method, object[] parameters)
+        {
+            base.Before(method, parameters);
+        }
+    }
+
+    public class Action2Attribute : ActionBaseAttribute
+    {
+        public override object After(string method, object result)
+        {
+            return base.After(method, result);
+        }
+
+        public override void Before(string method, object[] parameters)
+        {
+            base.Before(method, parameters);
+        }
+    }
 }
