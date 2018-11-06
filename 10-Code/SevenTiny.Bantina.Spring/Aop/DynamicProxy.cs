@@ -267,7 +267,7 @@ namespace SevenTiny.Bantina.Spring.Aop
                 if (method.ReturnType == typeof(void))
                 {
                     //if no action attribute，void method need pop(action attribute method has done before)
-                    if (!actionqTypeBuilders.Any())
+                    if (!actionTypeBuilders.Any())
                         ilMethod.Emit(OpCodes.Pop);
                 }
                 else
