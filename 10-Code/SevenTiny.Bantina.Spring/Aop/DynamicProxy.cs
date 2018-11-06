@@ -55,8 +55,7 @@ namespace SevenTiny.Bantina.Spring.Aop
             TypeBuilder typeBuilder = moduleBuilder.DefineType(nameOfType, TypeAttributes.Public, null, new[] { interfaceType });
             MethodAttributes methodAttributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot | MethodAttributes.Virtual | MethodAttributes.Final;
 
-            var result = Invoke(impType, typeBuilder, methodAttributes, interceptorType);
-            return result;
+            return Invoke(impType, typeBuilder, methodAttributes, interceptorType);
         }
 
         public static object CreateProxyOfInherit(Type impType, Type interceptorType = null)
@@ -254,9 +253,12 @@ namespace SevenTiny.Bantina.Spring.Aop
                         ilMethod.Emit(OpCodes.Ldloc, item.Value);
                         ilMethod.Emit(OpCodes.Ldloc, methodName);
                         ilMethod.Emit(OpCodes.Ldloc, result);
-                        ilMethod.Emit(OpCodes.Call, item.Key.GetMethod("After"));
+                        ilMethod.Emit(OpCodes.Callvirt, item.Key.GetMethod("After"));
+
                         //if no void return,set result
-                        if (method.ReturnType != typeof(void))
+                        if (method.ReturnType == typeof(void))
+                            ilMethod.Emit(OpCodes.Pop);
+                        else
                             ilMethod.Emit(OpCodes.Stloc, result);
                     }
                 }
@@ -264,7 +266,9 @@ namespace SevenTiny.Bantina.Spring.Aop
                 // pop the stack if return void
                 if (method.ReturnType == typeof(void))
                 {
-                    ilMethod.Emit(OpCodes.Pop);
+                    //if no action attribute，void method need pop(action attribute method has done before)
+                    if (!actionqTypeBuilders.Any())
+                        ilMethod.Emit(OpCodes.Pop);
                 }
                 else
                 {
