@@ -13,7 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SevenTiny.Bantina.Aop\SevenTiny.Bantina.Aop.csproj" />
     <ProjectReference Include="..\SevenTiny.Bantina.Spring\SevenTiny.Bantina.Spring.csproj" />
   </ItemGroup>
 

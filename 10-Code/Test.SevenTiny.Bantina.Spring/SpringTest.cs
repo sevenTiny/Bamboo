@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Spring.Aop;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Xunit;
@@ -16,6 +17,14 @@ namespace Test.SevenTiny.Bantina.Spring
         public void Test()
         {
             var instance = AService.Instance;
+
+            instance.ServiceTest();
+        }
+
+        [Fact]
+        public void Test2()
+        {
+            var instance = DynamicProxy.CreateProxyOfRealize<IAService, AService>();
 
             instance.ServiceTest();
         }

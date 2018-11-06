@@ -13,6 +13,7 @@
 * Thx , Best Regards ~
 *********************************************************/
 using SevenTiny.Bantina.Spring.DependencyInjection;
+using SevenTiny.Bantina.Spring.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -147,11 +148,17 @@ namespace SevenTiny.Bantina.Spring.Aop
                     //method can override class attrubute
                     if (method.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionTypeBuilders = method.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder));
+                        foreach (var item in method.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
                     else if (impType.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionTypeBuilders = impType.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder));
+                        foreach (var item in impType.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
 
                     foreach (var item in actionTypeBuilders.Select(t => t.Key).ToArray())
@@ -246,9 +253,12 @@ namespace SevenTiny.Bantina.Spring.Aop
                         ilMethod.Emit(OpCodes.Ldloc, item.Value);
                         ilMethod.Emit(OpCodes.Ldloc, methodName);
                         ilMethod.Emit(OpCodes.Ldloc, result);
-                        ilMethod.Emit(OpCodes.Call, item.Key.GetMethod("After"));
+                        ilMethod.Emit(OpCodes.Callvirt, item.Key.GetMethod("After"));
+
                         //if no void return,set result
-                        if (method.ReturnType != typeof(void))
+                        if (method.ReturnType == typeof(void))
+                            ilMethod.Emit(OpCodes.Pop);
+                        else
                             ilMethod.Emit(OpCodes.Stloc, result);
                     }
                 }
@@ -256,7 +266,9 @@ namespace SevenTiny.Bantina.Spring.Aop
                 // pop the stack if return void
                 if (method.ReturnType == typeof(void))
                 {
-                    ilMethod.Emit(OpCodes.Pop);
+                    //if no action attribute，void method need pop(action attribute method has done before)
+                    if (!actionTypeBuilders.Any())
+                        ilMethod.Emit(OpCodes.Pop);
                 }
                 else
                 {
