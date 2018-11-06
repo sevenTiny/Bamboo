@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Aop.Extensions;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -57,25 +59,27 @@ namespace SevenTiny.Bantina.Aop
 
         private static object Invoke(Type impType, TypeBuilder typeBuilder, MethodAttributes methodAttributes, Type interceptorType = null)
         {
-            Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType();
+            Type interceptorAttributeType = impType.GetCustomAttribute(typeof(InterceptorBaseAttribute))?.GetType() ?? interceptorType;
 
+            var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, null);
+            var ilOfCtor = constructorBuilder.GetILGenerator();
             // ---- define fields ----
             FieldBuilder fieldInterceptor = null;
             if (interceptorAttributeType != null)
             {
                 fieldInterceptor = typeBuilder.DefineField("_interceptor", interceptorAttributeType, FieldAttributes.Private);
-            }
-            // ---- define costructors ----
-            if (interceptorAttributeType != null)
-            {
-                var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, null);
-                var ilOfCtor = constructorBuilder.GetILGenerator();
-
                 ilOfCtor.Emit(OpCodes.Ldarg_0);
                 ilOfCtor.Emit(OpCodes.Newobj, interceptorAttributeType.GetConstructor(new Type[0]));
                 ilOfCtor.Emit(OpCodes.Stfld, fieldInterceptor);
-                ilOfCtor.Emit(OpCodes.Ret);
             }
+
+            //initial field of impObj
+            FieldBuilder _serviceImpObj = typeBuilder.DefineField("_serviceImpObj", impType, FieldAttributes.Private);
+            ilOfCtor.Emit(OpCodes.Ldarg_0);
+            ilOfCtor.Emit(OpCodes.Newobj, impType.GetConstructor(new Type[0]));
+            ilOfCtor.Emit(OpCodes.Stfld, _serviceImpObj);
+
+            ilOfCtor.Emit(OpCodes.Ret);
 
             // ---- define methods ----
 
@@ -94,37 +98,42 @@ namespace SevenTiny.Bantina.Aop
                 var ilMethod = methodBuilder.GetILGenerator();
 
                 // set local field
-                var impObj = ilMethod.DeclareLocal(impType);                //instance of imp object
                 var methodName = ilMethod.DeclareLocal(typeof(string));     //instance of method name
                 var parameters = ilMethod.DeclareLocal(typeof(object[]));   //instance of parameters
                 var result = ilMethod.DeclareLocal(typeof(object));         //instance of result
-                LocalBuilder actionAttributeObj = null;
+
+                Dictionary<Type, LocalBuilder> actionTypeBuilders = new Dictionary<Type, LocalBuilder>();
 
                 //attribute init
-                Type actionAttributeType = null;
-                if (method.GetCustomAttribute(typeof(ActionBaseAttribute)) != null || impType.GetCustomAttribute(typeof(ActionBaseAttribute)) != null)
+                if (method.GetCustomAttributes<ActionBaseAttribute>().Any() || impType.GetCustomAttributes<ActionBaseAttribute>().Any())
                 {
                     //method can override class attrubute
-                    if (method.GetCustomAttribute(typeof(ActionBaseAttribute)) != null)
+                    if (method.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionAttributeType = method.GetCustomAttribute(typeof(ActionBaseAttribute)).GetType();
+                        foreach (var item in method.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
-                    else if (impType.GetCustomAttribute(typeof(ActionBaseAttribute)) != null)
+                    else if (impType.GetCustomAttributes<ActionBaseAttribute>().Any())
                     {
-                        actionAttributeType = impType.GetCustomAttribute(typeof(ActionBaseAttribute)).GetType();
+                        foreach (var item in impType.GetCustomAttributes<ActionBaseAttribute>().ToDictionary(k => k.GetType(), v => default(LocalBuilder)))
+                        {
+                            actionTypeBuilders.AddOrUpdate(item.Key, item.Value);
+                        }
                     }
 
-                    actionAttributeObj = ilMethod.DeclareLocal(actionAttributeType);
-                    ilMethod.Emit(OpCodes.Newobj, actionAttributeType.GetConstructor(new Type[0]));
-                    ilMethod.Emit(OpCodes.Stloc, actionAttributeObj);
+                    foreach (var item in actionTypeBuilders.Select(t => t.Key).ToArray())
+                    {
+                        var actionAttributeObj = ilMethod.DeclareLocal(item);
+                        ilMethod.Emit(OpCodes.Newobj, item.GetConstructor(new Type[0]));
+                        ilMethod.Emit(OpCodes.Stloc, actionAttributeObj);
+                        actionTypeBuilders[item] = actionAttributeObj;
+                    }
                 }
 
-                //instance imp
-                ilMethod.Emit(OpCodes.Newobj, impType.GetConstructor(new Type[0]));
-                ilMethod.Emit(OpCodes.Stloc, impObj);
-
                 //if no attribute
-                if (fieldInterceptor != null || actionAttributeObj != null)
+                if (fieldInterceptor != null || actionTypeBuilders.Any())
                 {
                     ilMethod.Emit(OpCodes.Ldstr, method.Name);
                     ilMethod.Emit(OpCodes.Stloc, methodName);
@@ -146,13 +155,16 @@ namespace SevenTiny.Bantina.Aop
                 }
 
                 //dynamic proxy action before
-                if (actionAttributeType != null)
+                if (actionTypeBuilders.Any())
                 {
                     //load arguments
-                    ilMethod.Emit(OpCodes.Ldloc, actionAttributeObj);
-                    ilMethod.Emit(OpCodes.Ldloc, methodName);
-                    ilMethod.Emit(OpCodes.Ldloc, parameters);
-                    ilMethod.Emit(OpCodes.Call, actionAttributeType.GetMethod("Before"));
+                    foreach (var item in actionTypeBuilders)
+                    {
+                        ilMethod.Emit(OpCodes.Ldloc, item.Value);
+                        ilMethod.Emit(OpCodes.Ldloc, methodName);
+                        ilMethod.Emit(OpCodes.Ldloc, parameters);
+                        ilMethod.Emit(OpCodes.Call, item.Key.GetMethod("Before"));
+                    }
                 }
 
                 if (interceptorAttributeType != null)
@@ -160,7 +172,8 @@ namespace SevenTiny.Bantina.Aop
                     //load arguments
                     ilMethod.Emit(OpCodes.Ldarg_0);//this
                     ilMethod.Emit(OpCodes.Ldfld, fieldInterceptor);
-                    ilMethod.Emit(OpCodes.Ldloc, impObj);
+                    ilMethod.Emit(OpCodes.Ldarg_0);//this
+                    ilMethod.Emit(OpCodes.Ldfld, _serviceImpObj);
                     ilMethod.Emit(OpCodes.Ldloc, methodName);
                     ilMethod.Emit(OpCodes.Ldloc, parameters);
                     // call Invoke() method of Interceptor
@@ -169,19 +182,20 @@ namespace SevenTiny.Bantina.Aop
                 else
                 {
                     //direct call method
-                    if (method.ReturnType == typeof(void) && actionAttributeType == null)
+                    if (method.ReturnType == typeof(void) && !actionTypeBuilders.Any())
                     {
                         ilMethod.Emit(OpCodes.Ldnull);
                     }
 
-                    ilMethod.Emit(OpCodes.Ldloc, impObj);
+                    ilMethod.Emit(OpCodes.Ldarg_0);//this
+                    ilMethod.Emit(OpCodes.Ldfld, _serviceImpObj);
                     for (var j = 0; j < methodParameterTypes.Length; j++)
                     {
                         ilMethod.Emit(OpCodes.Ldarg, j + 1);
                     }
                     ilMethod.Emit(OpCodes.Callvirt, impType.GetMethod(method.Name));
                     //box
-                    if (actionAttributeType != null)
+                    if (actionTypeBuilders.Any())
                     {
                         if (method.ReturnType != typeof(void))
                             ilMethod.Emit(OpCodes.Box, method.ReturnType);
@@ -191,26 +205,40 @@ namespace SevenTiny.Bantina.Aop
                 }
 
                 //dynamic proxy action after
-                if (actionAttributeType != null)
+                if (actionTypeBuilders.Any())
                 {
                     ilMethod.Emit(OpCodes.Stloc, result);
-                    //load arguments
-                    ilMethod.Emit(OpCodes.Ldloc, actionAttributeObj);
-                    ilMethod.Emit(OpCodes.Ldloc, methodName);
-                    ilMethod.Emit(OpCodes.Ldloc, result);
-                    ilMethod.Emit(OpCodes.Call, actionAttributeType.GetMethod("After"));
+
+                    //1->2 before and 2->1 after
+                    foreach (var item in actionTypeBuilders.Reverse())
+                    {
+                        ilMethod.Emit(OpCodes.Ldloc, item.Value);
+                        ilMethod.Emit(OpCodes.Ldloc, methodName);
+                        ilMethod.Emit(OpCodes.Ldloc, result);
+                        ilMethod.Emit(OpCodes.Callvirt, item.Key.GetMethod("After"));
+
+                        //if no void return,set result
+                        if (method.ReturnType == typeof(void))
+                            ilMethod.Emit(OpCodes.Pop);
+                        else
+                            ilMethod.Emit(OpCodes.Stloc, result);
+                    }
                 }
 
                 // pop the stack if return void
                 if (method.ReturnType == typeof(void))
                 {
-                    ilMethod.Emit(OpCodes.Pop);
+                    //if no action attribute，void method need pop(action attribute method has done before)
+                    if (!actionTypeBuilders.Any())
+                        ilMethod.Emit(OpCodes.Pop);
                 }
                 else
                 {
                     //unbox,if direct invoke,no box
-                    if (fieldInterceptor != null || actionAttributeObj != null)
+                    if (fieldInterceptor != null || actionTypeBuilders.Any())
                     {
+                        ilMethod.Emit(OpCodes.Ldloc, result);
+
                         if (method.ReturnType.IsValueType)
                             ilMethod.Emit(OpCodes.Unbox_Any, method.ReturnType);
                         else
@@ -221,9 +249,9 @@ namespace SevenTiny.Bantina.Aop
                 ilMethod.Emit(OpCodes.Ret);
             }
 
-            var t = typeBuilder.CreateTypeInfo();
+            var typeInfo = typeBuilder.CreateTypeInfo();
 
-            return Activator.CreateInstance(t);
+            return Activator.CreateInstance(typeInfo);
         }
     }
 }

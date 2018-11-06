@@ -30,19 +30,25 @@ namespace Test.SevenTiny.Bantina.Aop
 
     [Interceptor]
     [Action]
+    [Action2]
+    [Action3]
     public class BusinessClass : IBusinessClass
     {
         public static IBusinessClass Instance = DynamicProxy.CreateProxyOfRealize<IBusinessClass, BusinessClass>();
 
         public static IBusinessClass Instance2 = new BusinessClass();
 
-        [Action]
+        //[Action]
+        //[Action2]
+        //[Action3]
         public void Test()
         {
             //do nothing;
         }
 
         //[Action]
+        //[Action2]
+        //[Action3]
         public bool GetBool(bool bo)
         {
             return bo;
@@ -128,7 +134,7 @@ namespace Test.SevenTiny.Bantina.Aop
 
         public static IBusinessClass Instance2 = new BusinessClass();
 
-        [Action]
+        //[Action]
         public virtual void Test()
         {
             //do nothing;
