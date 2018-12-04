@@ -163,6 +163,100 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
+        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+
+            //查找主键以及主键对应的值
+            //get property which is key
+            var keyProperty = propertyInfos.Where(t => t.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute)?.FirstOrDefault();
+            if (keyProperty == null)
+                throw new TableKeyNotFoundException($"table '{dbContext.TableName}' not found key column");
+
+            string colunmName = keyProperty.Name;
+            var value = keyProperty.GetValue(entity);
+
+            if (keyProperty.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr1)
+                colunmName = columnAttr1.GetName(keyProperty.Name);
+
+            //Generate Expression of update via key
+            ParameterExpression param = Expression.Parameter(typeof(TEntity), "t");
+            MemberExpression left = Expression.Property(param, keyProperty);
+            ConstantExpression right = Expression.Constant(value);
+            BinaryExpression where = Expression.Equal(left, right);
+            filter = Expression.Lambda<Func<TEntity, bool>>(where, param);
+
+            paramsDic = new Dictionary<string, object>();
+            StringBuilder builder_front = new StringBuilder();
+            builder_front.Append("UPDATE ");
+            //Mysql和sqlserver的分别处理
+            if (dbContext.DataBaseType == DataBaseType.MySql)
+            {
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+            }
+            builder_front.Append(filter.Parameters[0].Name);
+            builder_front.Append(" SET ");
+
+            string columnName = string.Empty;
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                //AutoIncrease : if property is auto increase attribute skip this column.
+                if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
+                {
+                }
+                //AutoIncrease : if property is auto increase attribute skip this column.
+                else if (propertyInfo.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute keyAttr)
+                {
+                }
+                //Column :
+                else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
+                {
+                    builder_front.Append(columnAttr.GetName(propertyInfo.Name));
+                    builder_front.Append("=");
+                    builder_front.Append("@");
+                    //multitype database support
+                    switch (dbContext.DataBaseType)
+                    {
+                        case DataBaseType.SqlServer:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                            break;
+                        case DataBaseType.MySql:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("`", "");
+                            break;
+                        default:
+                            //default 兼容mysql和sqlserver的系统字段
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "").Replace("`", "");
+                            break;
+                    }
+                    builder_front.Append(columnName);
+                    builder_front.Append(",");
+                    if (!paramsDic.ContainsKey(columnName))
+                    {
+                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
+                    }
+                }
+                //in the end,remove the redundant symbol of ','
+                if (propertyInfos.Last() == propertyInfo)
+                {
+                    builder_front.Remove(builder_front.Length - 1, 1);
+                }
+            }
+
+            //SqlServer和Mysql的sql语句分别处理
+            if (dbContext.DataBaseType == DataBaseType.SqlServer)
+            {
+                builder_front.Append(" FROM ");
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+                builder_front.Append(filter.Parameters[0].Name);
+            }
+
+            //Generate SqlStatement
+            return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
+        }
+
         public static string Delete<TEntity>(DbContext dbContext, TEntity entity) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
