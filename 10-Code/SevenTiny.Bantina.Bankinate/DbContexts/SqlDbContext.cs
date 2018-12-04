@@ -80,10 +80,6 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             DbCacheManager.Delete(this, filter);
         }
 
-        public void Update<TEntity>(TEntity entity) where TEntity : class
-        {
-
-        }
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, filter, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
