@@ -59,6 +59,13 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             //2.更新Table缓存中的该表记录
             TableCacheManager.DeleteCache(dbContext, filter);
         }
+        internal static void Delete<TEntity>(DbContext dbContext, TEntity entity)
+        {
+            //1.清空Query缓存中关于该表的所有缓存记录
+            QueryCacheManager.FlushTableCache(dbContext);
+            //2.更新Table缓存中的该表记录
+            TableCacheManager.DeleteCache(dbContext, entity);
+        }
 
         internal static List<TEntity> GetEntities<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Func<List<TEntity>> func) where TEntity : class
         {

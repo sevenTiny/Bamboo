@@ -1,5 +1,6 @@
 ﻿using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.DbContexts;
+using SevenTiny.Bantina.Bankinate.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return _propertiesDic[type];
         }
 
-        public static void Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
@@ -84,10 +85,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 }
             }
             //Generate SqlStatement
-            dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
+            return dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
         }
 
-        public static void Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
@@ -159,10 +160,29 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             }
 
             //Generate SqlStatement
-            dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
+            return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static void Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string Delete<TEntity>(DbContext dbContext, TEntity entity) where TEntity : class
+        {
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+            //get property which is key
+            var property = propertyInfos.Where(t => t.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute)?.FirstOrDefault();
+
+            if (property == null)
+                throw new TableKeyNotFoundException($"table '{dbContext.TableName}' not found key column");
+
+            string colunmName = property.Name;
+            var value = property.GetValue(entity);
+
+            if (property.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
+                colunmName = columnAttr.GetName(property.Name);
+
+            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE {colunmName} = {value}";
+        }
+
+        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
@@ -178,9 +198,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     dbContext.SqlStatement = string.Empty;
                     break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
@@ -194,9 +215,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
@@ -209,9 +231,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryList<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryList<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
@@ -224,9 +247,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
+        public static string QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
@@ -240,9 +264,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
+        public static string QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             string desc = isDESC ? "DESC" : "ASC";
@@ -257,6 +282,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
     }
 }
