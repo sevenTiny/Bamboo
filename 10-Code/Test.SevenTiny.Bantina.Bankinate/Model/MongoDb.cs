@@ -9,9 +9,9 @@ using System.Text;
 namespace Test.SevenTiny.Bantina.Bankinate.Model
 {
     [DataBase("local")]
-    public class MongoTestDbContext : MongoDbContext<MongoTestDbContext>
+    public class MongoDb : MongoDbContext<MongoDb>
     {
-        public MongoTestDbContext() : base(ConnectionStrings.Get("mongodb39911"))
+        public MongoDb() : base(ConnectionStrings.Get("mongodb39911"))
         {
 
         }

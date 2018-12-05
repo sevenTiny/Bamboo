@@ -22,7 +22,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
         private static void MongoDbTest()
         {
-            using (MongoTestDbContext db = new MongoTestDbContext())
+            using (MongoDb db = new MongoDb())
             {
                 //db.Add<Grade>(new Grade { Name = "Three", GradeId = 9 });
 
@@ -35,7 +35,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         {
             var result1 = StopwatchHelper.Caculate(100, () =>
                {
-                   using (MySqlTestDbContext db = new MySqlTestDbContext())
+                   using (MySqlDb db = new MySqlDb())
                    {
                        //for (int i = 1; i < 4; i++)
                        //{
@@ -69,7 +69,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             int i = 0;
             var result1 = StopwatchHelper.Caculate(100, () =>
             {
-                using (var db = new MySqlTestDbContext())
+                using (var db = new MySqlDb())
                 {
                     Thread.Sleep(1000);
                     i++;
@@ -132,7 +132,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             int i = 0;
             var result1 = StopwatchHelper.Caculate(1000, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     i++;
                     //db.Add(new Student {Id=i, Name = "monky-"+i,GradeId=1 });

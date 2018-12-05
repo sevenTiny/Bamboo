@@ -10,7 +10,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Fact]
         public void QueryList()
         {
-            using (var db = new SqlServerTestDbContext())
+            using (var db = new SqlServerDb())
             {
                 var students = db.QueryList<Student>(t => true);
             }
@@ -19,7 +19,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Fact]
         public void Add()
         {
-            using (var db = new SqlServerTestDbContext())
+            using (var db = new SqlServerDb())
             {
                 Student stu = new Student();
                 stu.Name = "AddTest";
@@ -30,7 +30,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Fact]
         public void Update()
         {
-            using (var db = new SqlServerTestDbContext())
+            using (var db = new SqlServerDb())
             {
                 Student stu = db.QueryOne<Student>(t => t.Name.Contains("AddTest"));
                 stu.Age = 3;
@@ -41,7 +41,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Fact]
         public void Delete()
         {
-            using (var db = new SqlServerTestDbContext())
+            using (var db = new SqlServerDb())
             {
                 db.Delete<Student>(t => t.Id == 1);
             }
@@ -55,7 +55,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     var students = db.QueryList<Student>(t => true);
                     if (db.IsFromCache)
@@ -78,7 +78,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     var students = db.QueryList<Student>(t => true);
                     if (db.IsFromCache)
@@ -100,7 +100,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     var students = db.QueryList<Student>(t => true);
                     if (db.IsFromCache)
@@ -124,7 +124,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     //查询单个
                     var stu = db.QueryOne<Student>(t => t.Id == 2);

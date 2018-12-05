@@ -19,13 +19,5 @@ namespace Test.SevenTiny.Bantina.Bankinate.Model
         public int Age { get; set; }
         [Column]
         public int GradeId { get; set; }
-
-        public int BodyHigh { get; set; }
-        public int HealthLevel { get; set; }
-
-        public string GetName()
-        {
-            return this.Name;
-        }
     }
 }
