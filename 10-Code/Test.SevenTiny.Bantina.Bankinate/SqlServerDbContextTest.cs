@@ -1,9 +1,6 @@
 ﻿using SevenTiny.Bantina;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using Test.Model;
+using Test.SevenTiny.Bantina.Bankinate.Model;
 using Xunit;
 
 namespace Test.SevenTiny.Bantina.Bankinate

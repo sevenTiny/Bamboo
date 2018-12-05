@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Test.Model;
+using Test.SevenTiny.Bantina.Bankinate.Model;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
@@ -26,8 +26,8 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             {
                 //db.Add<Grade>(new Grade { Name = "Three", GradeId = 9 });
 
-                IList<Grade> dbs = db.QueryList<Grade>(t => true);
-                Console.WriteLine(SerializeObject(dbs));
+                //IList<Grade> dbs = db.QueryList<Grade>(t => true);
+                //Console.WriteLine(SerializeObject(dbs));
             }
         }
 
@@ -182,7 +182,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
                     //Console.WriteLine(db.IsFromCache);
 
-                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId,null);
+                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId, null);
                     Console.WriteLine("paging " + db.IsFromCache);
                 }
             });
@@ -190,26 +190,14 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             Console.WriteLine($"QueryOne {i} sec：{result1.TotalMilliseconds} ms");
         }
 
-        private static void BugTest()
-        {
-            using (var db = new SqlServerTestDbContext())
-            {
-                Expression<Func<TB_Book, bool>> filter = t => t.IsDelete == 2;
-                int count2 = db.QueryCount(filter);
-
-                List<TB_Book> bookList = db.QueryListPaging<TB_Book>(1, 30, t => t.CreateTime, filter, true);
-                int count = db.QueryCount<TB_Book>(filter);
-            }
-        }
-
         private static void LambdaToSqlTest()
         {
             List<int> ages = new List<int> { 1, 2, 3, 34, 5 };
             //Expression<Func<Student, bool>> where = t => t.Name.Contains(ages.FirstOrDefault().ToString());
-           // Expression<Func<Student, bool>> where = t => t.Age == ages.FirstOrDefault();
+            // Expression<Func<Student, bool>> where = t => t.Age == ages.FirstOrDefault();
             Expression<Func<Student, bool>> where = t => true;
 
-           // var sql = LambdaToSql.ConvertWhere(where);
+            // var sql = LambdaToSql.ConvertWhere(where);
         }
     }
 }
