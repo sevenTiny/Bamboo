@@ -11,13 +11,13 @@ namespace Test.SevenTiny.Bantina.Spring
             base.Before(method, parameters);
         }
     }
-    public interface IDomainService
+    public interface ICService
     {
         void WriteLog();
     }
 
     [Action]
-    public class DomainService : IDomainService
+    public class CService : ICService
     {
         public void WriteLog()
         {

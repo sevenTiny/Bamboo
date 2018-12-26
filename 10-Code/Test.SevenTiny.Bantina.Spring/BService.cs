@@ -5,22 +5,25 @@ using System.Text;
 
 namespace Test.SevenTiny.Bantina.Spring
 {
-    public interface IBusinessService
+    public interface IBService
     {
         void Test();
     }
 
-    public class BusinessService : IBusinessService
+    public class BService : IBService
     {
         [Service]
-        private IDomainService domainService;
+        private ICService cService;
+
+        [Service]
+        private IAService aService;
 
         [Service]
         private IStorageProvider storage;
 
         public void Test()
         {
-            domainService.WriteLog();
+            cService.WriteLog();
         }
     }
 

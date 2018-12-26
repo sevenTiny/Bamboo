@@ -25,7 +25,7 @@ namespace SevenTiny.Bantina.Spring
         /// <summary>
         /// container request adapter
         /// </summary>
-        public static IServiceProvider RequestServices { get; } = new ServiceProvider();
+        public static IServiceProvider RequestServices { get { return new ServiceProvider(); } }
         /// <summary>
         /// service collection
         /// </summary>

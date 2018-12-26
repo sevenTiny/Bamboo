@@ -10,16 +10,14 @@ namespace Test.SevenTiny.Bantina.Spring
 
     public class AService : IAService
     {
-        public static IAService Instance = SpringContext.RequestServices.GetService<IAService>();
-
         [Service]
-        private IBusinessService businessService;
+        private IBService bService;
 
         [Action2]
         [Action1]
         public void ServiceTest()
         {
-            businessService.Test();
+            bService.Test();
         }
     }
 }

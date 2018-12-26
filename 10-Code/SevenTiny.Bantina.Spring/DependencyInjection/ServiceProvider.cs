@@ -7,6 +7,11 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
     public class ServiceProvider : IServiceProvider
     {
         /// <summary>
+        /// save scaned type
+        /// </summary>
+        private HashSet<Type> ScanedType = new HashSet<Type>();
+
+        /// <summary>
         /// dynamic proxy get service via this method
         /// </summary>
         /// <param name="assemblyName"></param>
@@ -69,6 +74,14 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
             {
                 return serviceObj;
             }
+
+            //check for circular references.
+            if (ScanedType.Contains(serviceType))
+                throw new InvalidOperationException("Existence of circular references.");
+            else
+                ScanedType.Add(serviceType);
+
+            //scan field
             var fieldInfos = serviceType.GetRuntimeFields();
             foreach (var field in fieldInfos)
             {

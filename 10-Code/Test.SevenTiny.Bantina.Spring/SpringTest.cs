@@ -1,4 +1,5 @@
-﻿using SevenTiny.Bantina.Spring.Aop;
+﻿using SevenTiny.Bantina.Spring;
+using SevenTiny.Bantina.Spring.Aop;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,7 +17,9 @@ namespace Test.SevenTiny.Bantina.Spring
         [Fact]
         public void Test()
         {
-            var instance = AService.Instance;
+            var instance = SpringContext.RequestServices.GetService<IAService>();
+            var instance1 = SpringContext.RequestServices.GetService<IAService>();
+            var instance2 = SpringContext.RequestServices.GetService<IAService>();
 
             instance.ServiceTest();
         }
