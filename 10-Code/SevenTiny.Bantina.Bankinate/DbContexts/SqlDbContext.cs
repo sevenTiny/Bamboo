@@ -82,12 +82,12 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter));
+            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter),CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter));
+            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter),CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
