@@ -379,5 +379,87 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             }
             return dbContext.SqlStatement;
         }
+
+        #region Queryable Methods
+        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        {
+            string result = string.Empty;
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                case DataBaseType.MySql:
+                    result = LambdaToSql.ConvertWhere(filter); break;
+                case DataBaseType.Oracle:
+                    result = string.Empty; break;
+                default:
+                    result = string.Empty; break;
+            }
+            return result;
+        }
+
+        public static string QueryableOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
+        {
+            if (orderBy == null)
+            {
+                return string.Empty;
+            }
+
+            string result = string.Empty;
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                case DataBaseType.MySql:
+                    string desc = isDESC ? "DESC" : "ASC";
+                    result = $" ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
+                case DataBaseType.Oracle:
+                    result = string.Empty; break;
+                default:
+                    result = string.Empty; break;
+            }
+            return result;
+        }
+
+        public static List<string> QueryableSelect<TEntity>(DbContext dbContext, Expression<Func<TEntity, object>> columns) where TEntity : class
+        {
+            return LambdaToSql.ConvertColumns<TEntity>(columns);
+        }
+
+        public static string QueryableQueryList<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, string top) where TEntity : class
+        {
+            string queryColumns = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"{alias}.{t}"));
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                    dbContext.SqlStatement = $"SELECT {top} {queryColumns} FROM {dbContext.TableName} {alias} {where} {orderBy}"; break;
+                case DataBaseType.MySql:
+                    dbContext.SqlStatement = $"SELECT {queryColumns} FROM {dbContext.TableName} {alias} {where} {orderBy} {top}"; break;
+                case DataBaseType.Oracle:
+                    dbContext.SqlStatement = string.Empty; break;
+                default:
+                    dbContext.SqlStatement = string.Empty; break;
+            }
+            return dbContext.SqlStatement;
+        }
+
+        //目前queryablePaging是最终的结果了
+        public static string QueryablePaging<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, int pageIndex, int pageSize) where TEntity : class
+        {
+            string queryColumns = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"TTTTTT.{t}"));
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                    string queryColumnsChild = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"{alias}.{t}"));
+                    dbContext.SqlStatement = $"SELECT TOP {pageSize} {queryColumns} FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,{queryColumnsChild} FROM {dbContext.TableName} {alias} {where}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
+                case DataBaseType.MySql:
+                    dbContext.SqlStatement = $"SELECT {string.Join(",", columns.Select(t => $"{alias}.{t}"))} FROM {dbContext.TableName} {alias} {where} {orderBy} LIMIT {pageIndex * pageSize},{pageSize}"; break;
+                case DataBaseType.Oracle:
+                    dbContext.SqlStatement = string.Empty; break;
+                default:
+                    dbContext.SqlStatement = string.Empty; break;
+            }
+            return dbContext.SqlStatement;
+        }
+
+        #endregion
     }
 }

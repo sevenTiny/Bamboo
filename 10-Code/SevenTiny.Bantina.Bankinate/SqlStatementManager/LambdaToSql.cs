@@ -12,7 +12,10 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -41,6 +44,51 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             {
                 MemberExpression order = (MemberExpression)orderby.Body;
                 return order.Member.Name;
+            }
+        }
+
+        //转换查询列
+        public static List<string> ConvertColumns<TEntity>(Expression<Func<TEntity, object>> columns) where TEntity : class
+        {
+            if (columns == null)
+            {
+                return null;
+            }   
+            List<string> strList = new List<string>();
+            if (columns.Body is NewExpression)
+            {
+                var newExp = columns.Body as NewExpression;
+                foreach (var nExp in newExp.Arguments)
+                {
+                    strList.Add(GetFieldAttribute(nExp));
+                }
+            }
+            else
+            {
+                strList.Add(GetFieldAttribute(columns.Body));
+            }
+            return strList;
+        }
+        //通过Attribute获取需要查找的字段列表
+        private static string GetFieldAttribute(Expression exp)
+        {
+            if (exp is UnaryExpression)
+            {
+                var ue = exp as UnaryExpression;
+                return GetFieldAttribute(ue.Operand);
+            }
+            else if (exp is MemberExpression)
+            {
+                var mem = exp as MemberExpression;
+                var member = mem.Member;
+                var metaFieldAttr = member.GetCustomAttributes(typeof(ColumnAttribute), true)?.FirstOrDefault();
+                var metaFieldName =  (metaFieldAttr as ColumnAttribute)?.Name ?? member.Name;
+                return metaFieldName;
+            }
+            else
+            {
+                MemberExpression order = (MemberExpression)exp;
+                return GetFieldAttribute(order);
             }
         }
 

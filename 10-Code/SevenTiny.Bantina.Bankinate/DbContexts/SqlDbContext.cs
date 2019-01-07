@@ -102,6 +102,16 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             DbCacheManager.Update(this, entity, filter);
         }
 
+        /// <summary>
+        /// 支持复杂高效查询的查询入口
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        public SqlQueryable<TEntity> Queryable<TEntity>() where TEntity :class
+        {
+            return new SqlQueryable<TEntity>(this);
+        }
+
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             return DbCacheManager.GetEntities(this, filter, () =>
