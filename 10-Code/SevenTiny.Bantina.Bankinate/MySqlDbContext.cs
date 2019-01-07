@@ -12,16 +12,8 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using SevenTiny.Bantina.Bankinate.Attributes;
-using SevenTiny.Bantina.Bankinate.Cache;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
-using SevenTiny.Bantina.Bankinate.SqlStatementManager;
 
 namespace SevenTiny.Bantina.Bankinate
 {
