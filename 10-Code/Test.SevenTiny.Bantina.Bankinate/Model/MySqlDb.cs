@@ -6,10 +6,10 @@ using System.Text;
 
 namespace Test.SevenTiny.Bantina.Bankinate.Model
 {
-    [DataBase("test")]
+    [DataBase("SevenTinyTest")]
     public class MySqlDb : MySqlDbContext<MySqlDb>
     {
-        public MySqlDb() : base("localhost")
+        public MySqlDb() : base(ConnectionStrings.Get("mysql39901"))
         {
         }
     }

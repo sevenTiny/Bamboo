@@ -14,7 +14,6 @@
  *********************************************************/
 using System;
 using System.Linq;
-using System.Reflection;
 
 namespace SevenTiny.Bantina.Configuration
 {
@@ -34,11 +33,8 @@ namespace SevenTiny.Bantina.Configuration
 
         public static string GetName(Type type)
         {
-            if (type.GetCustomAttribute(typeof(ConfigNameAttribute), true) is ConfigNameAttribute attr)
-            {
-                return attr?.Name ?? type.Name;
-            }
-            return type.Name;
+            var attr = type.GetCustomAttributes(typeof(ConfigNameAttribute), true)?.FirstOrDefault();
+            return (attr as ConfigNameAttribute)?.Name ?? type.Name;
         }
     }
 }

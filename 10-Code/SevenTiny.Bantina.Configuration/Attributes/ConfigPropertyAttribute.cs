@@ -13,6 +13,7 @@
  * Thx , Best Regards ~
  *********************************************************/
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace SevenTiny.Bantina.Configuration
@@ -24,11 +25,8 @@ namespace SevenTiny.Bantina.Configuration
 
         public static string GetName(PropertyInfo property)
         {
-            if (property.GetCustomAttribute(typeof(ConfigPropertyAttribute), true) is ConfigPropertyAttribute attr)
-            {
-                return attr?.Name ?? property.Name;
-            }
-            return property.Name;
+            var attr = property.GetCustomAttributes(typeof(ConfigPropertyAttribute), true)?.FirstOrDefault();
+            return (attr as ConfigPropertyAttribute)?.Name ?? property.Name;
         }
     }
 }

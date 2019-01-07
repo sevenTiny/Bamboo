@@ -18,6 +18,6 @@ namespace Test.SevenTiny.Bantina.Bankinate.Model
         [Column]
         public int Age { get; set; }
         [Column]
-        public int GradeId { get; set; }
+        public DateTime? SchoolTime { get; set; }
     }
 }

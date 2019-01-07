@@ -182,7 +182,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
                     //Console.WriteLine(db.IsFromCache);
 
-                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId, null);
+                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.SchoolTime, null);
                     Console.WriteLine("paging " + db.IsFromCache);
                 }
             });
