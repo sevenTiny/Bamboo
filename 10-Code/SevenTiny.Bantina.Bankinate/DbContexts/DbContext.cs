@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.Configs;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using System;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts

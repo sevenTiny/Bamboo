@@ -5,6 +5,7 @@
  * Address: Earth
  * Create: 2018-04-19 21:34:01
  * Modify: 2018-04-19 21:34:01
+ * Modify: 2019年1月7日 15点41分 -- 将原来的单文件进行拆分，提高代码整洁性
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -20,19 +21,11 @@ using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace SevenTiny.Bantina.Bankinate
+namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
 {
-    public enum DataBaseType
-    {
-        SqlServer,
-        MySql,
-        Oracle,
-        MongoDB
-    }
     public abstract class DbHelper
     {
         #region ConnString 链接字符串声明
@@ -487,226 +480,5 @@ namespace SevenTiny.Bantina.Bankinate
             return default(Entity);
         }
         #endregion
-    }
-
-    /// <summary>
-    /// Auto Fill Adapter
-    /// </summary>
-    /// <typeparam name="Entity"></typeparam>
-    internal class FillAdapter<Entity>
-    {
-        private static readonly Func<DataRow, Entity> funcCache = GetFactory();
-        public static Entity AutoFill(DataRow row)
-        {
-            return funcCache(row);
-        }
-        private static Func<DataRow, Entity> GetFactory()
-        {
-            var type = typeof(Entity);
-            var rowType = typeof(DataRow);
-            var rowDeclare = Expression.Parameter(rowType, "row");
-            var instanceDeclare = Expression.Parameter(type, "t");
-            //new Student()
-            var newExpression = Expression.New(type);
-            //(t = new Student())
-            var instanceExpression = Expression.Assign(instanceDeclare, newExpression);
-            //row == null
-            var nullEqualExpression = Expression.NotEqual(rowDeclare, Expression.Constant(null));
-            var containsMethod = typeof(DataColumnCollection).GetMethod("Contains");
-            var indexerMethod = rowType.GetMethod("get_Item", BindingFlags.Instance | BindingFlags.Public, null, new[] { typeof(string) }, new[] { new ParameterModifier(1) });
-            var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var setExpressions = new List<Expression>();
-            //row.Table.Columns
-            var columns = Expression.Property(Expression.Property(rowDeclare, "Table"), "Columns");
-            foreach (var propertyInfo in properties)
-            {
-                if (propertyInfo.CanWrite)
-                {
-                    //Id,Id is a property of Entity
-                    var propertyName = Expression.Constant(propertyInfo.Name, typeof(string));
-                    //row.Table.Columns.Contains("Id")
-                    var checkIfContainsColumn = Expression.Call(columns, containsMethod, propertyName);
-                    //t.Id
-                    var propertyExpression = Expression.Property(instanceDeclare, propertyInfo);
-                    //row.get_Item("Id")
-                    var value = Expression.Call(rowDeclare, indexerMethod, propertyName);
-                    //t.Id = Convert(row.get_Item("Id"), Int32)
-                    var propertyAssign = Expression.Assign(propertyExpression, Expression.Convert(value, propertyInfo.PropertyType));
-                    //t.Id = default(Int32)
-                    var propertyAssignDefault = Expression.Assign(propertyExpression, Expression.Default(propertyInfo.PropertyType));
-                    //if(row.Table.Columns.Contains("Id")&&!value.Equals(DBNull.Value<>)) {t.Id = Convert(row.get_Item("Id"), Int32)}else{t.Id = default(Int32)}
-                    var checkRowNull = Expression.IfThenElse(Expression.AndAlso(checkIfContainsColumn, Expression.NotEqual(value, Expression.Constant(System.DBNull.Value))), propertyAssign, propertyAssignDefault);
-                    //var checkContains = Expression.IfThen(checkIfContainsColumn, propertyAssign);
-                    setExpressions.Add(checkRowNull);
-                }
-            }
-            var checkIfRowIsNull = Expression.IfThen(nullEqualExpression, Expression.Block(setExpressions));
-            var body = Expression.Block(new[] { instanceDeclare }, instanceExpression, checkIfRowIsNull, instanceDeclare);
-            return Expression.Lambda<Func<DataRow, Entity>>(body, rowDeclare).Compile();
-        }
-    }
-
-    /**
-    * author:qixiao
-    * time:2017-9-18 18:02:23
-    * description:safe create sqlconnection support
-    * */
-    internal class SqlConnection_RW : IDisposable
-    {
-        /// <summary>
-        /// SqlConnection
-        /// </summary>
-        public DbConnection DbConnection { get; set; }
-
-        public SqlConnection_RW(DataBaseType dataBaseType, string ConnString_RW)
-        {
-            this.DbConnection = GetDbConnection(dataBaseType, ConnString_RW);
-        }
-        /**
-         * if read db disabled,switchover to read write db immediately
-         * */
-        public SqlConnection_RW(DataBaseType dataBaseType, string ConnString_R, string ConnString_RW)
-        {
-            try
-            {
-                this.DbConnection = GetDbConnection(dataBaseType, ConnString_R);
-            }
-            catch (Exception)
-            {
-                this.DbConnection = GetDbConnection(dataBaseType, ConnString_RW);
-            }
-        }
-
-        /// <summary>
-        /// GetDataBase ConnectionString by database type and connection string -- private use
-        /// </summary>
-        /// <param name="dataBaseType"></param>
-        /// <param name="ConnString"></param>
-        /// <returns></returns>
-        private DbConnection GetDbConnection(DataBaseType dataBaseType, string ConnString)
-        {
-            switch (dataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    return new SqlConnection(ConnString);
-                case DataBaseType.MySql:
-                    return new MySqlConnection(ConnString);
-                case DataBaseType.Oracle:
-                //return new OracleConnection(ConnString);
-                default:
-                    return new SqlConnection(ConnString);
-            }
-        }
-        /// <summary>
-        /// Must Close Connection after use
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.DbConnection != null)
-            {
-                this.DbConnection.Dispose();
-            }
-        }
-    }
-    /// <summary>
-    /// Common sqlcommand
-    /// </summary>
-    internal class DbCommandCommon : IDisposable
-    {
-        /// <summary>
-        /// common dbcommand
-        /// </summary>
-        public DbCommand DbCommand { get; set; }
-        public DbCommandCommon(DataBaseType dataBaseType)
-        {
-            this.DbCommand = GetDbCommand(dataBaseType);
-        }
-
-        /// <summary>
-        /// Get DbCommand select database type
-        /// </summary>
-        /// <param name="dataBaseType"></param>
-        /// <returns></returns>
-        private DbCommand GetDbCommand(DataBaseType dataBaseType)
-        {
-            switch (dataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    return new SqlCommand();
-                case DataBaseType.MySql:
-                    return new MySqlCommand();
-                case DataBaseType.Oracle:
-                //return new OracleCommand();
-                default:
-                    return new SqlCommand();
-            }
-        }
-        /// <summary>
-        /// must dispose after use
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.DbCommand != null)
-            {
-                this.DbCommand.Dispose();
-            }
-        }
-    }
-    /// <summary>
-    /// DbDataAdapterCommon
-    /// </summary>
-    internal class DbDataAdapterCommon : DbDataAdapter, IDisposable
-    {
-        public DbDataAdapter DbDataAdapter { get; set; }
-        public DbDataAdapterCommon(DataBaseType dataBaseType, DbCommand dbCommand)
-        {
-            //get dbAdapter
-            this.DbDataAdapter = GetDbAdapter(dataBaseType, dbCommand);
-            //provid select command
-            this.SelectCommand = dbCommand;
-        }
-        private DbDataAdapter GetDbAdapter(DataBaseType dataBaseType, DbCommand dbCommand)
-        {
-            switch (dataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    return new SqlDataAdapter();
-                case DataBaseType.MySql:
-                    return new MySqlDataAdapter();
-                case DataBaseType.Oracle:
-                //return new OracleDataAdapter();
-                default:
-                    return new SqlDataAdapter();
-            }
-        }
-        /// <summary>
-        /// must dispose after use
-        /// </summary>
-        public new void Dispose()
-        {
-            if (this.DbDataAdapter != null)
-            {
-                this.DbDataAdapter.Dispose();
-            }
-        }
-    }
-
-    /// <summary>
-    /// 用于批量操作的批量操作实体
-    /// </summary>
-    public class BatchExecuteModel
-    {
-        /// <summary>
-        /// 执行的语句或者存储过程名称
-        /// </summary>
-        public string CommandTextOrSpName { get; set; }
-        /// <summary>
-        /// 执行类别，默认执行sql语句
-        /// </summary>
-        public CommandType CommandType { get; set; } = CommandType.Text;
-        /// <summary>
-        /// 执行语句的参数字典
-        /// </summary>
-        public IDictionary<string, object> ParamsDic { get; set; }
     }
 }
