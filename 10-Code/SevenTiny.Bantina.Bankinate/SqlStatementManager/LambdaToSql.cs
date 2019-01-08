@@ -53,7 +53,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             if (columns == null)
             {
                 return null;
-            }   
+            }
             List<string> strList = new List<string>();
             if (columns.Body is NewExpression)
             {
@@ -82,7 +82,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 var mem = exp as MemberExpression;
                 var member = mem.Member;
                 var metaFieldAttr = member.GetCustomAttributes(typeof(ColumnAttribute), true)?.FirstOrDefault();
-                var metaFieldName =  (metaFieldAttr as ColumnAttribute)?.Name ?? member.Name;
+                var metaFieldName = (metaFieldAttr as ColumnAttribute)?.Name ?? member.Name;
                 return metaFieldName;
             }
             else
@@ -183,9 +183,12 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 }
                 else if (ce.Value is ValueType)
                 {
-                    if (ce.Value is bool)
+                    if (ce.Value is bool b)
                     {
-                        return " 1=1 ";
+                        if (b)
+                            return " 1=1 ";
+                        else
+                            return " 1=2 ";
                     }
                     return ce.Value.ToString();
                 }
