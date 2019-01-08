@@ -25,7 +25,7 @@ namespace SevenTiny.Bantina.Bankinate
         private bool _isDesc = false;
 
         private List<string> _columns;
-        private string _limit;
+        private string _top;
         private string _alias;
 
         //paging
@@ -79,9 +79,9 @@ namespace SevenTiny.Bantina.Bankinate
             switch (_dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    _limit = $" TOP {count} "; break;
+                    _top = $" TOP {count} "; break;
                 case DataBaseType.MySql:
-                    _limit = $" LIMIT {count} "; break;
+                    _top = $" LIMIT {count} "; break;
                 case DataBaseType.Oracle:
                     break;
             }
@@ -153,7 +153,7 @@ namespace SevenTiny.Bantina.Bankinate
                         _alias,
                         SqlGenerator.QueryableWhere(_dbContext, _where),
                         SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
-                        _limit);
+                        _top);
                     return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement);
                 });
             }
