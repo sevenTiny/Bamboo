@@ -1,12 +1,37 @@
 ﻿using SevenTiny.Bantina;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Test.SevenTiny.Bantina.Bankinate.Model;
 using Xunit;
 
 namespace Test.SevenTiny.Bantina.Bankinate
 {
-    public class SqlServerDbContextTest
+    public class SqlServerTest
     {
+        public SqlServerDb Db => new SqlServerDb();
+
+        [Fact]
+        [Trait("desc", "初始化测试数据，当跑全部下列用例的时候，删除所有数据并执行预置数据操作！")]
+        public void InitTestDatas()
+        {
+            using (var db = new SqlServerDb())
+            {
+                //清空所有数据
+                db.Delete<Student>(t => true);
+
+                //预置测试数据
+                List<Student> students = new List<Student>();
+                for (int i = 0; i < 1000; i++)
+                {
+                    students.Add(new Student { Name = "7tiny_" + i, Age = i, SchoolTime = DateTime.Now });
+                }
+                db.Add<Student>(students);
+            }
+            Assert.True(true);
+        }
+
         [Fact]
         public void QueryList()
         {
@@ -47,6 +72,49 @@ namespace Test.SevenTiny.Bantina.Bankinate
             }
         }
 
+        [Fact]
+        public void Query_Where()
+        {
+            var re = Db.Queryable<Student>().Where(t => t.Name.EndsWith("3")).ToList();
+            Assert.Equal(100, re.Count);
+        }
+
+        [Fact]
+        public void Query_Where_Multi()
+        {
+            var re = Db.Queryable<Student>().Where(t => t.Name.Contains("3")).Where(t => t.Age == 3).ToList();
+            Assert.Single(re);
+        }
+
+        [Fact]
+        public void Query_Select()
+        {
+            var re = Db.Queryable<Student>().Where(t => t.Age < 3).Select(t => new { t.Age, t.Name }).ToList();
+            Assert.Equal(3, re.Count);
+        }
+
+        [Fact]
+        public void Query_OrderBy()
+        {
+            var re = Db.Queryable<Student>().Where(t => t.Age < 9).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).ToList();
+            Assert.True(re.Count == 9 && re.First().Age == 8 && re.First().Id == 0);//没有查id，id应该=0
+        }
+
+        [Fact]
+        public void Query_Top()
+        {
+            var re = Db.Queryable<Student>().Where(t => t.Age > 3).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).Top(30).ToList();
+            Assert.Equal(30, re.Count);
+        }
+
+        [Fact]
+        public void Query_Paging()
+        {
+            var re4 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(0, 10).ToList();
+            var re5 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).Paging(0, 10).ToList();
+            var re6 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(1, 10).ToList();
+        }
+
         [Theory]
         [InlineData(100)]
         [Trait("desc", "无缓存测试")]
@@ -67,7 +135,6 @@ namespace Test.SevenTiny.Bantina.Bankinate
             Trace.WriteLine($"执行查询{times}次耗时：{timeSpan.TotalMilliseconds}，有{fromCacheTimes}次从缓存中获取，有{times - fromCacheTimes}次从数据库获取");
             //执行查询100次耗时：6576.8009
         }
-
 
         [Theory]
         [InlineData(10000)]

@@ -6,13 +6,12 @@ using System.Text;
 
 namespace Test.SevenTiny.Bantina.Bankinate.Model
 {
-    [DataBase("Test")]
+    [DataBase("SevenTinyTest")]
     public class SqlServerDb : SqlServerDbContext<SqlServerDb>
     {
-        public SqlServerDb() : base("data source=.;initial catalog=Test;persist security info=True;user id=sa;password=123456;MultipleActiveResultSets=True;App=EntityFramework")
+        public SqlServerDb() : base("Data Source=.;Initial Catalog=SevenTinyTest;Integrated Security=True")
         {
-            OpenTableCache = true;
-            OpenQueryCache = false;
+            
         }
     }
 }

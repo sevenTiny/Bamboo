@@ -135,11 +135,11 @@ namespace SevenTiny.Bantina.Bankinate
                         _dbContext,
                         _columns,
                         _alias,
-                        SqlGenerator.QueryableWhere(_dbContext, _where),
+                        SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
                         SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
                         _pageIndex,
                         _pageSize);
-                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement);
+                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
                 });
                 return result;
             }
@@ -151,10 +151,10 @@ namespace SevenTiny.Bantina.Bankinate
                         _dbContext,
                         _columns,
                         _alias,
-                        SqlGenerator.QueryableWhere(_dbContext, _where),
+                        SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
                         SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
                         _top);
-                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement);
+                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
                 });
             }
         }

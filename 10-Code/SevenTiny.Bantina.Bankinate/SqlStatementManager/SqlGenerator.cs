@@ -381,14 +381,15 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
         }
 
         #region Queryable Methods
-        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
         {
+            parameters = new Dictionary<string, object>();
             string result = string.Empty;
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
-                    result = LambdaToSql.ConvertWhere(filter); break;
+                    result = LambdaToSql.ConvertWhere(filter, out parameters); break;
                 case DataBaseType.Oracle:
                     result = string.Empty; break;
                 default:
