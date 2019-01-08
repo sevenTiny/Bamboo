@@ -2,6 +2,7 @@
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
 using SevenTiny.Bantina.Bankinate.Exceptions;
+using SevenTiny.Bantina.Bankinate.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,7 +90,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
         }
 
-        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out IDictionary<string, object> paramsDic) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
@@ -164,7 +165,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
@@ -258,8 +259,9 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static string Delete<TEntity>(DbContext dbContext, TEntity entity) where TEntity : class
+        public static string Delete<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> parameters) where TEntity : class
         {
+            parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
             //get property which is key
@@ -274,17 +276,19 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             if (property.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
                 colunmName = columnAttr.GetName(property.Name);
 
-            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE {colunmName} = {value}";
+            parameters.AddOrUpdate($"@t{colunmName}", value);
+            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE t{colunmName} = @t{colunmName}";
         }
 
-        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
         {
+            parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter,out parameters)}";
                     break;
                 case DataBaseType.Oracle:
                     dbContext.SqlStatement = string.Empty;
@@ -292,95 +296,12 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 default:
                     dbContext.SqlStatement = string.Empty;
                     break;
-            }
-            return dbContext.SqlStatement;
-        }
-
-        public static string QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT TOP 1 * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
-            }
-            return dbContext.SqlStatement;
-        }
-
-        public static string QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
-            }
-            return dbContext.SqlStatement;
-        }
-
-        public static string QueryList<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
-            }
-            return dbContext.SqlStatement;
-        }
-
-        public static string QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                case DataBaseType.MySql:
-                    string desc = isDESC ? "DESC" : "ASC";
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
-            }
-            return dbContext.SqlStatement;
-        }
-
-        public static string QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            string desc = isDESC ? "DESC" : "ASC";
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT TOP {pageSize} * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}) AS RowNumber,* FROM {dbContext.TableName} {orderBy.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
             }
             return dbContext.SqlStatement;
         }
 
         #region Queryable Methods
+
         public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
         {
             parameters = new Dictionary<string, object>();
@@ -425,7 +346,22 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return LambdaToSql.ConvertColumns<TEntity>(columns);
         }
 
-        public static string QueryableQueryList<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, string top) where TEntity : class
+        public static string QueryableQueryCount<TEntity>(DbContext dbContext, string alias, string where) where TEntity : class
+        {
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                case DataBaseType.MySql:
+                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {alias} {where}"; break;
+                case DataBaseType.Oracle:
+                    dbContext.SqlStatement = string.Empty; break;
+                default:
+                    dbContext.SqlStatement = string.Empty; break;
+            }
+            return dbContext.SqlStatement;
+        }
+
+        public static string QueryableQuery<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, string top) where TEntity : class
         {
             string queryColumns = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"{alias}.{t}"));
             switch (dbContext.DataBaseType)

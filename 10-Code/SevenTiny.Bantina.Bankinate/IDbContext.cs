@@ -42,10 +42,12 @@ namespace SevenTiny.Bantina.Bankinate
         void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
 
+        QueryableBase<TEntity> Queryable<TEntity>() where TEntity:class;
+
+        List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
-        List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
     }
 
     /// <summary>
@@ -59,15 +61,6 @@ namespace SevenTiny.Bantina.Bankinate
         object ExecuteQueryOneDataSql(string sqlStatement, IDictionary<string, object> parms = null);
         TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
         List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class;
-    }
-
-    /// <summary>
-    /// 分页查询扩展Api
-    /// </summary>
-    public interface IQueryPagingOperate
-    {
-        List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class;
-        List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class;
     }
 
     /// <summary>

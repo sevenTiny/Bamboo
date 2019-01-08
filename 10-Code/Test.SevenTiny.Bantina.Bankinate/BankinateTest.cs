@@ -55,7 +55,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                        //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
 
                        //var grades = db.QueryList<Grade2>(t => true);
-                       var list = db.QueryList<Student>(t => t.Name.Contains("monky"));
+                       //var list = db.QueryList<Student>(t => t.Name.Contains("monky"));
                        //var student = db.QueryOne<Student>(t => true);
                        //Console.WriteLine(student.Name);
                    }
@@ -182,7 +182,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
                     //Console.WriteLine(db.IsFromCache);
 
-                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.SchoolTime, null);
+                    //var list2 = db.QueryListPaging<Student>(1, 2, t => t.SchoolTime, null);
                     Console.WriteLine("paging " + db.IsFromCache);
                 }
             });

@@ -142,6 +142,11 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             DbCacheManager.Delete(this, filter);
         }
 
+        public QueryableBase<TEntity> Queryable<TEntity>() where TEntity : class
+        {
+            return new NoSqlQueryable<TEntity>(this);
+        }
+
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
             SqlStatement = filter.ToString();

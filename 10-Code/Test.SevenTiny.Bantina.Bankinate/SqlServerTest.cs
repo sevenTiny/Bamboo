@@ -16,60 +16,43 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Trait("desc", "初始化测试数据，当跑全部下列用例的时候，删除所有数据并执行预置数据操作！")]
         public void InitTestDatas()
         {
-            using (var db = new SqlServerDb())
-            {
-                //清空所有数据
-                db.Delete<Student>(t => true);
+            return;//初始化数据把这行代码放开
 
-                //预置测试数据
-                List<Student> students = new List<Student>();
-                for (int i = 0; i < 1000; i++)
-                {
-                    students.Add(new Student { Name = "7tiny_" + i, Age = i, SchoolTime = DateTime.Now });
-                }
-                db.Add<Student>(students);
+            //清空所有数据
+            Db.Delete<Student>(t => true);
+
+            //预置测试数据
+            List<Student> students = new List<Student>();
+            for (int i = 0; i < 1000; i++)
+            {
+                students.Add(new Student { Name = "7tiny_" + i, Age = i, SchoolTime = DateTime.Now });
             }
+            Db.Add<Student>(students);
+
             Assert.True(true);
-        }
-
-        [Fact]
-        public void QueryList()
-        {
-            using (var db = new SqlServerDb())
-            {
-                var students = db.QueryList<Student>(t => true);
-            }
         }
 
         [Fact]
         public void Add()
         {
-            using (var db = new SqlServerDb())
-            {
-                Student stu = new Student();
-                stu.Name = "AddTest";
-                db.Add<Student>(stu);
-            }
+            Student stu = new Student();
+            stu.Age = 9999;
+            stu.Name = "AddTest";
+            Db.Add<Student>(stu);
         }
 
         [Fact]
         public void Update()
         {
-            using (var db = new SqlServerDb())
-            {
-                Student stu = db.QueryOne<Student>(t => t.Name.Contains("AddTest"));
-                stu.Age = 3;
-                db.Update<Student>(t => t.Name.Contains("AddTest"), stu);
-            }
+            Student stu = Db.QueryOne<Student>(t => t.Age == 9999);
+            stu.Name = "UpdateTest9999";
+            Db.Update<Student>(stu);
         }
 
         [Fact]
         public void Delete()
         {
-            using (var db = new SqlServerDb())
-            {
-                db.Delete<Student>(t => t.Id == 1);
-            }
+            Db.Delete<Student>(t => t.Age == 9999);
         }
 
         [Fact]
@@ -113,19 +96,22 @@ namespace Test.SevenTiny.Bantina.Bankinate
             var re4 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(0, 10).ToList();
             var re5 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).Paging(0, 10).ToList();
             var re6 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(1, 10).ToList();
+            Assert.True(re4.Count == re5.Count && re5.Count == re6.Count && re6.Count == re4.Count);
         }
 
         [Theory]
         [InlineData(100)]
         [Trait("desc", "无缓存测试")]
-        public void QueryListWithNoCacheLevel1(int times)
+        public void PerformanceTest_QueryListWithNoCacheLevel1(int times)
         {
+            return;
+
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
                 using (var db = new SqlServerDb())
                 {
-                    var students = db.QueryList<Student>(t => true);
+                    var students = db.Queryable<Student>().Where(t => true).ToList();
                     if (db.IsFromCache)
                     {
                         fromCacheTimes++;
@@ -140,14 +126,16 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [InlineData(10000)]
         [Trait("desc", "一级缓存测试")]
         [Trait("desc", "测试该用例，请将一级缓存（QueryCache）打开")]
-        public void QueryListWithCacheLevel1(int times)
+        public void PerformanceTest_QueryListWithCacheLevel1(int times)
         {
+            return;
+
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
                 using (var db = new SqlServerDb())
                 {
-                    var students = db.QueryList<Student>(t => true);
+                    var students = db.Queryable<Student>().Where(t => true).ToList();
                     if (db.IsFromCache)
                     {
                         fromCacheTimes++;
@@ -162,14 +150,16 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [InlineData(10000)]
         [Trait("desc", "二级缓存测试")]
         [Trait("desc", "测试该用例，请将二级缓存（TableCache）打开，并在对应表的实体上添加缓存标签")]
-        public void QueryListWithCacheLevel2(int times)
+        public void PerformanceTest_QueryListWithCacheLevel2(int times)
         {
+            return;
+
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
                 using (var db = new SqlServerDb())
                 {
-                    var students = db.QueryList<Student>(t => true);
+                    var students = db.Queryable<Student>().Where(t => true).ToList();
                     if (db.IsFromCache)
                     {
                         fromCacheTimes++;
@@ -186,8 +176,10 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [InlineData(1000)]
         [Trait("desc", "开启二级缓存增删改查测试")]
         [Trait("desc", "测试该用例，请将二级缓存（TableCache）打开，并在对应表的实体上添加缓存标签")]
-        public void AddUpdateDeleteQueryCacheLevel2(int times)
+        public void PerformanceTest_AddUpdateDeleteQueryCacheLevel2(int times)
         {
+            return;
+
             int fromCacheTimes = 0;
             var timeSpan = StopwatchHelper.Caculate(times, () =>
             {
@@ -199,7 +191,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
                     stu.Name = "test11-1";
                     db.Update<Student>(t => t.Id == 1, stu);
 
-                    var students = db.QueryList<Student>(t => true);
+                    var students = db.Queryable<Student>().Where(t => true).ToList();
                     if (db.IsFromCache)
                     {
                         fromCacheTimes++;

@@ -1,4 +1,17 @@
-﻿using SevenTiny.Bantina.Bankinate.Attributes;
+﻿/*********************************************************
+* CopyRight: 7TINY CODE BUILDER. 
+* Version: 5.0.0
+* Author: 7tiny
+* Address: Earth
+* Create: 1/8/2019, 5:31:04 PM
+* Modify: 
+* E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
+* GitHub: https://github.com/sevenTiny 
+* Personal web site: http://www.7tiny.com 
+* Technical WebSit: http://www.cnblogs.com/7tiny/ 
+* Description: 适合于Sql条件下的懒加载查询配置
+* Thx , Best Regards ~
+*********************************************************/
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
@@ -10,49 +23,16 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate
 {
-    public class SqlQueryable<TEntity> where TEntity : class
+    public class SqlQueryable<TEntity> : QueryableBase<TEntity> where TEntity : class
     {
-        public SqlQueryable(DbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
-
-        private DbContext _dbContext;
-        private Expression<Func<TEntity, bool>> _where;
-
-        //orderby
-        private Expression<Func<TEntity, object>> _orderby;
-        private bool _isDesc = false;
-
-        private List<string> _columns;
-        private string _top;
-        private string _alias;
-
-        //paging
-        private bool _isPaging = false;
-        private int _pageIndex = 0;
-        private int _pageSize = 0;
+        public SqlQueryable(DbContext dbContext) : base(dbContext) { }
 
         /// <summary>
-        /// 必要条件检查
+        /// 查询sql语句中表的别名
         /// </summary>
-        private void MustExistCheck()
-        {
-            if (_where == null)
-            {
-                throw new ArgumentNullException("Where condition deficiency");
-            }
-        }
+        protected string _alias;
 
-        /// <summary>
-        /// 获取TableName，并将其重新赋值
-        /// </summary>
-        private void ReSetTableName()
-        {
-            _dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-        }
-
-        public SqlQueryable<TEntity> Where(Expression<Func<TEntity, bool>> filter)
+        public override QueryableBase<TEntity> Where(Expression<Func<TEntity, bool>> filter)
         {
             if (_where != null)
                 _where = _where.And(filter);
@@ -63,18 +43,12 @@ namespace SevenTiny.Bantina.Bankinate
             return this;
         }
 
-        public SqlQueryable<TEntity> Select(Expression<Func<TEntity, object>> columns)
-        {
-            _columns = SqlGenerator.QueryableSelect(_dbContext, columns);
-            return this;
-        }
-
         /// <summary>
         /// 取最前面的count行，该方法不能和分页方法连用
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public SqlQueryable<TEntity> Top(int count)
+        public override QueryableBase<TEntity> Top(int count)
         {
             switch (_dbContext.DataBaseType)
             {
@@ -88,41 +62,7 @@ namespace SevenTiny.Bantina.Bankinate
             return this;
         }
 
-        public SqlQueryable<TEntity> OrderBy(Expression<Func<TEntity, object>> orderBy)
-        {
-            _orderby = orderBy;
-            _isDesc = false;
-            return this;
-        }
-
-        public SqlQueryable<TEntity> OrderByDescending(Expression<Func<TEntity, object>> orderBy)
-        {
-            _orderby = orderBy;
-            _isDesc = true;
-            return this;
-        }
-
-        public SqlQueryable<TEntity> Paging(int pageIndex, int pageSize)
-        {
-            _isPaging = true;
-
-            if (pageIndex <= 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            _pageIndex = pageIndex;
-            _pageSize = pageSize;
-
-            return this;
-        }
-
-        public List<TEntity> ToList()
+        public override List<TEntity> ToList()
         {
             MustExistCheck();
             ReSetTableName();
@@ -147,7 +87,7 @@ namespace SevenTiny.Bantina.Bankinate
             {
                 return DbCacheManager.GetEntities(_dbContext, _where, () =>
                 {
-                    _dbContext.SqlStatement = SqlGenerator.QueryableQueryList<TEntity>(
+                    _dbContext.SqlStatement = SqlGenerator.QueryableQuery<TEntity>(
                         _dbContext,
                         _columns,
                         _alias,
@@ -159,12 +99,40 @@ namespace SevenTiny.Bantina.Bankinate
             }
         }
 
-        public TEntity ToEntity()
+        public override TEntity ToEntity()
         {
             MustExistCheck();
             ReSetTableName();
 
-            return default(TEntity);
+            Top(1);
+
+            return DbCacheManager.GetEntity(_dbContext, _where, () =>
+            {
+                _dbContext.SqlStatement = SqlGenerator.QueryableQuery<TEntity>(
+                    _dbContext,
+                    _columns,
+                    _alias,
+                    SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
+                    SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
+                    _top);
+                return DbHelper.ExecuteEntity<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
+            });
+        }
+
+        public override int ToCount()
+        {
+            MustExistCheck();
+            ReSetTableName();
+
+            return DbCacheManager.GetCount(_dbContext, _where, () =>
+            {
+                _dbContext.SqlStatement = SqlGenerator.QueryableQueryCount<TEntity>(
+                    _dbContext,
+                    _alias,
+                    SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters));
+
+                return Convert.ToInt32(DbHelper.ExecuteScalar(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters));
+            });
         }
     }
 }

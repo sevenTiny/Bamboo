@@ -15,20 +15,43 @@ namespace Test.SevenTiny.Bantina.Bankinate
         [Trait("desc", "初始化测试数据，当跑全部下列用例的时候，删除所有数据并执行预置数据操作！")]
         public void InitTestDatas()
         {
-            using (var db = new MySqlDb())
-            {
-                //清空所有数据
-                db.Delete<Student>(t => true);
+            return;//初始化数据把这行代码放开
 
-                //预置测试数据
-                List<Student> students = new List<Student>();
-                for (int i = 0; i < 1000; i++)
-                {
-                    students.Add(new Student { Name = "7tiny_" + i, Age = i, SchoolTime = DateTime.Now });
-                }
-                db.Add<Student>(students);
+            //清空所有数据
+            Db.Delete<Student>(t => true);
+
+            //预置测试数据
+            List<Student> students = new List<Student>();
+            for (int i = 0; i < 1000; i++)
+            {
+                students.Add(new Student { Name = "7tiny_" + i, Age = i, SchoolTime = DateTime.Now });
             }
+            Db.Add<Student>(students);
+
             Assert.True(true);
+        }
+
+        [Fact]
+        public void Add()
+        {
+            Student stu = new Student();
+            stu.Age = 9999;
+            stu.Name = "AddTest";
+            Db.Add<Student>(stu);
+        }
+
+        [Fact]
+        public void Update()
+        {
+            Student stu = Db.QueryOne<Student>(t => t.Age == 9999);
+            stu.Name = "UpdateTest9999";
+            Db.Update<Student>(stu);
+        }
+
+        [Fact]
+        public void Delete()
+        {
+            Db.Delete<Student>(t => t.Age == 9999);
         }
 
         [Fact]
@@ -72,6 +95,7 @@ namespace Test.SevenTiny.Bantina.Bankinate
             var re4 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(0, 10).ToList();
             var re5 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).Paging(0, 10).ToList();
             var re6 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(1, 10).ToList();
+            Assert.True(re4.Count == re5.Count && re5.Count == re6.Count && re6.Count == re4.Count);
         }
     }
 }

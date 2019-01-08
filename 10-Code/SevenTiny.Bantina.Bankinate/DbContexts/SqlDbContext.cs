@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
-    public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, IExecuteSqlOperate, IQueryPagingOperate where TDataBase : class
+    public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, IExecuteSqlOperate where TDataBase : class
     {
         public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType) { }
 
@@ -62,43 +62,43 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Delete<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, entity));
+            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, entity, out IDictionary<string, object> parameters), CommandType.Text, parameters);
             DbCacheManager.Delete(this, entity);
         }
         public void DeleteAsync<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, entity));
+            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, entity, out IDictionary<string, object> parameters), CommandType.Text, parameters);
             DbCacheManager.Delete(this, entity);
         }
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, filter));
+            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, filter, out IDictionary<string, object> parameters), CommandType.Text, parameters);
             DbCacheManager.Delete(this, filter);
         }
         public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, filter));
+            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, filter, out IDictionary<string, object> parameters), CommandType.Text, parameters);
             DbCacheManager.Delete(this, filter);
         }
 
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter),CommandType.Text, paramsDic);
+            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out Dictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter),CommandType.Text, paramsDic);
+            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, filter, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, filter, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
 
@@ -107,75 +107,22 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        public SqlQueryable<TEntity> Queryable<TEntity>() where TEntity :class
+        public QueryableBase<TEntity> Queryable<TEntity>() where TEntity : class
         {
             return new SqlQueryable<TEntity>(this);
         }
 
         public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            return DbCacheManager.GetEntities(this, filter, () =>
-              {
-                  return DbHelper.ExecuteList<TEntity>(SqlGenerator.QueryList(this, filter));
-              });
+            return Queryable<TEntity>().Where(filter).ToList();
         }
-        public List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC = false) where TEntity : class
-        {
-            return DbCacheManager.GetEntities(this, filter, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlGenerator.QueryOrderBy(this, filter, orderBy, isDESC));
-            });
-        }
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, bool isDESC = false) where TEntity : class
-        {
-            if (pageIndex <= 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            return DbCacheManager.GetEntities(this, filter, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlGenerator.QueryPaging(this, pageIndex, pageSize, filter, orderBy, isDESC));
-            });
-        }
-        public List<TEntity> QueryListPaging<TEntity>(int pageIndex, int pageSize, Expression<Func<TEntity, object>> orderBy, Expression<Func<TEntity, bool>> filter, out int count, bool isDESC = false) where TEntity : class
-        {
-            if (pageIndex <= 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            var result = DbCacheManager.GetEntities(this, filter, () =>
-            {
-                return DbHelper.ExecuteList<TEntity>(SqlGenerator.QueryPaging(this, pageIndex, pageSize, filter, orderBy, isDESC));
-            });
-            count = result?.Count ?? default(int);
-            return result;
-        }
-
         public TEntity QueryOne<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            return DbCacheManager.GetEntity(this, filter, () =>
-             {
-                 return DbHelper.ExecuteEntity<TEntity>(SqlGenerator.QueryOne(this, filter));
-             });
+            return Queryable<TEntity>().Where(filter).ToEntity();
         }
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            return DbCacheManager.GetCount(this, filter, () =>
-            {
-                return int.TryParse(Convert.ToString(DbHelper.ExecuteScalar(SqlGenerator.QueryCount(this, filter))), out int result) ? result : default(int);
-            });
+            return Queryable<TEntity>().Where(filter).ToCount();
         }
         public bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
