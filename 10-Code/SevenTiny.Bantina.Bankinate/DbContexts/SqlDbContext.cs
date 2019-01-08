@@ -130,7 +130,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         {
             if (pageIndex <= 0)
             {
-                pageIndex = 1;
+                pageIndex = 0;
             }
 
             if (pageSize <= 0)
@@ -147,7 +147,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         {
             if (pageIndex <= 0)
             {
-                pageIndex = 1;
+                pageIndex = 0;
             }
 
             if (pageSize <= 0)

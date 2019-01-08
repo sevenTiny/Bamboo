@@ -108,7 +108,7 @@ namespace SevenTiny.Bantina.Bankinate
 
             if (pageIndex <= 0)
             {
-                pageIndex = 1;
+                pageIndex = 0;
             }
 
             if (pageSize <= 0)

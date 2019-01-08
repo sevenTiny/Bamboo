@@ -8,6 +8,8 @@ namespace Test.SevenTiny.Bantina.Bankinate
 {
     public class MysqlTest
     {
+        public MySqlDb Db => new MySqlDb();
+
         /// <summary>
         /// 初始化测试数据
         /// </summary>
@@ -26,16 +28,30 @@ namespace Test.SevenTiny.Bantina.Bankinate
         }
 
         [Fact]
-        public void QueryAll()
+        public void Query_Where()
         {
-            using (var db = new MySqlDb())
-            {
-                var re1 = db.Queryable<Student>().Where(t => t.Name.EndsWith("3")).ToList();
-                //var re5 = db.Queryable<Student>().Where(t => t.Name.Equals("3")).Where(t => t.Age == 3).ToList();
-                //var re2 = db.Queryable<Student>().Where(t => t.Age == 3).Select(t => new { t.Age, t.Name }).ToList();
-                //var re3 = db.Queryable<Student>().Where(t => t.Age == 3).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).ToList();
-                //var re4 = db.Queryable<Student>().Where(t => t.Age == 3).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(1, 10).ToList();
-            }
+            var re = Db.Queryable<Student>().Where(t => t.Name.EndsWith("3")).ToList();
+            var re5 = Db.Queryable<Student>().Where(t => t.Name.Equals("3")).Where(t => t.Age == 3).ToList();
+        }
+
+        [Fact]
+        public void Query_Select()
+        {
+            var re2 = Db.Queryable<Student>().Where(t => t.Age == 3).Select(t => new { t.Age, t.Name }).ToList();
+        }
+
+        [Fact]
+        public void Query_OrderBy()
+        {
+            var re3 = Db.Queryable<Student>().Where(t => t.Age == 3).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).ToList();
+        }
+
+        [Fact]
+        public void Query_Paging()
+        {
+            var re4 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(0, 10).ToList();
+            var re5 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderByDescending(t => t.Age).Paging(0, 10).ToList();
+            var re6 = Db.Queryable<Student>().Where(t => t.Name.Contains("1")).Select(t => new { t.Age, t.Name }).OrderBy(t => t.Age).Paging(1, 10).ToList();
         }
     }
 }
