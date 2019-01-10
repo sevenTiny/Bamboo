@@ -25,17 +25,12 @@ namespace SevenTiny.Bantina.Bankinate.Validation
     {
         public RequireAttribute(string errorMsg = null) : base(errorMsg) { }
 
-        internal static void Verify<TEntity>(TEntity entity) where TEntity : class
+        internal static void Verify(PropertyInfo propertyInfo, object value)
         {
-            foreach (var propertyInfo in typeof(TEntity).GetProperties())
+            if (propertyInfo.GetCustomAttribute(typeof(RequireAttribute), true) is RequireAttribute require)
             {
-                if (propertyInfo.GetCustomAttribute(typeof(RequireAttribute), true) is RequireAttribute require)
-                {
-                    var value = propertyInfo.GetValue(entity);
-
-                    if (value == null)
-                        throw new ArgumentNullException(require.ErrorMessage ?? $"value of '{propertyInfo.Name}' can not be null");
-                }
+                if (value == null)
+                    throw new ArgumentNullException(require.ErrorMessage ?? $"value of '{propertyInfo.Name}' can not be null");
             }
         }
     }

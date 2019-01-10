@@ -13,4 +13,13 @@ namespace Test.SevenTiny.Bantina.Bankinate.Model
         {
         }
     }
+
+    [DataBase("SevenTinyTest")]
+    public class MySqlPropertyValidateDb : MySqlDbContext<MySqlPropertyValidateDb>
+    {
+        public MySqlPropertyValidateDb() : base(ConnectionStrings.Get("mysql39901"))
+        {
+            OpenPropertyDataValidate = true;
+        }
+    }
 }

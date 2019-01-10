@@ -22,6 +22,5 @@ namespace SevenTiny.Bantina.Bankinate.Validation
     public class MaxLimitAttribute : RangeLimitAttribute
     {
         public MaxLimitAttribute(double maxValue, string errorMsg = null) : base(maxValue: maxValue, errorMsg: errorMsg) { }
-        public MaxLimitAttribute(DateTime maxValue, string errorMsg = null) : base(DateTime.MinValue, maxValue, errorMsg: errorMsg) { }
     }
 }

@@ -27,14 +27,22 @@ namespace SevenTiny.Bantina.Bankinate.Validation
             if (!context.OpenPropertyDataValidate)
                 return;
 
-            //Require
-            RequireAttribute.Verify(entity);
+            if (entity == null)
+                return;
 
-            //StringLength
-            StringLengthAttribute.Verify(entity);
+            foreach (var propertyInfo in typeof(TEntity).GetProperties())
+            {
+                var value = propertyInfo.GetValue(entity);
 
-            //RangeLimit
-            RangeLimitAttribute.Verify(entity);
+                //Require
+                RequireAttribute.Verify(propertyInfo,value);
+
+                //StringLength
+                StringLengthAttribute.Verify(propertyInfo, value);
+
+                //RangeLimit
+                RangeLimitAttribute.Verify(propertyInfo, value);
+            }
         }
     }
 }

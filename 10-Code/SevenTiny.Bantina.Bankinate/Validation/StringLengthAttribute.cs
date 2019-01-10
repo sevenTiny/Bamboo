@@ -37,20 +37,15 @@ namespace SevenTiny.Bantina.Bankinate.Validation
             MaxLength = maxLength;
         }
 
-        internal static void Verify<TEntity>(TEntity entity) where TEntity : class
+        internal static void Verify(PropertyInfo propertyInfo, object value)
         {
-            foreach (var propertyInfo in typeof(TEntity).GetProperties())
+            if (propertyInfo.GetCustomAttribute(typeof(StringLengthAttribute), true) is StringLengthAttribute stringLength)
             {
-                if (propertyInfo.GetCustomAttribute(typeof(StringLengthAttribute), true) is StringLengthAttribute stringLength)
-                {
-                    if (propertyInfo.PropertyType != typeof(string))
-                        throw new CustomAttributeFormatException($"'{nameof(StringLengthAttribute)}' cannot be used in '{propertyInfo.PropertyType}' type property");
+                if (propertyInfo.PropertyType != typeof(string))
+                    throw new CustomAttributeFormatException($"'{nameof(StringLengthAttribute)}' cannot be used in '{propertyInfo.PropertyType}' type property");
 
-                    var value = propertyInfo.GetValue(entity);
-
-                    if (value is string strValue && (strValue?.Length > stringLength.MaxLength || strValue?.Length < stringLength.MinLength))
-                        throw new ArgumentOutOfRangeException(stringLength.ErrorMessage ?? $"value of '{propertyInfo.Name}' is out of range,parameter value:{value}");
-                }
+                if (value is string strValue && (strValue?.Length > stringLength.MaxLength || strValue?.Length < stringLength.MinLength))
+                    throw new ArgumentOutOfRangeException(stringLength.ErrorMessage ?? $"value of '{propertyInfo.Name}' is out of range,parameter value:{value}");
             }
         }
     }

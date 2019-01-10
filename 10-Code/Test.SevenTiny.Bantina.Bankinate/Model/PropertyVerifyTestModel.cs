@@ -3,19 +3,59 @@ using System;
 
 namespace Test.SevenTiny.Bantina.Bankinate.Model
 {
-    public class PropertyVerifyTestModel
+    public class PropertyVerifyTestModel_Int_1_10
     {
-        public int IntKey { get; set; }
-        public int InkKey2 { get; set; }
-        public float FloatKey { get; set; }
-        public double DoubleKey { get; set; }
-        public decimal DecimalKey { get; set; }
-        [StringLength(4)]
-        public string StringKey1 { get; set; }
-        public string StringKey2 { get; set; }
-        public string StringKey3 { get; set; }
-        public DateTime DateTimeKey1 { get; set; }
-        public DateTime DateTimeKey2 { get; set; }
-        public DateTime DateTimeKey3 { get; set; }
+        [RangeLimit(1, 10)]
+        public int Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_Int_Max_10
+    {
+        [MaxLimit(10)]
+        public int Key { get; set; }
+    }
+
+    public class PropertyVerifyTestModel_Int_Require
+    {
+        [Require]
+        public int? Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_Float_Min_1
+    {
+        [MinLimit(1)]
+        public float Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_Double_1_10
+    {
+        [RangeLimit(1, 10)]
+        public double Key { get; set; }
+
+    }
+    public class PropertyVerifyTestModel_Decimal_1_10
+    {
+        [RangeLimit(1, 10)]
+        public decimal Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_String_Max_10
+    {
+        [StringLength(10)]
+        public string Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_String_1_10
+    {
+        [StringLength(1, 10)]
+        public string Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_String_Require
+    {
+        [Require]
+        public string Key { get; set; }
+    }
+    public class PropertyVerifyTestModel_DateTime_1_10
+    {
+        /// <summary>
+        /// DateTime使用double类型的RangeLimit会在Convert.ToDouble(value)的时候抛出Convert异常
+        /// </summary>
+        [RangeLimit(1, 10)]
+        public DateTime Key { get; set; }
     }
 }

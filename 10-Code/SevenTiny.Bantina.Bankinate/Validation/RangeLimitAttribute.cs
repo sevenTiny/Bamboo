@@ -22,8 +22,8 @@ namespace SevenTiny.Bantina.Bankinate.Validation
     /// </summary>
     public class RangeLimitAttribute : ValidationAttribute
     {
-        internal dynamic MinValue { get; set; }
-        internal dynamic MaxValue { get; set; }
+        internal double MinValue { get; set; }
+        internal double MaxValue { get; set; }
 
         public RangeLimitAttribute(double minValue = double.MinValue, double maxValue = double.MaxValue, string errorMsg = null) : base(errorMsg)
         {
@@ -31,29 +31,20 @@ namespace SevenTiny.Bantina.Bankinate.Validation
             this.MaxValue = maxValue;
         }
 
-        public RangeLimitAttribute(DateTime minTime, DateTime maxTime, string errorMsg = null) : base(errorMsg)
+        internal static void Verify(PropertyInfo propertyInfo, object value)
         {
-            this.MinValue = minTime;
-            this.MaxValue = maxTime;
-        }
-
-        internal static void Verify<TEntity>(TEntity entity) where TEntity : class
-        {
-            foreach (var propertyInfo in typeof(TEntity).GetProperties())
+            if (propertyInfo.GetCustomAttribute(typeof(RangeLimitAttribute), true) is RangeLimitAttribute rangeLimit)
             {
-                if (propertyInfo.GetCustomAttribute(typeof(RangeLimitAttribute), true) is RangeLimitAttribute rangeLimit)
-                {
-                    if (!propertyInfo.PropertyType.IsValueType)
-                        throw new CustomAttributeFormatException($"'{nameof(RangeLimitAttribute)}' cannot be used in an unvaluetype property like '{propertyInfo.PropertyType}'");
+                if (!propertyInfo.PropertyType.IsValueType)
+                    throw new CustomAttributeFormatException($"'{nameof(RangeLimitAttribute)}' cannot be used in an unvaluetype property like '{propertyInfo.PropertyType}'");
 
-                    var value = propertyInfo.GetValue(entity) as ValueType;
+                if (value == null)
+                    throw new ArgumentNullException(rangeLimit.ErrorMessage ?? $"value of '{propertyInfo.Name}' can not be null");
 
-                    if (value == null)
-                        throw new ArgumentNullException(rangeLimit.ErrorMessage ?? $"value of '{propertyInfo.Name}' can not be null");
+                double val = Convert.ToDouble(value);
 
-                    if (value > rangeLimit.MaxValue || value < rangeLimit.MinValue)
-                        throw new ArgumentOutOfRangeException(rangeLimit.ErrorMessage ?? $"value of '{propertyInfo.Name}' is out of range:[{rangeLimit.MinValue},{rangeLimit.MaxValue}]，parameter value:{value}");
-                }
+                if (val > rangeLimit.MaxValue || val < rangeLimit.MinValue)
+                    throw new ArgumentOutOfRangeException(rangeLimit.ErrorMessage ?? $"value of '{propertyInfo.Name}' is out of range:[{rangeLimit.MinValue},{rangeLimit.MaxValue}]，parameter value:{value}");
             }
         }
     }
