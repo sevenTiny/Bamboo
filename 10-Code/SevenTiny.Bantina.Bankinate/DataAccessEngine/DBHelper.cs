@@ -14,6 +14,7 @@
  * Thx , Best Regards ~
  *********************************************************/
 using MySql.Data.MySqlClient;
+using SevenTiny.Bantina.Bankinate.DbContexts;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,65 +29,38 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
 {
     public abstract class DbHelper
     {
-        #region ConnString 链接字符串声明
-
         /// <summary>
-        /// 连接字符串 ConnString_Default 默认，且赋值时会直接覆盖掉读写
+        /// ExcuteNonQuery 执行sql语句或者存储过程,返回影响的行数---ExcuteNonQuery
         /// </summary>
-        private static string _connString;
-        public static string ConnString_Default
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static int ExecuteNonQuery(DbContext dbContext)
         {
-            get { return _connString; }
-            set
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                _connString = value;
-                ConnString_RW = _connString;
-                ConnString_R = _connString;
-            }
-        }
-        /// <summary>
-        /// 连接字符串 ConnString_RW 读写数据库使用
-        /// </summary>
-        public static string ConnString_RW { get; set; } = _connString;
-        /// <summary>
-        /// 连接字符串 ConnString_R 读数据库使用
-        /// </summary>
-        public static string ConnString_R { get; set; } = _connString;
-        /// <summary>
-        /// DataBaseType Select default:mysql
-        /// </summary>
-        public static DataBaseType DbType { get; set; } = DataBaseType.MySql;
-
-        #endregion
-
-        #region ExcuteNonQuery 执行sql语句或者存储过程,返回影响的行数---ExcuteNonQuery
-        public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType = CommandType.Text)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);//参数增加了参数增加了commandType 可以自己编辑执行方式
                     return cmd.DbCommand.ExecuteNonQuery();
                 }
             }
         }
-        public static int ExecuteNonQuery(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
+        public static Task<int> ExecuteNonQueryAsync(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);//参数增加了commandType 可以自己编辑执行方式
-                    return cmd.DbCommand.ExecuteNonQuery();
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);//参数增加了commandType 可以自己编辑执行方式
+                    return cmd.DbCommand.ExecuteNonQueryAsync();
                 }
             }
         }
-        public static void BatchExecuteNonQuery(IEnumerable<BatchExecuteModel> batchExecuteModels)
+        public static void BatchExecuteNonQuery(DbContext dbContext, IEnumerable<BatchExecuteModel> batchExecuteModels)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     foreach (var item in batchExecuteModels)
                     {
@@ -96,33 +70,11 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 }
             }
         }
-        public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        public static void BatchExecuteNonQueryAsync(DbContext dbContext, IEnumerable<BatchExecuteModel> batchExecuteModels)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
-                    return cmd.DbCommand.ExecuteNonQueryAsync();
-                }
-            }
-        }
-        public static Task<int> ExecuteNonQueryAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);//参数增加了commandType 可以自己编辑执行方式
-                    return cmd.DbCommand.ExecuteNonQueryAsync();
-                }
-            }
-        }
-        public static void BatchExecuteNonQueryAsync(IEnumerable<BatchExecuteModel> batchExecuteModels)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     foreach (var item in batchExecuteModels)
                     {
@@ -132,90 +84,66 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 }
             }
         }
-        #endregion
 
-        #region ExecuteScalar 执行sql语句或者存储过程,执行单条语句，返回单个结果---ScalarExecuteScalar
-        public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        /// <summary>
+        /// ExecuteScalar 执行sql语句或者存储过程,执行单条语句，返回单个结果---ScalarExecuteScalar
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static object ExecuteScalar(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
-                    return cmd.DbCommand.ExecuteScalar();
-                }
-            }
-        }
-        public static object ExecuteScalar(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
                     return cmd.DbCommand.ExecuteScalar();
                 }
 
             }
         }
-        public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        public static Task<object> ExecuteScalarAsync(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
-                    return cmd.DbCommand.ExecuteScalarAsync();
-                }
-            }
-        }
-        public static Task<object> ExecuteScalarAsync(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
                     return cmd.DbCommand.ExecuteScalarAsync();
                 }
 
             }
         }
-        #endregion
 
-        #region ExecuteReader 执行sql语句或者存储过程,返回DataReader---DataReader
-        public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        /// <summary>
+        /// ExecuteReader 执行sql语句或者存储过程,返回DataReader---DataReader
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static DbDataReader ExecuteReader(DbContext dbContext)
         {
             //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
-            SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW);
-            DbCommandCommon cmd = new DbCommandCommon(DbType);
-            PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
+            SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_R, dbContext.ConnString_RW);
+            DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType);
+            PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
             return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
         }
-        public static DbDataReader ExecuteReader(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            //sqlDataReader不能用using 会关闭conn 导致不能获取到返回值。注意：DataReader获取值时必须保持连接状态
-            SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW);
-            DbCommandCommon cmd = new DbCommandCommon(DbType);
-            PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
-            return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
-        }
-        #endregion
 
-        #region ExecuteDataTable 执行sql语句或者存储过程,返回一个DataTable---DataTable
-
-        /**
-         * Update At 2017-3-2 14:58:45
-         * Add the ExecuteDataTable Method into Sql_Helper_DG  
-         **/
-        public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        /// <summary>
+        /// ExecuteDataTable 执行sql语句或者存储过程,返回一个DataTable---DataTable
+        /// Update At 2017-3-2 14:58:45
+        /// Add the ExecuteDataTable Method into Sql_Helper_DG  
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <returns></returns> 
+        public static DataTable ExecuteDataTable(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_R, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(DbType, cmd.DbCommand))
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
+                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(dbContext.DataBaseType, cmd.DbCommand))
                     {
                         DataSet ds = new DataSet();
                         da.Fill(ds);
@@ -228,37 +156,20 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 }
             }
         }
-        public static DataTable ExecuteDataTable(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(DbType, cmd.DbCommand))
-                    {
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        if (ds.Tables.Count > 0)
-                        {
-                            return ds.Tables[0];
-                        }
-                        return default(DataTable);
-                    }
-                }
-            }
-        }
-        #endregion
 
-        #region ExecuteDataSet 执行sql语句或者存储过程,返回一个DataSet---DataSet
-        public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType = CommandType.Text)
+        /// <summary>
+        /// ExecuteDataSet 执行sql语句或者存储过程,返回一个DataSet---DataSet
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static DataSet ExecuteDataSet(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
+            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_R, dbContext.ConnString_RW))
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
+                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(DbType, cmd.DbCommand))
+                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
+                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(dbContext.DataBaseType, cmd.DbCommand))
                     {
                         DataSet ds = new DataSet();
                         da.Fill(ds);
@@ -267,47 +178,37 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 }
             }
         }
-        public static DataSet ExecuteDataSet(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary)
-        {
-            using (SqlConnection_RW conn = new SqlConnection_RW(DbType, ConnString_R, ConnString_RW))
-            {
-                using (DbCommandCommon cmd = new DbCommandCommon(DbType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, commandTextOrSpName, commandType, dictionary);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(DbType, cmd.DbCommand))
-                    {
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        return ds;
-                    }
-                }
-            }
-        }
-        #endregion
 
-        #region ExecuteList Entity 执行sql语句或者存储过程，返回一个List<T>---List<T>
-        public static List<Entity> ExecuteList<Entity>(string commandTextOrSpName, CommandType commandType = CommandType.Text) where Entity : class
+        /// <summary>
+        /// ExecuteList Entity 执行sql语句或者存储过程，返回一个List<T>---List<T>
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static List<Entity> ExecuteList<Entity>(DbContext dbContext) where Entity : class
         {
-            return GetListFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
+            return GetListFromDataSetV2<Entity>(ExecuteDataSet(dbContext));
         }
-        public static List<Entity> ExecuteList<Entity>(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary) where Entity : class
-        {
-            return GetListFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
-        }
-        #endregion
 
-        #region ExecuteEntity 执行sql语句或者存储过程，返回一个Entity---Entity
-        public static Entity ExecuteEntity<Entity>(string commandTextOrSpName, CommandType commandType = CommandType.Text) where Entity : class
+        /// <summary>
+        /// ExecuteEntity 执行sql语句或者存储过程，返回一个Entity---Entity
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="dbContext"></param>
+        /// <returns></returns>
+        public static Entity ExecuteEntity<Entity>(DbContext dbContext) where Entity : class
         {
-            return GetEntityFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType));
+            return GetEntityFromDataSetV2<Entity>(ExecuteDataSet(dbContext));
         }
-        public static Entity ExecuteEntity<Entity>(string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary) where Entity : class
-        {
-            return GetEntityFromDataSetV2<Entity>(ExecuteDataSet(commandTextOrSpName, commandType, dictionary));
-        }
-        #endregion
 
-        #region ---PreparCommand 构建一个通用的command对象供内部方法进行调用---
+        /// <summary>
+        ///  ---PreparCommand 构建一个通用的command对象供内部方法进行调用---
+        /// </summary>
+        /// <param name="conn"></param>
+        /// <param name="cmd"></param>
+        /// <param name="commandTextOrSpName"></param>
+        /// <param name="commandType"></param>
+        /// <param name="dictionary"></param>
         private static void PreparCommand(DbConnection conn, DbCommand cmd, string commandTextOrSpName, CommandType commandType, IDictionary<string, object> dictionary = null)
         {
             //打开连接
@@ -366,10 +267,10 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 cmd.Parameters.AddRange(parameters);
             }
         }
-        #endregion
 
         #region 通过Model反射返回结果集 Model为 Entity 泛型变量的真实类型---反射返回结果集
-        public static List<Entity> GetListFromDataSet<Entity>(DataSet ds) where Entity : class
+        //DESC:由于性能较低，现在使用全部切换到高性能的方法V2版本，V1版本代码切换成私有方法不再对外开放 -- 7tiny - 2019年1月10日 22点46分
+        private static List<Entity> GetListFromDataSet<Entity>(DataSet ds) where Entity : class
         {
             List<Entity> list = new List<Entity>();//实例化一个list对象
             PropertyInfo[] propertyInfos = typeof(Entity).GetProperties();     //获取T对象的所有公共属性
@@ -416,21 +317,7 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
             }
             return list;
         }
-        public static List<Entity> GetListFromDataSetV2<Entity>(DataSet ds) where Entity : class
-        {
-            List<Entity> list = new List<Entity>();
-            DataTable dt = ds.Tables[0];
-            if (dt.Rows.Count > 0)
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    Entity entity = FillAdapter<Entity>.AutoFill(row);
-                    list.Add(entity);
-                }
-            }
-            return list;
-        }
-        public static Entity GetEntityFromDataReader<Entity>(DbDataReader reader) where Entity : class
+        private static Entity GetEntityFromDataReader<Entity>(DbDataReader reader) where Entity : class
         {
             Entity model = System.Activator.CreateInstance<Entity>();           //实例化一个T类型对象
             PropertyInfo[] propertyInfos = model.GetType().GetProperties();     //获取T对象的所有公共属性
@@ -466,9 +353,30 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
             }
             return default(Entity);//返回引用类型和值类型的默认值0或null
         }
-        public static Entity GetEntityFromDataSet<Entity>(DataSet ds) where Entity : class
+        private static Entity GetEntityFromDataSet<Entity>(DataSet ds) where Entity : class
         {
             return GetListFromDataSet<Entity>(ds).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// ExpressionTree高性能转换DataSet为List集合
+        /// </summary>
+        /// <typeparam name="Entity"></typeparam>
+        /// <param name="ds"></param>
+        /// <returns></returns>
+        public static List<Entity> GetListFromDataSetV2<Entity>(DataSet ds) where Entity : class
+        {
+            List<Entity> list = new List<Entity>();
+            DataTable dt = ds.Tables[0];
+            if (dt.Rows.Count > 0)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    Entity entity = FillAdapter<Entity>.AutoFill(row);
+                    list.Add(entity);
+                }
+            }
+            return list;
         }
         public static Entity GetEntityFromDataSetV2<Entity>(DataSet ds) where Entity : class
         {

@@ -35,7 +35,7 @@ namespace Test.SevenTiny.Bantina
             return CreateInstance(typeof(T), parameters) as T;
         }
 
-        static Expression[] buildParameters(Type[] parameterTypes, ParameterExpression paramExp)
+        static Expression[] BuildParameters(Type[] parameterTypes, ParameterExpression paramExp)
         {
             List<Expression> list = new List<Expression>();
             for (int i = 0; i < parameterTypes.Length; i++)
@@ -70,7 +70,7 @@ namespace Test.SevenTiny.Bantina
                 var lambdaParam = Expression.Parameter(typeof(object[]), "_args");
 
                 //创建构造函数的参数表达式数组
-                var constructorParam = buildParameters(ptypes, lambdaParam);
+                var constructorParam = BuildParameters(ptypes, lambdaParam);
 
                 var newExpression = Expression.New(constructorInfo, constructorParam);
 

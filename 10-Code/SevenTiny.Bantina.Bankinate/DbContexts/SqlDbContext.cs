@@ -12,26 +12,25 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
     public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, ISqlQueryOperate, IExecuteSqlOperate where TDataBase : class
     {
-        public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType) { }
+        public SqlDbContext(DataBaseType dataBaseType, string connectionString) : this(dataBaseType, connectionString, connectionString) { }
 
-        public SqlDbContext(string connectionString_Read, string connectionString_ReadWrite, DataBaseType dataBaseType) : base(dataBaseType)
+        public SqlDbContext(DataBaseType dataBaseType, string connectionString_ReadWrite, string connectionString_Read) : base(dataBaseType, connectionString_ReadWrite, connectionString_Read)
         {
-            DbHelper.ConnString_R = connectionString_Read;
-            DbHelper.ConnString_RW = connectionString_ReadWrite;
-            DbHelper.DbType = dataBaseType;
             DataBaseName = DataBaseAttribute.GetName(typeof(TDataBase));
         }
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQuery(SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            SqlGenerator.Add(this, entity);
+            DbHelper.ExecuteNonQuery(this);
             DbCacheManager.Add(this, entity);
         }
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            SqlGenerator.Add(this, entity);
+            DbHelper.ExecuteNonQueryAsync(this);
             DbCacheManager.Add(this, entity);
         }
         public void Add<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
@@ -42,11 +41,11 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
                 PropertyDataValidator.Verify(this, item);
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
-                    CommandTextOrSpName = SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic),
-                    ParamsDic = paramsDic
+                    CommandTextOrSpName = SqlGenerator.Add(this, item),
+                    ParamsDic = this.Parameters
                 });
             }
-            DbHelper.BatchExecuteNonQuery(batchExecuteModels);
+            DbHelper.BatchExecuteNonQuery(this, batchExecuteModels);
             DbCacheManager.Add(this, entities);
         }
         public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
@@ -57,57 +56,65 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
                 PropertyDataValidator.Verify(this, item);
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
-                    CommandTextOrSpName = SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic),
-                    ParamsDic = paramsDic
+                    CommandTextOrSpName = SqlGenerator.Add(this, item),
+                    ParamsDic = this.Parameters
                 });
             }
-            DbHelper.BatchExecuteNonQueryAsync(batchExecuteModels);
+            DbHelper.BatchExecuteNonQueryAsync(this,batchExecuteModels);
             DbCacheManager.Add(this, entities);
         }
 
         public void Delete<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, entity, out IDictionary<string, object> parameters), CommandType.Text, parameters);
+            SqlGenerator.Delete(this, entity);
+            DbHelper.ExecuteNonQuery(this);
             DbCacheManager.Delete(this, entity);
         }
         public void DeleteAsync<TEntity>(TEntity entity) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, entity, out IDictionary<string, object> parameters), CommandType.Text, parameters);
+            SqlGenerator.Delete(this, entity);
+            DbHelper.ExecuteNonQueryAsync(this);
             DbCacheManager.Delete(this, entity);
         }
         public void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            DbHelper.ExecuteNonQuery(SqlGenerator.Delete(this, filter, out IDictionary<string, object> parameters), CommandType.Text, parameters);
+            SqlGenerator.Delete(this, filter);
+            DbHelper.ExecuteNonQuery(this);
             DbCacheManager.Delete(this, filter);
         }
         public void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Delete(this, filter, out IDictionary<string, object> parameters), CommandType.Text, parameters);
+            SqlGenerator.Delete(this, filter);
+            DbHelper.ExecuteNonQueryAsync(this);
             DbCacheManager.Delete(this, filter);
         }
 
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
+            SqlGenerator.Update(this, entity, out Expression<Func<TEntity, bool>> filter);
+            DbHelper.ExecuteNonQuery(this);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
+            SqlGenerator.Update(this, entity, out Expression<Func<TEntity, bool>> filter);
+            DbHelper.ExecuteNonQueryAsync(this);
             DbCacheManager.Update(this, entity, filter);
         }
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            SqlGenerator.Update(this, filter, entity );
+            DbHelper.ExecuteNonQuery(this);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
             PropertyDataValidator.Verify(this, entity);
-            DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
+            SqlGenerator.Update(this, filter, entity);
+            DbHelper.ExecuteNonQueryAsync(this);
             DbCacheManager.Update(this, entity, filter);
         }
 
@@ -140,27 +147,39 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void ExecuteSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            DbHelper.ExecuteNonQuery(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            DbHelper.ExecuteNonQuery(this);
         }
         public void ExecuteSqlAsync(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            DbHelper.ExecuteNonQueryAsync(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            DbHelper.ExecuteNonQueryAsync(this);
         }
         public DataSet ExecuteQueryDataSetSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            return DbHelper.ExecuteDataSet(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            return DbHelper.ExecuteDataSet(this);
         }
         public object ExecuteQueryOneDataSql(string sqlStatement, IDictionary<string, object> parms = null)
         {
-            return DbHelper.ExecuteScalar(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            return DbHelper.ExecuteScalar(this);
         }
         public TEntity ExecuteQueryOneSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
         {
-            return DbHelper.ExecuteEntity<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            return DbHelper.ExecuteEntity<TEntity>(this);
         }
         public List<TEntity> ExecuteQueryListSql<TEntity>(string sqlStatement, IDictionary<string, object> parms = null) where TEntity : class
         {
-            return DbHelper.ExecuteList<TEntity>(sqlStatement, System.Data.CommandType.Text, parms);
+            SqlStatement = sqlStatement;
+            Parameters = parms;
+            return DbHelper.ExecuteList<TEntity>(this);
         }
 
         public void Dispose()

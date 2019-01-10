@@ -120,11 +120,11 @@ namespace SevenTiny.Bantina.Bankinate
                         _dbContext,
                         _columns,
                         _alias,
-                        SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
+                        SqlGenerator.QueryableWhere(_dbContext, _where),
                         SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
                         _pageIndex,
                         _pageSize);
-                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
+                    return DbHelper.ExecuteList<TEntity>(_dbContext);
                 });
                 return result;
             }
@@ -136,10 +136,10 @@ namespace SevenTiny.Bantina.Bankinate
                         _dbContext,
                         _columns,
                         _alias,
-                        SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
+                        SqlGenerator.QueryableWhere(_dbContext, _where),
                         SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
                         _top);
-                    return DbHelper.ExecuteList<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
+                    return DbHelper.ExecuteList<TEntity>(_dbContext);
                 });
             }
         }
@@ -157,10 +157,10 @@ namespace SevenTiny.Bantina.Bankinate
                     _dbContext,
                     _columns,
                     _alias,
-                    SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters),
+                    SqlGenerator.QueryableWhere(_dbContext, _where),
                     SqlGenerator.QueryableOrderBy(_dbContext, _orderby, _isDesc),
                     _top);
-                return DbHelper.ExecuteEntity<TEntity>(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters);
+                return DbHelper.ExecuteEntity<TEntity>(_dbContext);
             });
         }
 
@@ -174,9 +174,9 @@ namespace SevenTiny.Bantina.Bankinate
                 _dbContext.SqlStatement = SqlGenerator.QueryableQueryCount<TEntity>(
                     _dbContext,
                     _alias,
-                    SqlGenerator.QueryableWhere(_dbContext, _where, out IDictionary<string, object> parameters));
+                    SqlGenerator.QueryableWhere(_dbContext, _where));
 
-                return Convert.ToInt32(DbHelper.ExecuteScalar(_dbContext.SqlStatement, System.Data.CommandType.Text, parameters));
+                return Convert.ToInt32(DbHelper.ExecuteScalar(_dbContext));
             });
         }
     }

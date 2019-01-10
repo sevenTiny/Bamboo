@@ -12,7 +12,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
     public abstract class NoSqlDbContext<TDataBase> : DbContext, IDbContext, INoSqlQueryOperate where TDataBase : class
     {
-        protected NoSqlDbContext(DataBaseType dataBaseType, string connectionString) : base(dataBaseType)
+        protected NoSqlDbContext(DataBaseType dataBaseType, string connectionString) : base(dataBaseType, connectionString)
         {
             switch (dataBaseType)
             {
@@ -24,7 +24,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             }
             DataBaseName = DataBaseAttribute.GetName(typeof(TDataBase));
         }
-        protected NoSqlDbContext(MongoClientSettings mongoClientSettings) : base(DataBaseType.MongoDB)
+        protected NoSqlDbContext(MongoClientSettings mongoClientSettings) : base(DataBaseType.MongoDB, null)
         {
             Client = new MongoClient(mongoClientSettings);
             DataBaseName = DataBaseAttribute.GetName(typeof(TDataBase));

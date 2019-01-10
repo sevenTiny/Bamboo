@@ -1,23 +1,57 @@
-﻿using MongoDB.Driver;
-using SevenTiny.Bantina.Bankinate.Attributes;
+﻿using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.Configs;
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using System;
+using System.Collections.Generic;
+using System.Data;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
     public abstract class DbContext
     {
-        public DbContext(DataBaseType dataBaseType)
+        public DbContext(DataBaseType dataBaseType, string connectionString) : this(dataBaseType, connectionString, connectionString) { }
+
+        public DbContext(DataBaseType dataBaseType, string connectionString_ReadWrite, string connectionString_Read)
         {
             DataBaseType = dataBaseType;
+            ConnString_RW = connectionString_ReadWrite;
+            ConnString_R = connectionString_Read;
         }
 
+        /// <summary>
+        /// 连接字符串 ConnString_RW 读写数据库使用
+        /// </summary>
+        public string ConnString_RW { get; set; }
+        /// <summary>
+        /// 连接字符串 ConnString_R 读数据库使用
+        /// </summary>
+        public string ConnString_R { get; set; }
         public DataBaseType DataBaseType { get; private set; }
         public string DataBaseName { get; protected set; }
         public string TableName { get; internal set; }
+        /// <summary>
+        /// Sql语句
+        /// </summary>
         public string SqlStatement { get; internal set; }
+        /// <summary>
+        /// 命令类型，可以在运行时随时灵活调整
+        /// </summary>
+        public CommandType CommandType { get; set; } = CommandType.Text;
+        /// <summary>
+        /// 参数化查询参数
+        /// </summary>
+        public IDictionary<string, object> Parameters { get; set; }
+        /// <summary>
+        /// NoSql的文档集合
+        /// </summary>
+        internal dynamic NoSqlCollection { get; set; }
+
+        //Db Control
+        /// <summary>
+        /// 真实执行持久化操作开关，如果为false，则只执行准备动作，不实际操作数据库（友情提示：测试框架代码执行情况可以将其关闭）
+        /// </summary>
+        public bool OpenRealExecutionSaveToDb { get; protected set; } = true;
 
         //Cache Control
         /// <summary>
@@ -92,10 +126,6 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// 清空二级缓存
         /// </summary>
         public void FlushTableCache() => TableCacheManager.FlushAllCache(this);
-        /// <summary>
-        /// NoSql的文档集合
-        /// </summary>
-        internal dynamic NoSqlCollection { get; set; }
 
         //Validate Control
         /// <summary>
