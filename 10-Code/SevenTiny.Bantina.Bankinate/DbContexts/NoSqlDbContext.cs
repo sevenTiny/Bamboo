@@ -2,6 +2,7 @@
 using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
+using SevenTiny.Bantina.Bankinate.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,10 +42,24 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             switch (DataBaseType)
             {
                 case DataBaseType.MongoDB:
                     GetCollectionEntity<TEntity>().InsertOne(entity);
+                    break;
+                default:
+                    break;
+            }
+            DbCacheManager.Add(this, entity);
+        }
+        public void AddAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            PropertyDataValidator.Verify(this, entity);
+            switch (DataBaseType)
+            {
+                case DataBaseType.MongoDB:
+                    GetCollectionEntity<TEntity>().InsertOneAsync(entity);
                     break;
                 default:
                     break;
@@ -63,18 +78,6 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             }
             DbCacheManager.Add(this, entities);
         }
-        public void AddAsync<TEntity>(TEntity entity) where TEntity : class
-        {
-            switch (DataBaseType)
-            {
-                case DataBaseType.MongoDB:
-                    GetCollectionEntity<TEntity>().InsertOneAsync(entity);
-                    break;
-                default:
-                    break;
-            }
-            DbCacheManager.Add(this, entity);
-        }
         public void AddAsync<TEntity>(IEnumerable<TEntity> entities) where TEntity : class
         {
             switch (DataBaseType)
@@ -90,6 +93,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             SqlStatement = filter.ToString();
             switch (DataBaseType)
             {
@@ -103,6 +107,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         }
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             SqlStatement = filter.ToString();
             switch (DataBaseType)
             {

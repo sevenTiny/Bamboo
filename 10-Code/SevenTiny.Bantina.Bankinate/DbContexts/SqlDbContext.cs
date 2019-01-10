@@ -2,6 +2,7 @@
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.SqlStatementManager;
+using SevenTiny.Bantina.Bankinate.Validation;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,11 +24,13 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQuery(SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Add(this, entity);
         }
         public void AddAsync<TEntity>(TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQueryAsync(SqlGenerator.Add(this, entity, out Dictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Add(this, entity);
         }
@@ -36,6 +39,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
+                PropertyDataValidator.Verify(this, item);
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
                     CommandTextOrSpName = SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic),
@@ -50,6 +54,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             List<BatchExecuteModel> batchExecuteModels = new List<BatchExecuteModel>();
             foreach (var item in entities)
             {
+                PropertyDataValidator.Verify(this, item);
                 batchExecuteModels.Add(new BatchExecuteModel
                 {
                     CommandTextOrSpName = SqlGenerator.Add(this, item, out Dictionary<string, object> paramsDic),
@@ -83,21 +88,25 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
 
         public void Update<TEntity>(TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter), CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void Update<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQuery(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }
         public void UpdateAsync<TEntity>(Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
+            PropertyDataValidator.Verify(this, entity);
             DbHelper.ExecuteNonQueryAsync(SqlGenerator.Update(this, filter, entity, out IDictionary<string, object> paramsDic), System.Data.CommandType.Text, paramsDic);
             DbCacheManager.Update(this, entity, filter);
         }

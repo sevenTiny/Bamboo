@@ -97,6 +97,12 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// </summary>
         internal dynamic NoSqlCollection { get; set; }
 
+        //Validate Control
+        /// <summary>
+        /// 属性值校验开关，如开启，则Add/Update等操作会校验输入的值是否满足特性标签标识的条件
+        /// </summary>
+        public bool OpenPropertyDataValidate { get; protected set; } = false;
+
         //内置方法
         /// <summary>
         /// 根据实体获取表明
