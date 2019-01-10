@@ -1,8 +1,12 @@
-﻿using SevenTiny.Bantina.Extensions;
+﻿using SevenTiny.Bantina.Configuration;
+using SevenTiny.Bantina.Extensions;
 using System.Collections.Generic;
 
-namespace SevenTiny.Bantina.Configuration
+namespace SevenTiny.Bantina.Internationalization.Configuration
 {
+    /// <summary>
+    /// 该配置文件是SevenTiny系列组建的配置文件，如用在其他项目则忽略该类
+    /// </summary>
     [ConfigName(Name = "SevenTinyBantina")]
     public class ConfigRoot : ConfigBase<ConfigRoot>
     {

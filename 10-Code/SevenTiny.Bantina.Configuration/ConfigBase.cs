@@ -57,12 +57,12 @@ namespace SevenTiny.Bantina.Configuration
 
         #endregion
 
-        private static IEnumerable<T> _Configs;
+        private static List<T> _Configs;
 
         /// <summary>
         /// Configs List
         /// </summary>
-        protected static IEnumerable<T> Configs
+        protected static List<T> Configs
         {
             get
             {
@@ -81,52 +81,39 @@ namespace SevenTiny.Bantina.Configuration
                             return _Configs;
                         }
                         //1.from local file
-                        if (Directory.Exists(BaseConfigPath))
+                        if (Directory.Exists(BaseConfigPath) && File.Exists(ConfigFileFullPath))
                         {
-                            if (File.Exists(ConfigFileFullPath))
+                            //flush config file per 30 minutes.
+                            var lastWriteTime = File.GetLastWriteTime(ConfigFileFullPath);
+                            if (DateTime.Now - lastWriteTime < TimeSpan.FromMinutes(30))
                             {
-                                //flush config file per 30 minutes.
-                                var lastWriteTime = File.GetLastWriteTime(ConfigFileFullPath);
-                                if (DateTime.Now - lastWriteTime < TimeSpan.FromMinutes(30))
-                                {
-                                    return _Configs = JsonConvert.DeserializeObject<IEnumerable<T>>(File.ReadAllText(ConfigFileFullPath));
-                                }
+                                return _Configs = JsonConvert.DeserializeObject<List<T>>(File.ReadAllText(ConfigFileFullPath));
                             }
                         }
                         //2.from remote config server
                         using (var db = new ConfigDbContext(ConnectionString))
                         {
-                            try
+                            _Configs = db.ExecuteQueryListSql<T>($"SELECT * FROM {ConfigName}");
+                            if (!Directory.Exists(BaseConfigPath))
                             {
-                                _Configs = db.ExecuteQueryListSql<T>($"SELECT * FROM {ConfigName}");
-                                if (!Directory.Exists(BaseConfigPath))
-                                {
-                                    Directory.CreateDirectory(BaseConfigPath);
-                                }
-                                //false means overwrite the file
-                                using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, false))
-                                {
-                                    writer.AutoFlush = true;
-                                    writer.WriteLine(JsonConvert.SerializeObject(_Configs));
-                                }
-                                return _Configs;
+                                Directory.CreateDirectory(BaseConfigPath);
                             }
-                            catch (Exception ex)
+                            //false means overwrite the file
+                            using (StreamWriter writer = new StreamWriter(ConfigFileFullPath, false))
                             {
-                                //3.if remote config get error,may be cause by server error...re-get from file if exist.
-                                if (Directory.Exists(BaseConfigPath))
-                                {
-                                    if (File.Exists(ConfigFileFullPath))
-                                    {
-                                        return _Configs = JsonConvert.DeserializeObject<IEnumerable<T>>(File.ReadAllText(ConfigFileFullPath));
-                                    }
-                                }
-                                throw ex;
+                                writer.AutoFlush = true;
+                                writer.WriteLine(JsonConvert.SerializeObject(_Configs));
                             }
+                            return _Configs;
                         }
                     }
                     catch (Exception ex)
                     {
+                        //3.if remote config get error,may be cause by server error...re-get from file if exist.
+                        if (Directory.Exists(BaseConfigPath) && File.Exists(ConfigFileFullPath))
+                        {
+                            return _Configs = JsonConvert.DeserializeObject<List<T>>(File.ReadAllText(ConfigFileFullPath));
+                        }
                         throw ex;
                     }
                     finally

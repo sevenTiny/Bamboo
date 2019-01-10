@@ -16,6 +16,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.DbContexts;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -14,6 +14,7 @@
  * Thx , Best Regards ~
  *********************************************************/
 using SevenTiny.Bantina.Bankinate.DbContexts;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 
 namespace SevenTiny.Bantina.Bankinate
 {

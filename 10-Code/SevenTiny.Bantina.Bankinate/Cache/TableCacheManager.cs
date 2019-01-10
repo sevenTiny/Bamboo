@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.Configs;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
 using System;
 using System.Collections.Generic;
@@ -158,6 +159,36 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                 }
             }
         }
+        /// <summary>
+        /// 更新数据到缓存（Delete）
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <param name="dbContext"></param>
+        /// <param name="entity"></param>
+        internal static void DeleteCache<TEntity>(DbContext dbContext, TEntity entity)
+        {
+            if (dbContext.OpenTableCache)
+            {
+                //如果存在表级别缓存，则更新数据到缓存
+                if (CacheStorageManager.IsExist(dbContext, GetTableCacheKey(dbContext), out List<TEntity> entities))
+                {
+
+                    if (TableCachingAttribute.IsExistTaleCaching(typeof(TEntity), out TimeSpan tableCacheTimeSpan))
+                    {
+                        //如果过期时间为0，则取上下文的过期时间
+                        TimeSpan timeSpan = tableCacheTimeSpan == TimeSpan.Zero ? dbContext.TableCacheExpiredTimeSpan : tableCacheTimeSpan;
+                        //从缓存集合中寻找该记录，如果找到，则更新该记录
+                        var val = entities.Find(t=>t.Equals(entity));
+                        if (val != null)
+                        {
+                            entities.Remove(val);
+                            CacheStorageManager.Put(dbContext, GetTableCacheKey(dbContext), entities, tableCacheTimeSpan);
+                        }
+                    }
+                }
+            }
+        }
+
 
         /// <summary>
         /// 从缓存中获取数据，如果没有，则后台执行扫描表任务

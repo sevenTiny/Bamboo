@@ -1,5 +1,8 @@
 ﻿using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
+using SevenTiny.Bantina.Bankinate.Exceptions;
+using SevenTiny.Bantina.Bankinate.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +18,11 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
         private static Dictionary<Type, PropertyInfo[]> _propertiesDic = new Dictionary<Type, PropertyInfo[]>();
         private static PropertyInfo[] GetPropertiesDicByType(Type type)
         {
-            if (!_propertiesDic.ContainsKey(type))
-            {
-                _propertiesDic.Add(type, type.GetProperties());
-            }
+            _propertiesDic.AddOrUpdate(type, type.GetProperties());
             return _propertiesDic[type];
         }
 
-        public static void Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
@@ -67,10 +67,8 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     }
                     builder_behind.Append(columnName);
                     builder_behind.Append(",");
-                    if (!paramsDic.ContainsKey(columnName))
-                    {
-                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
-                    }
+
+                    paramsDic.AddOrUpdate($"@{columnName}", propertyInfo.GetValue(entity));
                 }
 
                 //in the end,remove the redundant symbol of ','
@@ -84,13 +82,13 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 }
             }
             //Generate SqlStatement
-            dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
+            return dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
         }
 
-        public static void Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out IDictionary<string, object> paramsDic) where TEntity : class
         {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             paramsDic = new Dictionary<string, object>();
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
 
             StringBuilder builder_front = new StringBuilder();
             builder_front.Append("UPDATE ");
@@ -100,7 +98,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 builder_front.Append(dbContext.TableName);
                 builder_front.Append(" ");
             }
-            builder_front.Append(filter.Parameters[0].Name);
+
+            //查询语句中表的别名，例如“t”
+            string alias = filter.Parameters[0].Name;
+            builder_front.Append(alias);
             builder_front.Append(" SET ");
 
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
@@ -111,16 +112,12 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
                 {
                 }
-                //AutoIncrease : if property is auto increase attribute skip this column.
-                else if (propertyInfo.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute keyAttr)
-                {
-                }
                 //Column :
                 else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
                 {
                     builder_front.Append(columnAttr.GetName(propertyInfo.Name));
                     builder_front.Append("=");
-                    builder_front.Append("@");
+                    builder_front.Append($"@{alias}");
                     //multitype database support
                     switch (dbContext.DataBaseType)
                     {
@@ -137,10 +134,8 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     }
                     builder_front.Append(columnName);
                     builder_front.Append(",");
-                    if (!paramsDic.ContainsKey(columnName))
-                    {
-                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
-                    }
+
+                    paramsDic.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
                 }
                 //in the end,remove the redundant symbol of ','
                 if (propertyInfos.Last() == propertyInfo)
@@ -155,21 +150,141 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 builder_front.Append(" FROM ");
                 builder_front.Append(dbContext.TableName);
                 builder_front.Append(" ");
-                builder_front.Append(filter.Parameters[0].Name);
+                builder_front.Append(alias);
             }
 
             //Generate SqlStatement
-            dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
+            return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static void Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
+            paramsDic = new Dictionary<string, object>();
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+
+            //查找主键以及主键对应的值，如果用该方法更新数据，主键是必须存在的
+            //get property which is key
+            var keyProperty = propertyInfos.Where(t => t.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute)?.FirstOrDefault();
+            if (keyProperty == null)
+                throw new TableKeyNotFoundException($"table '{dbContext.TableName}' not found key column");
+
+            //主键的key
+            string keyName = keyProperty.Name;
+            //主键的value 
+            var keyValue = keyProperty.GetValue(entity);
+
+            if (keyProperty.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr1)
+                keyName = columnAttr1.GetName(keyProperty.Name);
+
+            //Generate Expression of update via key : t=>t.'Key'== value
+            ParameterExpression param = Expression.Parameter(typeof(TEntity), "t");
+            MemberExpression left = Expression.Property(param, keyProperty);
+            ConstantExpression right = Expression.Constant(keyValue);
+            BinaryExpression where = Expression.Equal(left, right);
+            filter = Expression.Lambda<Func<TEntity, bool>>(where, param);
+
+            //将主键的查询参数加到字典中
+            paramsDic.AddOrUpdate($"@t{keyName}", keyValue);
+
+            //开始构造赋值的sql语句
+            StringBuilder builder_front = new StringBuilder();
+            builder_front.Append("UPDATE ");
+            //Mysql和sqlserver的分别处理
+            if (dbContext.DataBaseType == DataBaseType.MySql)
+            {
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+            }
+
+            //查询语句中表的别名，例如“t”
+            string alias = filter.Parameters[0].Name;
+
+            builder_front.Append(alias);
+            builder_front.Append(" SET ");
+
+            string columnName = string.Empty;
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                //AutoIncrease : if property is auto increase attribute skip this column.
+                if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
+                {
+                }
+                //Column :
+                else if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
+                {
+                    builder_front.Append(columnAttr.GetName(propertyInfo.Name));
+                    builder_front.Append("=");
+                    builder_front.Append($"@{alias}");
+                    //multitype database support
+                    switch (dbContext.DataBaseType)
+                    {
+                        case DataBaseType.SqlServer:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "");
+                            break;
+                        case DataBaseType.MySql:
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("`", "");
+                            break;
+                        default:
+                            //default 兼容mysql和sqlserver的系统字段
+                            columnName = columnAttr.GetName(propertyInfo.Name).Replace("[", "").Replace("]", "").Replace("`", "");
+                            break;
+                    }
+                    builder_front.Append(columnName);
+                    builder_front.Append(",");
+
+                    paramsDic.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
+                }
+                //in the end,remove the redundant symbol of ','
+                if (propertyInfos.Last() == propertyInfo)
+                {
+                    builder_front.Remove(builder_front.Length - 1, 1);
+                }
+            }
+
+            //SqlServer和Mysql的sql语句分别处理
+            if (dbContext.DataBaseType == DataBaseType.SqlServer)
+            {
+                builder_front.Append(" FROM ");
+                builder_front.Append(dbContext.TableName);
+                builder_front.Append(" ");
+                builder_front.Append(alias);
+            }
+
+            //Generate SqlStatement
+            return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
+        }
+
+        public static string Delete<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> parameters) where TEntity : class
+        {
+            parameters = new Dictionary<string, object>();
+            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
+            //get property which is key
+            var property = propertyInfos.Where(t => t.GetCustomAttribute(typeof(KeyAttribute), true) is KeyAttribute)?.FirstOrDefault();
+
+            if (property == null)
+                throw new TableKeyNotFoundException($"table '{dbContext.TableName}' not found key column");
+
+            string colunmName = property.Name;
+            var value = property.GetValue(entity);
+
+            if (property.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
+                colunmName = columnAttr.GetName(property.Name);
+
+            parameters.AddOrUpdate($"@t{colunmName}", value);
+            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE t.{colunmName} = @t{colunmName}";
+        }
+
+        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
+        {
+            parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}";
+                    dbContext.SqlStatement = $"DELETE {filter.Parameters[0].Name} From {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter, out parameters)}";
                     break;
                 case DataBaseType.Oracle:
                     dbContext.SqlStatement = string.Empty;
@@ -178,85 +293,106 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     dbContext.SqlStatement = string.Empty;
                     break;
             }
+            return dbContext.SqlStatement;
         }
 
-        public static void QueryOne<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
-            {
-                case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT TOP 1 * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} LIMIT 1"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
-            }
-        }
+        #region Queryable Methods
 
-        public static void QueryCount<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
         {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            parameters = new Dictionary<string, object>();
+            string result = string.Empty;
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
+                    result = LambdaToSql.ConvertWhere(filter, out parameters); break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
+                    result = string.Empty; break;
                 default:
-                    dbContext.SqlStatement = string.Empty; break;
+                    result = string.Empty; break;
             }
+            return result;
         }
 
-        public static void QueryList<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string QueryableOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
         {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            switch (dbContext.DataBaseType)
+            if (orderBy == null)
             {
-                case DataBaseType.SqlServer:
-                case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}"; break;
-                case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
-                default:
-                    dbContext.SqlStatement = string.Empty; break;
+                return string.Empty;
             }
-        }
 
-        public static void QueryOrderBy<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
-        {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
+            string result = string.Empty;
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
                     string desc = isDESC ? "DESC" : "ASC";
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
+                    result = $" ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}"; break;
                 case DataBaseType.Oracle:
-                    dbContext.SqlStatement = string.Empty; break;
+                    result = string.Empty; break;
                 default:
-                    dbContext.SqlStatement = string.Empty; break;
+                    result = string.Empty; break;
             }
+            return result;
         }
 
-        public static void QueryPaging<TEntity>(DbContext dbContext, int pageIndex, int pageSize, Expression<Func<TEntity, bool>> filter, Expression<Func<TEntity, object>> orderBy, bool isDESC) where TEntity : class
+        public static List<string> QueryableSelect<TEntity>(DbContext dbContext, Expression<Func<TEntity, object>> columns) where TEntity : class
         {
-            dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            string desc = isDESC ? "DESC" : "ASC";
+            return LambdaToSql.ConvertColumns<TEntity>(columns);
+        }
+
+        public static string QueryableQueryCount<TEntity>(DbContext dbContext, string alias, string where) where TEntity : class
+        {
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    dbContext.SqlStatement = $"SELECT TOP {pageSize} * FROM (SELECT ROW_NUMBER() OVER (ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc}) AS RowNumber,* FROM {dbContext.TableName} {orderBy.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
                 case DataBaseType.MySql:
-                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName} {filter.Parameters[0].Name} {LambdaToSql.ConvertWhere(filter)} ORDER BY {LambdaToSql.ConvertOrderBy(orderBy)} {desc} LIMIT {pageIndex * pageSize},{pageSize}"; break;
+                    dbContext.SqlStatement = $"SELECT COUNT(0) FROM {dbContext.TableName} {alias} {where}"; break;
                 case DataBaseType.Oracle:
                     dbContext.SqlStatement = string.Empty; break;
                 default:
                     dbContext.SqlStatement = string.Empty; break;
             }
+            return dbContext.SqlStatement;
         }
+
+        public static string QueryableQuery<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, string top) where TEntity : class
+        {
+            string queryColumns = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"{alias}.{t}"));
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                    dbContext.SqlStatement = $"SELECT {top} {queryColumns} FROM {dbContext.TableName} {alias} {where} {orderBy}"; break;
+                case DataBaseType.MySql:
+                    dbContext.SqlStatement = $"SELECT {queryColumns} FROM {dbContext.TableName} {alias} {where} {orderBy} {top}"; break;
+                case DataBaseType.Oracle:
+                    dbContext.SqlStatement = string.Empty; break;
+                default:
+                    dbContext.SqlStatement = string.Empty; break;
+            }
+            return dbContext.SqlStatement;
+        }
+
+        //目前queryablePaging是最终的结果了
+        public static string QueryablePaging<TEntity>(DbContext dbContext, List<string> columns, string alias, string where, string orderBy, int pageIndex, int pageSize) where TEntity : class
+        {
+            string queryColumns = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"TTTTTT.{t}"));
+            switch (dbContext.DataBaseType)
+            {
+                case DataBaseType.SqlServer:
+                    string queryColumnsChild = (columns == null || !columns.Any()) ? "*" : string.Join(",", columns.Select(t => $"{alias}.{t}"));
+                    dbContext.SqlStatement = $"SELECT TOP {pageSize} {queryColumns} FROM (SELECT ROW_NUMBER() OVER ({orderBy}) AS RowNumber,{queryColumnsChild} FROM {dbContext.TableName} {alias} {where}) AS TTTTTT  WHERE RowNumber > {pageSize * (pageIndex - 1)}"; break;
+                case DataBaseType.MySql:
+                    dbContext.SqlStatement = $"SELECT {string.Join(",", columns.Select(t => $"{alias}.{t}"))} FROM {dbContext.TableName} {alias} {where} {orderBy} LIMIT {pageIndex * pageSize},{pageSize}"; break;
+                case DataBaseType.Oracle:
+                    dbContext.SqlStatement = string.Empty; break;
+                default:
+                    dbContext.SqlStatement = string.Empty; break;
+            }
+            return dbContext.SqlStatement;
+        }
+
+        #endregion
     }
 }

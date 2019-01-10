@@ -35,5 +35,10 @@ namespace SevenTiny.Bantina.Bankinate.Attributes
             var attr = type.GetCustomAttributes(typeof(ColumnAttribute), true)?.FirstOrDefault();
             return (attr as ColumnAttribute)?.Name ?? type.Name;
         }
+        public static string GetName(Type type, string defaultName)
+        {
+            var attr = type.GetCustomAttributes(typeof(ColumnAttribute), true)?.FirstOrDefault();
+            return (attr as ColumnAttribute)?.Name ?? defaultName;
+        }
     }
 }

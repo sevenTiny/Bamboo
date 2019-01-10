@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Test.Model;
+using Test.SevenTiny.Bantina.Bankinate.Model;
 using static Newtonsoft.Json.JsonConvert;
 
 namespace Test.SevenTiny.Bantina.ConsoleApp
@@ -22,12 +22,12 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
         private static void MongoDbTest()
         {
-            using (MongoTestDbContext db = new MongoTestDbContext())
+            using (MongoDb db = new MongoDb())
             {
                 //db.Add<Grade>(new Grade { Name = "Three", GradeId = 9 });
 
-                IList<Grade> dbs = db.QueryList<Grade>(t => true);
-                Console.WriteLine(SerializeObject(dbs));
+                //IList<Grade> dbs = db.QueryList<Grade>(t => true);
+                //Console.WriteLine(SerializeObject(dbs));
             }
         }
 
@@ -35,7 +35,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
         {
             var result1 = StopwatchHelper.Caculate(100, () =>
                {
-                   using (MySqlTestDbContext db = new MySqlTestDbContext())
+                   using (MySqlDb db = new MySqlDb())
                    {
                        //for (int i = 1; i < 4; i++)
                        //{
@@ -55,7 +55,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
                        //var result = db.QueryListPaging<Student>(3,3,t=>t.Age,t => t.Name.EndsWith("3"),true);
 
                        //var grades = db.QueryList<Grade2>(t => true);
-                       var list = db.QueryList<Student>(t => t.Name.Contains("monky"));
+                       //var list = db.QueryList<Student>(t => t.Name.Contains("monky"));
                        //var student = db.QueryOne<Student>(t => true);
                        //Console.WriteLine(student.Name);
                    }
@@ -69,7 +69,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             int i = 0;
             var result1 = StopwatchHelper.Caculate(100, () =>
             {
-                using (var db = new MySqlTestDbContext())
+                using (var db = new MySqlDb())
                 {
                     Thread.Sleep(1000);
                     i++;
@@ -132,7 +132,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             int i = 0;
             var result1 = StopwatchHelper.Caculate(1000, () =>
             {
-                using (var db = new SqlServerTestDbContext())
+                using (var db = new SqlServerDb())
                 {
                     i++;
                     //db.Add(new Student {Id=i, Name = "monky-"+i,GradeId=1 });
@@ -182,7 +182,7 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
 
                     //Console.WriteLine(db.IsFromCache);
 
-                    var list2 = db.QueryListPaging<Student>(1, 2, t => t.GradeId,null);
+                    //var list2 = db.QueryListPaging<Student>(1, 2, t => t.SchoolTime, null);
                     Console.WriteLine("paging " + db.IsFromCache);
                 }
             });
@@ -190,26 +190,14 @@ namespace Test.SevenTiny.Bantina.ConsoleApp
             Console.WriteLine($"QueryOne {i} sec：{result1.TotalMilliseconds} ms");
         }
 
-        private static void BugTest()
-        {
-            using (var db = new SqlServerTestDbContext())
-            {
-                Expression<Func<TB_Book, bool>> filter = t => t.IsDelete == 2;
-                int count2 = db.QueryCount(filter);
-
-                List<TB_Book> bookList = db.QueryListPaging<TB_Book>(1, 30, t => t.CreateTime, filter, true);
-                int count = db.QueryCount<TB_Book>(filter);
-            }
-        }
-
         private static void LambdaToSqlTest()
         {
             List<int> ages = new List<int> { 1, 2, 3, 34, 5 };
             //Expression<Func<Student, bool>> where = t => t.Name.Contains(ages.FirstOrDefault().ToString());
-           // Expression<Func<Student, bool>> where = t => t.Age == ages.FirstOrDefault();
+            // Expression<Func<Student, bool>> where = t => t.Age == ages.FirstOrDefault();
             Expression<Func<Student, bool>> where = t => true;
 
-           // var sql = LambdaToSql.ConvertWhere(where);
+            // var sql = LambdaToSql.ConvertWhere(where);
         }
     }
 }

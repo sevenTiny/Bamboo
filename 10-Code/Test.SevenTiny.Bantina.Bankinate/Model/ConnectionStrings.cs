@@ -1,23 +1,11 @@
-﻿using SevenTiny.Bantina.Bankinate;
-using SevenTiny.Bantina.Bankinate.Attributes;
-using SevenTiny.Bantina.Configuration;
+﻿using SevenTiny.Bantina.Configuration;
 using SevenTiny.Bantina.Extensions;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Test.Model
+namespace Test.SevenTiny.Bantina.Bankinate.Model
 {
-    [DataBase("local")]
-    public class MongoTestDbContext : MongoDbContext<MongoTestDbContext>
+    public class ConnectionStrings : ConfigBase<ConnectionStrings>
     {
-        public MongoTestDbContext() : base(ConnectionStrings.Get("mongodb39911"))
-        {
-
-        }
-    }
-
-    public class ConnectionStrings: ConfigBase<ConnectionStrings> {
         public string Key { get; set; }
         public string Value { get; set; }
 

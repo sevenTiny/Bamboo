@@ -1,15 +1,15 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.Cache;
+using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using SevenTiny.Bantina.Bankinate.Attributes;
-using SevenTiny.Bantina.Bankinate.Cache;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
-    public abstract class NoSqlDbContext<TDataBase> : DbContext, IDbContext where TDataBase : class
+    public abstract class NoSqlDbContext<TDataBase> : DbContext, IDbContext, INoSqlQueryOperate where TDataBase : class
     {
         protected NoSqlDbContext(DataBaseType dataBaseType, string connectionString) : base(dataBaseType)
         {
@@ -140,6 +140,11 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
                     break;
             }
             DbCacheManager.Delete(this, filter);
+        }
+
+        public NoSqlQueryable<TEntity> Queryable<TEntity>() where TEntity : class
+        {
+            return new NoSqlQueryable<TEntity>(this);
         }
 
         public int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class
