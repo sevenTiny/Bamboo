@@ -18,10 +18,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
         private static Dictionary<Type, PropertyInfo[]> _propertiesDic = new Dictionary<Type, PropertyInfo[]>();
         private static PropertyInfo[] GetPropertiesDicByType(Type type)
         {
-            if (!_propertiesDic.ContainsKey(type))
-            {
-                _propertiesDic.Add(type, type.GetProperties());
-            }
+            _propertiesDic.AddOrUpdate(type, type.GetProperties());
             return _propertiesDic[type];
         }
 
@@ -70,10 +67,8 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     }
                     builder_behind.Append(columnName);
                     builder_behind.Append(",");
-                    if (!paramsDic.ContainsKey(columnName))
-                    {
-                        paramsDic.Add(columnName, propertyInfo.GetValue(entity));
-                    }
+
+                    paramsDic.AddOrUpdate($"@{columnName}", propertyInfo.GetValue(entity));
                 }
 
                 //in the end,remove the redundant symbol of ','
@@ -278,7 +273,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                 colunmName = columnAttr.GetName(property.Name);
 
             parameters.AddOrUpdate($"@t{colunmName}", value);
-            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE t{colunmName} = @t{colunmName}";
+            return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE t.{colunmName} = @t{colunmName}";
         }
 
         public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class

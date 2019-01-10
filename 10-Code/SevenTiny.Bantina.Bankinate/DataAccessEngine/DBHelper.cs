@@ -350,16 +350,16 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                     switch (conn)
                     {
                         case SqlConnection s:
-                            parameters[i] = new SqlParameter(keyArray[i], valueArray[i]);
+                            parameters[i] = new SqlParameter(keyArray[i], valueArray[i] ?? DBNull.Value);
                             break;
                         case MySqlConnection m:
-                            parameters[i] = new MySqlParameter(keyArray[i], valueArray[i]);
+                            parameters[i] = new MySqlParameter(keyArray[i], valueArray[i] ?? DBNull.Value);
                             break;
                         //case OracleConnection o:
                         // parameters[i] = new OracleParameter(keyArray[i], valueArray[i]);
                         // break;
                         default:
-                            parameters[i] = new SqlParameter(keyArray[i], valueArray[i]);
+                            parameters[i] = new SqlParameter(keyArray[i], valueArray[i] ?? DBNull.Value);
                             break;
                     }
                 }

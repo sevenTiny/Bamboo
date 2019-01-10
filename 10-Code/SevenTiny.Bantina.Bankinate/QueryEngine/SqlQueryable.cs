@@ -32,7 +32,7 @@ namespace SevenTiny.Bantina.Bankinate
         /// </summary>
         protected string _alias;
 
-        public override QueryableBase<TEntity> Where(Expression<Func<TEntity, bool>> filter)
+        public SqlQueryable<TEntity> Where(Expression<Func<TEntity, bool>> filter)
         {
             if (_where != null)
                 _where = _where.And(filter);
@@ -43,12 +43,57 @@ namespace SevenTiny.Bantina.Bankinate
             return this;
         }
 
+        public SqlQueryable<TEntity> OrderBy(Expression<Func<TEntity, object>> orderBy)
+        {
+            _orderby = orderBy;
+            _isDesc = false;
+            return this;
+        }
+
+        public SqlQueryable<TEntity> OrderByDescending(Expression<Func<TEntity, object>> orderBy)
+        {
+            _orderby = orderBy;
+            _isDesc = true;
+            return this;
+        }
+
+        public SqlQueryable<TEntity> Paging(int pageIndex, int pageSize)
+        {
+            _isPaging = true;
+
+            if (pageIndex <= 0)
+            {
+                pageIndex = 0;
+            }
+
+            if (pageSize <= 0)
+            {
+                pageSize = 10;
+            }
+
+            _pageIndex = pageIndex;
+            _pageSize = pageSize;
+
+            return this;
+        }
+
+        /// <summary>
+        /// 筛选具体的某几列
+        /// </summary>
+        /// <param name="columns"></param>
+        /// <returns></returns>
+        public SqlQueryable<TEntity> Select(Expression<Func<TEntity, object>> columns)
+        {
+            _columns = SqlGenerator.QueryableSelect(_dbContext, columns);
+            return this;
+        }
+
         /// <summary>
         /// 取最前面的count行，该方法不能和分页方法连用
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        protected QueryableBase<TEntity> Limit(int count)
+        public SqlQueryable<TEntity> Limit(int count)
         {
             switch (_dbContext.DataBaseType)
             {

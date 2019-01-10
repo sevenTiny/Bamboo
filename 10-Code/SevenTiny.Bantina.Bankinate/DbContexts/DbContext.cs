@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Bankinate.Cache;
 using SevenTiny.Bantina.Bankinate.Configs;
 using SevenTiny.Bantina.Bankinate.DataAccessEngine;
@@ -82,18 +83,27 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// <summary>
         /// 清空全部缓存
         /// </summary>
-        public void FlushAllCache()=> DbCacheManager.FlushAllCache(this);
+        public void FlushAllCache() => DbCacheManager.FlushAllCache(this);
         /// <summary>
         /// 清空一级缓存
         /// </summary>
-        public void FlushQueryCache()=> QueryCacheManager.FlushAllCache(this);
+        public void FlushQueryCache() => QueryCacheManager.FlushAllCache(this);
         /// <summary>
         /// 清空二级缓存
         /// </summary>
-        public void FlushTableCache()=> TableCacheManager.FlushAllCache(this);
+        public void FlushTableCache() => TableCacheManager.FlushAllCache(this);
         /// <summary>
         /// NoSql的文档集合
         /// </summary>
         internal dynamic NoSqlCollection { get; set; }
+
+        //内置方法
+        /// <summary>
+        /// 根据实体获取表明
+        /// </summary>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        public string GetTableName<TEntity>() where TEntity : class
+        => TableAttribute.GetName(typeof(TEntity));
     }
 }

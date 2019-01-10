@@ -22,14 +22,14 @@ namespace SevenTiny.Bantina.Bankinate
     /// <summary>
     /// 通用的Api接口，具备基础的操作，缓存
     /// </summary>
-    public interface IDbContext : IDisposable, IBaseOerate, ICacheable
+    public interface IDbContext : IDisposable, IBaseOperate, ICacheable
     {
     }
 
     /// <summary>
     /// 基础操作Api
     /// </summary>
-    public interface IBaseOerate
+    public interface IBaseOperate
     {
         void Add<TEntity>(TEntity entity) where TEntity : class;
         void AddAsync<TEntity>(TEntity entity) where TEntity : class;
@@ -41,9 +41,29 @@ namespace SevenTiny.Bantina.Bankinate
 
         void Delete<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         void DeleteAsync<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
+    }
 
-        QueryableBase<TEntity> Queryable<TEntity>() where TEntity:class;
+    /// <summary>
+    /// Sql引擎查询api
+    /// </summary>
+    public interface ISqlQueryOperate : IQueryOperate
+    {
+        SqlQueryable<TEntity> Queryable<TEntity>() where TEntity : class;
+    }
 
+    /// <summary>
+    /// NoSql引擎查询Api
+    /// </summary>
+    public interface INoSqlQueryOperate : IQueryOperate
+    {
+        NoSqlQueryable<TEntity> Queryable<TEntity>() where TEntity : class;
+    }
+
+    /// <summary>
+    /// 基础查询Api
+    /// </summary>
+    public interface IQueryOperate
+    {
         List<TEntity> QueryList<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         bool QueryExist<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;
         int QueryCount<TEntity>(Expression<Func<TEntity, bool>> filter) where TEntity : class;

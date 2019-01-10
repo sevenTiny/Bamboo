@@ -23,7 +23,7 @@ namespace SevenTiny.Bantina.Bankinate
     {
         public NoSqlQueryable(DbContext dbContext) : base(dbContext) { }
 
-        public override QueryableBase<TEntity> Where(Expression<Func<TEntity, bool>> filter)
+        public NoSqlQueryable<TEntity> Where(Expression<Func<TEntity, bool>> filter)
         {
             throw new NotImplementedException();
         }

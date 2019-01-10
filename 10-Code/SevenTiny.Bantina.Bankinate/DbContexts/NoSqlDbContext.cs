@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
-    public abstract class NoSqlDbContext<TDataBase> : DbContext, IDbContext where TDataBase : class
+    public abstract class NoSqlDbContext<TDataBase> : DbContext, IDbContext, INoSqlQueryOperate where TDataBase : class
     {
         protected NoSqlDbContext(DataBaseType dataBaseType, string connectionString) : base(dataBaseType)
         {
@@ -142,7 +142,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
             DbCacheManager.Delete(this, filter);
         }
 
-        public QueryableBase<TEntity> Queryable<TEntity>() where TEntity : class
+        public NoSqlQueryable<TEntity> Queryable<TEntity>() where TEntity : class
         {
             return new NoSqlQueryable<TEntity>(this);
         }

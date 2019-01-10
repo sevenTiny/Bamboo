@@ -13,9 +13,7 @@
 * Thx , Best Regards ~
 *********************************************************/
 using SevenTiny.Bantina.Bankinate.Attributes;
-using SevenTiny.Bantina.Bankinate.DataAccessEngine;
 using SevenTiny.Bantina.Bankinate.DbContexts;
-using SevenTiny.Bantina.Bankinate.Helpers;
 using SevenTiny.Bantina.Bankinate.SqlStatementManager;
 using System;
 using System.Collections.Generic;
@@ -75,53 +73,6 @@ namespace SevenTiny.Bantina.Bankinate
         protected void ReSetTableName()
         {
             _dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-        }
-
-        public abstract QueryableBase<TEntity> Where(Expression<Func<TEntity, bool>> filter);
-
-        public QueryableBase<TEntity> OrderBy(Expression<Func<TEntity, object>> orderBy)
-        {
-            _orderby = orderBy;
-            _isDesc = false;
-            return this;
-        }
-
-        public QueryableBase<TEntity> OrderByDescending(Expression<Func<TEntity, object>> orderBy)
-        {
-            _orderby = orderBy;
-            _isDesc = true;
-            return this;
-        }
-
-        public QueryableBase<TEntity> Paging(int pageIndex, int pageSize)
-        {
-            _isPaging = true;
-
-            if (pageIndex <= 0)
-            {
-                pageIndex = 0;
-            }
-
-            if (pageSize <= 0)
-            {
-                pageSize = 10;
-            }
-
-            _pageIndex = pageIndex;
-            _pageSize = pageSize;
-
-            return this;
-        }
-
-        /// <summary>
-        /// 筛选具体的某几列
-        /// </summary>
-        /// <param name="columns"></param>
-        /// <returns></returns>
-        public QueryableBase<TEntity> Select(Expression<Func<TEntity, object>> columns)
-        {
-            _columns = SqlGenerator.QueryableSelect(_dbContext, columns);
-            return this;
         }
 
         /// <summary>

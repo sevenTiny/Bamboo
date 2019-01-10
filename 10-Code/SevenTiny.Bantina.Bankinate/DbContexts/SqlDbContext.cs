@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace SevenTiny.Bantina.Bankinate.DbContexts
 {
-    public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, IExecuteSqlOperate where TDataBase : class
+    public abstract class SqlDbContext<TDataBase> : DbContext, IDbContext, ISqlQueryOperate, IExecuteSqlOperate where TDataBase : class
     {
         public SqlDbContext(string connectionString, DataBaseType dataBaseType) : this(connectionString, connectionString, dataBaseType) { }
 
@@ -107,7 +107,7 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// </summary>
         /// <typeparam name="TEntity"></typeparam>
         /// <returns></returns>
-        public QueryableBase<TEntity> Queryable<TEntity>() where TEntity : class
+        public SqlQueryable<TEntity> Queryable<TEntity>() where TEntity : class
         {
             return new SqlQueryable<TEntity>(this);
         }
