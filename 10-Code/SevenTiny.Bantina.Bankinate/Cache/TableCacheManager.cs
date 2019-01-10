@@ -178,7 +178,7 @@ namespace SevenTiny.Bantina.Bankinate.Cache
                         //如果过期时间为0，则取上下文的过期时间
                         TimeSpan timeSpan = tableCacheTimeSpan == TimeSpan.Zero ? dbContext.TableCacheExpiredTimeSpan : tableCacheTimeSpan;
                         //从缓存集合中寻找该记录，如果找到，则更新该记录
-                        var val = entities.Find(t=>t.Equals(entity));
+                        var val = entities.Find(t => t.Equals(entity));
                         if (val != null)
                         {
                             entities.Remove(val);
@@ -274,11 +274,11 @@ namespace SevenTiny.Bantina.Bankinate.Cache
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
-                    return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
                 case DataBaseType.MySql:
-                    return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
                 case DataBaseType.Oracle:
-                    return DbHelper.ExecuteList<TEntity>($"SELECT * FROM {dbContext.TableName}");
+                    dbContext.SqlStatement = $"SELECT * FROM {dbContext.TableName}";
+                    dbContext.Parameters = null;
+                    return DbHelper.ExecuteList<TEntity>(dbContext);
                 case DataBaseType.MongoDB:
                     return (dbContext.NoSqlCollection as IMongoCollection<TEntity>).Find(t => true).ToList();//获取MongoDb全文档记录
                 default:

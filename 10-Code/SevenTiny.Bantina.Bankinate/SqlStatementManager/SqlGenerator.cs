@@ -22,10 +22,10 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return _propertiesDic[type];
         }
 
-        public static string Add<TEntity>(DbContext dbContext, TEntity entity, out Dictionary<string, object> paramsDic) where TEntity : class
+        public static string Add<TEntity>(DbContext dbContext, TEntity entity) where TEntity : class
         {
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
-            paramsDic = new Dictionary<string, object>();
+            dbContext.Parameters = new Dictionary<string, object>();
 
             StringBuilder builder_front = new StringBuilder(), builder_behind = new StringBuilder();
             builder_front.Append("INSERT INTO ");
@@ -68,7 +68,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     builder_behind.Append(columnName);
                     builder_behind.Append(",");
 
-                    paramsDic.AddOrUpdate($"@{columnName}", propertyInfo.GetValue(entity));
+                    dbContext.Parameters.AddOrUpdate($"@{columnName}", propertyInfo.GetValue(entity));
                 }
 
                 //in the end,remove the redundant symbol of ','
@@ -85,9 +85,9 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append(builder_behind.ToString()).ToString();
         }
 
-        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity, out IDictionary<string, object> paramsDic) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, TEntity entity) where TEntity : class
         {
-            paramsDic = new Dictionary<string, object>();
+            dbContext.Parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
 
             StringBuilder builder_front = new StringBuilder();
@@ -135,7 +135,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     builder_front.Append(columnName);
                     builder_front.Append(",");
 
-                    paramsDic.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
+                    dbContext.Parameters.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
                 }
                 //in the end,remove the redundant symbol of ','
                 if (propertyInfos.Last() == propertyInfo)
@@ -157,9 +157,9 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> paramsDic, out Expression<Func<TEntity, bool>> filter) where TEntity : class
+        public static string Update<TEntity>(DbContext dbContext, TEntity entity, out Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            paramsDic = new Dictionary<string, object>();
+            dbContext.Parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
 
@@ -185,7 +185,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             filter = Expression.Lambda<Func<TEntity, bool>>(where, param);
 
             //将主键的查询参数加到字典中
-            paramsDic.AddOrUpdate($"@t{keyName}", keyValue);
+            dbContext.Parameters.AddOrUpdate($"@t{keyName}", keyValue);
 
             //开始构造赋值的sql语句
             StringBuilder builder_front = new StringBuilder();
@@ -233,7 +233,7 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     builder_front.Append(columnName);
                     builder_front.Append(",");
 
-                    paramsDic.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
+                    dbContext.Parameters.AddOrUpdate($"@{alias}{columnName}", propertyInfo.GetValue(entity));
                 }
                 //in the end,remove the redundant symbol of ','
                 if (propertyInfos.Last() == propertyInfo)
@@ -255,9 +255,9 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             return dbContext.SqlStatement = builder_front.Append($"{LambdaToSql.ConvertWhere(filter)}").ToString();
         }
 
-        public static string Delete<TEntity>(DbContext dbContext, TEntity entity, out IDictionary<string, object> parameters) where TEntity : class
+        public static string Delete<TEntity>(DbContext dbContext, TEntity entity) where TEntity : class
         {
-            parameters = new Dictionary<string, object>();
+            dbContext.Parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             PropertyInfo[] propertyInfos = GetPropertiesDicByType(typeof(TEntity));
             //get property which is key
@@ -272,13 +272,13 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             if (property.GetCustomAttribute(typeof(ColumnAttribute), true) is ColumnAttribute columnAttr)
                 colunmName = columnAttr.GetName(property.Name);
 
-            parameters.AddOrUpdate($"@t{colunmName}", value);
+            dbContext.Parameters.AddOrUpdate($"@t{colunmName}", value);
             return dbContext.SqlStatement = $"DELETE t FROM {dbContext.TableName} t WHERE t.{colunmName} = @t{colunmName}";
         }
 
-        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
+        public static string Delete<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            parameters = new Dictionary<string, object>();
+            IDictionary<string, object> parameters = new Dictionary<string, object>();
             dbContext.TableName = TableAttribute.GetName(typeof(TEntity));
             switch (dbContext.DataBaseType)
             {
@@ -293,25 +293,28 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
                     dbContext.SqlStatement = string.Empty;
                     break;
             }
+            dbContext.Parameters = parameters;
             return dbContext.SqlStatement;
         }
 
         #region Queryable Methods
 
-        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter, out IDictionary<string, object> parameters) where TEntity : class
+        public static string QueryableWhere<TEntity>(DbContext dbContext, Expression<Func<TEntity, bool>> filter) where TEntity : class
         {
-            parameters = new Dictionary<string, object>();
+            IDictionary<string, object> parameters = new Dictionary<string, object>();
             string result = string.Empty;
             switch (dbContext.DataBaseType)
             {
                 case DataBaseType.SqlServer:
                 case DataBaseType.MySql:
-                    result = LambdaToSql.ConvertWhere(filter, out parameters); break;
+                    result = LambdaToSql.ConvertWhere(filter, out parameters);
+                    break;
                 case DataBaseType.Oracle:
                     result = string.Empty; break;
                 default:
                     result = string.Empty; break;
             }
+            dbContext.Parameters = parameters;
             return result;
         }
 

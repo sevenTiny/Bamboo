@@ -27,9 +27,11 @@ namespace Test.SevenTiny.Bantina.Bankinate.Model
         public double? DoubleNullKey { get; set; }
         /// <summary>
         /// SqlServer用float?会在FillAdapter转化中报错，因为SqlServer的类型对应的实体字段类型是double映射关系
+        /// MySql用double?会在FillAdapter转化中报错，因为MySql库中对应float
+        /// 这里需要针对具体的数据库进行针对性地设计实体地属性类型
         /// </summary>
-        [Column]
-        public double? FloatNullKey { get; set; }
+        //[Column]
+        public float? FloatNullKey { get; set; }
     }
 }
 
