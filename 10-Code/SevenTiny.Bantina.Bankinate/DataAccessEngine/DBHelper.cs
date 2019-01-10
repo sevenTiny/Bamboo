@@ -41,7 +41,9 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);//参数增加了参数增加了commandType 可以自己编辑执行方式
-                    return cmd.DbCommand.ExecuteNonQuery();
+                    if (dbContext.OpenRealExecutionSaveToDb)
+                        return cmd.DbCommand.ExecuteNonQuery();
+                    return default(int);
                 }
             }
         }
@@ -52,7 +54,9 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);//参数增加了commandType 可以自己编辑执行方式
-                    return cmd.DbCommand.ExecuteNonQueryAsync();
+                    if (dbContext.OpenRealExecutionSaveToDb)
+                        return cmd.DbCommand.ExecuteNonQueryAsync();
+                    return default(Task<int>);
                 }
             }
         }
@@ -65,7 +69,8 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                     foreach (var item in batchExecuteModels)
                     {
                         PreparCommand(conn.DbConnection, cmd.DbCommand, item.CommandTextOrSpName, item.CommandType, item.ParamsDic);
-                        cmd.DbCommand.ExecuteNonQuery();
+                        if (dbContext.OpenRealExecutionSaveToDb)
+                            cmd.DbCommand.ExecuteNonQuery();
                     }
                 }
             }
@@ -79,7 +84,8 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                     foreach (var item in batchExecuteModels)
                     {
                         PreparCommand(conn.DbConnection, cmd.DbCommand, item.CommandTextOrSpName, item.CommandType, item.ParamsDic);
-                        cmd.DbCommand.ExecuteNonQueryAsync();
+                        if (dbContext.OpenRealExecutionSaveToDb)
+                            cmd.DbCommand.ExecuteNonQueryAsync();
                     }
                 }
             }
@@ -97,7 +103,9 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
-                    return cmd.DbCommand.ExecuteScalar();
+                    if (dbContext.OpenRealExecutionSaveToDb)
+                        return cmd.DbCommand.ExecuteScalar();
+                    return default(object);
                 }
 
             }
@@ -109,7 +117,9 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
-                    return cmd.DbCommand.ExecuteScalarAsync();
+                    if (dbContext.OpenRealExecutionSaveToDb)
+                        return cmd.DbCommand.ExecuteScalarAsync();
+                    return default(Task<object>);
                 }
 
             }
@@ -126,7 +136,9 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
             SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_R, dbContext.ConnString_RW);
             DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType);
             PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
-            return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
+            if (dbContext.OpenRealExecutionSaveToDb)
+                return cmd.DbCommand.ExecuteReader(CommandBehavior.CloseConnection);
+            return default(DbDataReader);
         }
 
         /// <summary>
@@ -138,23 +150,12 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
         /// <returns></returns> 
         public static DataTable ExecuteDataTable(DbContext dbContext)
         {
-            using (SqlConnection_RW conn = new SqlConnection_RW(dbContext.DataBaseType, dbContext.ConnString_R, dbContext.ConnString_RW))
+            DataSet ds = ExecuteDataSet(dbContext);
+            if (ds != null && ds.Tables != null && ds.Tables.Count > 0)
             {
-                using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
-                {
-                    PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(dbContext.DataBaseType, cmd.DbCommand))
-                    {
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        if (ds.Tables.Count > 0)
-                        {
-                            return ds.Tables[0];
-                        }
-                        return default(DataTable);
-                    }
-                }
+                return ds.Tables[0];
             }
+            return default(DataTable);
         }
 
         /// <summary>
@@ -169,11 +170,18 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
                 using (DbCommandCommon cmd = new DbCommandCommon(dbContext.DataBaseType))
                 {
                     PreparCommand(conn.DbConnection, cmd.DbCommand, dbContext.SqlStatement, dbContext.CommandType, dbContext.Parameters);
-                    using (DbDataAdapterCommon da = new DbDataAdapterCommon(dbContext.DataBaseType, cmd.DbCommand))
+                    if (dbContext.OpenRealExecutionSaveToDb)
                     {
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        return ds;
+                        using (DbDataAdapterCommon da = new DbDataAdapterCommon(dbContext.DataBaseType, cmd.DbCommand))
+                        {
+                            DataSet ds = new DataSet();
+                            da.Fill(ds);
+                            return ds;
+                        }
+                    }
+                    else
+                    {
+                        return default(DataSet);
                     }
                 }
             }

@@ -20,6 +20,7 @@ namespace Test.SevenTiny.Bantina.Bankinate.Model
         public MySqlPropertyValidateDb() : base(ConnectionStrings.Get("mysql39901"))
         {
             OpenPropertyDataValidate = true;
+            OpenRealExecutionSaveToDb = false;
         }
     }
 }
