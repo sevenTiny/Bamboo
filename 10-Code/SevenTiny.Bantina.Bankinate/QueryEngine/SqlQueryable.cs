@@ -48,7 +48,7 @@ namespace SevenTiny.Bantina.Bankinate
         /// </summary>
         /// <param name="count"></param>
         /// <returns></returns>
-        public override QueryableBase<TEntity> Top(int count)
+        protected QueryableBase<TEntity> Limit(int count)
         {
             switch (_dbContext.DataBaseType)
             {
@@ -104,7 +104,7 @@ namespace SevenTiny.Bantina.Bankinate
             MustExistCheck();
             ReSetTableName();
 
-            Top(1);
+            Limit(1);
 
             return DbCacheManager.GetEntity(_dbContext, _where, () =>
             {

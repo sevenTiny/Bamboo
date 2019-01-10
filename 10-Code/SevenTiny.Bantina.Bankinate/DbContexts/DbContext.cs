@@ -74,7 +74,6 @@ namespace SevenTiny.Bantina.Bankinate.DbContexts
         /// Cache 第三方存储媒介服务地址
         /// </summary>
         public string CacheMediaServer { get; protected set; }
-
         /// <summary>
         /// 最大的缓存时间（用于缓存缓存键）
         /// </summary>

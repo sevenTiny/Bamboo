@@ -125,13 +125,6 @@ namespace SevenTiny.Bantina.Bankinate
         }
 
         /// <summary>
-        /// 查询前x条，不能和Paging方法连用
-        /// </summary>
-        /// <param name="count"></param>
-        /// <returns></returns>
-        public abstract QueryableBase<TEntity> Top(int count);
-
-        /// <summary>
         /// 查询生成符合当前条件的List结果集
         /// </summary>
         /// <returns></returns>
