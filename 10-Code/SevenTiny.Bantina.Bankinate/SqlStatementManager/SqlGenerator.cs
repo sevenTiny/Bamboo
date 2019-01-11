@@ -37,12 +37,8 @@ namespace SevenTiny.Bantina.Bankinate.SqlStatementManager
             string columnName = string.Empty;
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
-                //if not column mark exist,jump to next
-                if (ColumnIgnoreAttribute.Exist(typeof(TEntity)))
-                {
-                }
                 //AutoIncrease : if property is auto increase attribute skip this column.
-                else if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
+                if (propertyInfo.GetCustomAttribute(typeof(AutoIncreaseAttribute), true) is AutoIncreaseAttribute autoIncreaseAttr)
                 {
                 }
                 //Column
