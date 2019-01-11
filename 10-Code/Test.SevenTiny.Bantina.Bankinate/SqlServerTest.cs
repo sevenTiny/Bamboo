@@ -86,6 +86,13 @@ namespace Test.SevenTiny.Bantina.Bankinate
         }
 
         [Fact]
+        public void Query_All()
+        {
+            var re = Db.Queryable<OperateTestModel>().ToList();
+            Assert.Equal(1000, re.Count);
+        }
+
+        [Fact]
         public void Query_Where()
         {
             var re = Db.Queryable<OperateTestModel>().Where(t => t.StringKey.EndsWith("3")).ToList();

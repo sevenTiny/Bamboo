@@ -12,6 +12,7 @@
 * Description: 
 * Thx , Best Regards ~
 *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -51,6 +52,10 @@ namespace SevenTiny.Bantina.Bankinate.DataAccessEngine
             var columns = Expression.Property(Expression.Property(rowDeclare, "Table"), "Columns");
             foreach (var propertyInfo in properties)
             {
+                // no column , no translation
+                if (propertyInfo.GetCustomAttribute(typeof(ColumnAttribute), true) == null)
+                    continue;
+
                 if (propertyInfo.CanWrite)
                 {
                     //Id,Id is a property of Entity

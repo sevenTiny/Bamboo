@@ -36,7 +36,7 @@ namespace SevenTiny.Bantina.Bankinate
         protected DbContext _dbContext;
 
         //where
-        protected Expression<Func<TEntity, bool>> _where;
+        protected Expression<Func<TEntity, bool>> _where = t => true;
 
         //orderby
         protected Expression<Func<TEntity, object>> _orderby;
