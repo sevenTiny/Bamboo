@@ -12,8 +12,9 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
+using SevenTiny.Bantina.Bankinate.Helpers;
 using SevenTiny.Bantina.Configuration;
-using SevenTiny.Bantina.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +24,13 @@ namespace SevenTiny.Bantina.Redis
     [ConfigName(Name = "Redis")]
     internal class RedisConfig : ConfigBase<RedisConfig>
     {
+        [Column]
         public string KeySpace { get; set; }
+        [Column]
         public string Key { get; set; }
+        [Column]
         public string Value { get; set; }
+        [Column]
         public string Description { get; set; }
 
         private static Dictionary<string,Dictionary<string, string>> dictionary;

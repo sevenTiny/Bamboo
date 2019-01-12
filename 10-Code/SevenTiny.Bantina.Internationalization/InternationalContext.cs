@@ -12,8 +12,7 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-using SevenTiny.Bantina.Configuration;
-using SevenTiny.Bantina.Extensions;
+using SevenTiny.Bantina.Bankinate.Helpers;
 using SevenTiny.Bantina.Internationalization.Configs;
 using System;
 using System.Collections.Generic;

@@ -12,6 +12,7 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Configuration;
 using System.Collections.Generic;
 
@@ -20,9 +21,13 @@ namespace SevenTiny.Bantina.Internationalization.Configs
     [ConfigName(Name = "Internationalization_English")]
     public class Internationalization_English_Config : ConfigBase<Internationalization_English_Config>
     {
+        [Column]
         public int ID { get; set; }
+        [Column]
         public string Code { get; set; }
+        [Column]
         public string Content { get; set; }
+        [Column]
         public string Description { get; set; }
         public static IEnumerable<Internationalization_English_Config> ConfigEnumerable => Configs;
     }

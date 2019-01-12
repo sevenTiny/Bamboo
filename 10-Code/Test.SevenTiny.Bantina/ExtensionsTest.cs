@@ -1,7 +1,6 @@
 using SevenTiny.Bantina.Extensions;
 using System;
 using System.Linq.Expressions;
-using Test.Model;
 using Xunit;
 
 namespace Test.SevenTiny.Bantina
@@ -18,6 +17,21 @@ namespace Test.SevenTiny.Bantina
             func = func.Or(tt => tt.HealthLevel == 2);
 
             Assert.NotNull(func);
+        }
+    }
+
+    public class Student
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public int GradeId { get; set; }
+        public int BodyHigh { get; set; }
+        public int HealthLevel { get; set; }
+
+        public string GetName()
+        {
+            return this.Name;
         }
     }
 }
