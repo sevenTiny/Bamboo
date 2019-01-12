@@ -12,6 +12,7 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Configuration;
 using System;
 using System.Linq;
@@ -21,12 +22,19 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
     [ConfigName(Name = "Logging")]
     public class LoggingConfig : ConfigBase<LoggingConfig>
     {
+        [Column]
         public string Group { get; set; }
+        [Column]
         public string Level { get; set; }
+        [Column]
         public string StorageMedium { get; set; }
+        [Column]
         public string Directory { get; set; }
+        [Column]
         public string ConnectionString { get; set; }
+        [Column]
         public int[] Levels { get; set; }
+        [Column]
         public int[] StorageMediums { get; set; }
 
         private static LoggingConfig _loggingConfig;
