@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Configura
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Logging", "..\10-Code\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj", "{DA01D74A-9421-4F91-9821-34BA9D499293}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Bankinate", "..\10-Code\SevenTiny.Bantina.Bankinate\SevenTiny.Bantina.Bankinate.csproj", "{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Amqp", "..\10-Code\SevenTiny.Bantina.Amqp\SevenTiny.Bantina.Amqp.csproj", "{612AD90E-78E1-49AB-8112-0980EF31039E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Internationalization", "..\10-Code\SevenTiny.Bantina.Internationalization\SevenTiny.Bantina.Internationalization.csproj", "{D1DE01A0-43B5-44E9-B6FD-805ED0198904}"
@@ -24,8 +22,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.AutoMapper", "..\10-Code\SevenTiny.Bantina.AutoMapper\SevenTiny.Bantina.AutoMapper.csproj", "{3938EBB5-1A12-4104-81BE-6B38D3DF1B01}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina", "..\10-Code\Test.SevenTiny.Bantina\Test.SevenTiny.Bantina.csproj", "{2983D245-53DE-4B34-899B-17882258C457}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina.Bankinate", "..\10-Code\Test.SevenTiny.Bantina.Bankinate\Test.SevenTiny.Bantina.Bankinate.csproj", "{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Model", "..\10-Code\Test.Model\Test.Model.csproj", "{9286C119-E402-4DB4-B34C-650E8A8DDC9A}"
 EndProject
@@ -45,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Dependenc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Spring", "..\10-Code\SevenTiny.Bantina.Spring\SevenTiny.Bantina.Spring.csproj", "{45B5CB7C-5DA1-40A9-BE9E-A8B3D424BBB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bantina.Spring", "..\10-Code\Test.SevenTiny.Bantina.Spring\Test.SevenTiny.Bantina.Spring.csproj", "{45BE51C3-8A11-4060-9C52-9F202A84D6A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina.Spring", "..\10-Code\Test.SevenTiny.Bantina.Spring\Test.SevenTiny.Bantina.Spring.csproj", "{45BE51C3-8A11-4060-9C52-9F202A84D6A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,10 +61,6 @@ Global
 		{DA01D74A-9421-4F91-9821-34BA9D499293}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA01D74A-9421-4F91-9821-34BA9D499293}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA01D74A-9421-4F91-9821-34BA9D499293}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E011E1E-739F-44A2-AF48-1ABE9BB8CA72}.Release|Any CPU.Build.0 = Release|Any CPU
 		{612AD90E-78E1-49AB-8112-0980EF31039E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{612AD90E-78E1-49AB-8112-0980EF31039E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{612AD90E-78E1-49AB-8112-0980EF31039E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -93,10 +85,6 @@ Global
 		{2983D245-53DE-4B34-899B-17882258C457}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2983D245-53DE-4B34-899B-17882258C457}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9286C119-E402-4DB4-B34C-650E8A8DDC9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9286C119-E402-4DB4-B34C-650E8A8DDC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9286C119-E402-4DB4-B34C-650E8A8DDC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -143,7 +131,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2983D245-53DE-4B34-899B-17882258C457} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
-		{FA5B6CCC-E6B3-49DB-A8BD-9CA7DE85486E} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{9286C119-E402-4DB4-B34C-650E8A8DDC9A} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{7CC5C352-4EF3-4E47-92C1-39875B6FE1B9} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{406BE5C8-E34C-41D3-B9A9-ED43D1CA0459} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
