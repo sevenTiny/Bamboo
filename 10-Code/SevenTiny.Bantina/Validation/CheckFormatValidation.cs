@@ -68,6 +68,12 @@ namespace SevenTiny.Bantina.Validation
         {
             if (!data.IsStrongCipher()) { throw new Exception(errorMessage); }
         }
+        //数字和字母
+        public static void CheckAlnum(this string data, int minLength, int maxLength, string errorMessage)
+        {
+            if (!data.IsAlnum(minLength, maxLength)) { throw new Exception(errorMessage); }
+        }
+
         public static void CheckDataFormat(this string data, string errorMessage)
         {
             if (!data.IsDataFormat()) { throw new Exception(errorMessage); }

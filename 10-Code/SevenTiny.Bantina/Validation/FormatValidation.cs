@@ -25,7 +25,7 @@ namespace SevenTiny.Bantina.Validation
         /// <param name="data"></param>
         /// <param name="regexString"></param>
         /// <returns></returns>
-        public static bool IsXXX_ByRegex(this string data,string regexString)
+        public static bool IsXXX_ByRegex(this string data, string regexString)
         {
             return Regex.IsMatch(data, regexString);
         }
@@ -62,6 +62,17 @@ namespace SevenTiny.Bantina.Validation
         public static bool IsPassword(this string data)
         {
             return Regex.IsMatch(data, @"^[a-zA-Z]\w{5,17}$");
+        }
+        /// <summary>
+        /// 字母和数字
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="minLength">最小长度</param>
+        /// <param name="maxLength">最大长度</param>
+        /// <returns></returns>
+        public static bool IsAlnum(this string data, int minLength, int maxLength)
+        {
+            return Regex.IsMatch(data, $@"^[a-zA-Z][a-zA-Z0-9_]{{{minLength - 1},{maxLength - 1}}}$");
         }
         //(必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-10之间)
         public static bool IsStrongCipher(this string data)
