@@ -14,7 +14,7 @@
  *********************************************************/
 using System;
 
-namespace SevenTiny.Bantina
+namespace SevenTiny.Bantina.IO
 {
     public abstract class PathHelper
     {
