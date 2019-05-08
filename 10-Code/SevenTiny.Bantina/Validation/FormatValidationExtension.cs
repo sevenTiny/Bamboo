@@ -17,8 +17,10 @@ using System.Text.RegularExpressions;
 
 namespace SevenTiny.Bantina.Validation
 {
-    public static class FormatValidation
+    public static class FormatValidationExtension
     {
+        public static bool IsNull(this object data) => data == null;
+
         /// <summary>
         /// check match regex string
         /// </summary>
