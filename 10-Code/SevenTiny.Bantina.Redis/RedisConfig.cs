@@ -21,32 +21,43 @@ using System.Linq;
 
 namespace SevenTiny.Bantina.Redis
 {
-    [ConfigName(Name = "Redis")]
-    internal class RedisConfig : ConfigBase<RedisConfig>
+    [ConfigName("Redis")]
+    internal class RedisConfig : MySqlConfigBase<RedisConfig>
     {
-        [Column]
+        private static RedisConfig Instance = new RedisConfig();
+
+        [ConfigProperty]
         public string KeySpace { get; set; }
-        [Column]
+        [ConfigProperty]
         public string Key { get; set; }
-        [Column]
+        [ConfigProperty]
         public string Value { get; set; }
-        [Column]
+        [ConfigProperty]
         public string Description { get; set; }
 
-        private static Dictionary<string,Dictionary<string, string>> dictionary;
+        protected override string _ConnectionString => GetConnectionStringFromAppSettings("SeventinyConfig");
+
+        private static Dictionary<string, Dictionary<string, string>> dictionary;
 
         private static void Initial()
         {
-            var group = Configs.GroupBy(t => t.KeySpace).Select(t=>new { KeySpace = t.Key, RedisConfig = t }).ToList();
+            var group = Instance.GetConfigList().GroupBy(t => t.KeySpace).Select(t => new { KeySpace = t.Key, RedisConfig = t }).ToList();
             dictionary = new Dictionary<string, Dictionary<string, string>>();
             foreach (var item in group)
             {
                 var innerDic = new Dictionary<string, string>();
                 foreach (var config in item.RedisConfig)
                 {
-                    innerDic.AddOrUpdate(config.Key, config.Value);
+                    if (innerDic.ContainsKey(config.Key))
+                        innerDic[config.Key] = config.Value;
+                    else
+                        innerDic.Add(config.Key, config.Value);
                 }
-                dictionary.AddOrUpdate(item.KeySpace, innerDic);
+
+                if (dictionary.ContainsKey(item.KeySpace))
+                    dictionary[item.KeySpace] = innerDic;
+                else
+                    dictionary.Add(item.KeySpace, innerDic);
             }
         }
 
@@ -55,7 +66,7 @@ namespace SevenTiny.Bantina.Redis
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static string Get(string keySpace,string key)
+        public static string Get(string keySpace, string key)
         {
             try
             {
