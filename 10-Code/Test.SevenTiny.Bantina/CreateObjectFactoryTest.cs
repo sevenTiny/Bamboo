@@ -82,7 +82,7 @@ namespace Test.SevenTiny.Bantina
 
 
     /// <summary>
-    /// 为了测试Expression代参数兼容性能损耗，特加个最简单的
+    /// 为了测试Expression不带参数兼容性能损耗，特加个最简单的
     /// </summary>
     public class ExpressionCreateObject
     {

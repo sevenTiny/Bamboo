@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace SevenTiny.Bantina.Net
+namespace SevenTiny.Bantina.Net.Ftp
 {
     public class FTPHelper
     {

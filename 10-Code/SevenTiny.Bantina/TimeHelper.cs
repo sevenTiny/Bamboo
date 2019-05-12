@@ -16,24 +16,30 @@ using System;
 
 namespace SevenTiny.Bantina
 {
-    public static class DataTimeHelper
+    public static class TimeHelper
     {
-        /// <summary>
-        /// Current timestamp
-        /// </summary>
-        public static long TimestampNow => (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000;
-
         /// <summary>
         /// convert timestamp to datetime
         /// </summary>
         /// <param name="timestamp">unix timestamp length 13</param>
         /// <returns>datetime</returns>
-        public static DateTime TimestampToDate(string timestamp)
+        public static DateTime GetDateTime(long timestamp)
         {
-            DateTime dtStart = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
-            long lTime = long.Parse(timestamp + "0000");
-            TimeSpan toNow = new TimeSpan(lTime);
-            return dtStart.Add(toNow);
+            return TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local).Add(new TimeSpan(timestamp * 10000));
+        }
+
+        /// <summary>
+        /// 获取当前时间戳
+        /// </summary>
+        /// <param name="time">时间，如不填默认当前时刻</param>
+        /// <returns></returns>
+        public static long GetTimeStamp(DateTime time = default(DateTime))
+        {
+            if (DateTime.Equals(time, default(DateTime)))
+                time = DateTime.UtcNow;
+
+            TimeSpan ts = time - TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
+            return Convert.ToInt64(ts.TotalMilliseconds);
         }
     }
 }
