@@ -12,30 +12,33 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
-using SevenTiny.Bantina.Bankinate.Attributes;
 using SevenTiny.Bantina.Configuration;
 using System;
 using System.Linq;
 
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
-    [ConfigName(Name = "Logging")]
-    public class LoggingConfig : ConfigBase<LoggingConfig>
+    [ConfigName("Logging")]
+    internal class LoggingConfig : MySqlConfigBase<LoggingConfig>
     {
-        [Column]
+        public static LoggingConfig Instance = new LoggingConfig();
+
+        [ConfigProperty]
         public string Group { get; set; }
-        [Column]
+        [ConfigProperty]
         public string Level { get; set; }
-        [Column]
+        [ConfigProperty]
         public string StorageMedium { get; set; }
-        [Column]
+        [ConfigProperty]
         public string Directory { get; set; }
-        [Column]
+        [ConfigProperty]
         public string ConnectionString { get; set; }
-        [Column]
+        [ConfigProperty]
         public int[] Levels { get; set; }
-        [Column]
+        [ConfigProperty]
         public int[] StorageMediums { get; set; }
+
+        protected override string _ConnectionString => GetConnectionStringFromAppSettings("SevenTinyConfig");
 
         private static LoggingConfig _loggingConfig;
 
@@ -46,7 +49,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
@@ -62,13 +65,13 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //load group config
-            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Configs?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
@@ -76,7 +79,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
             return new LoggingConfig() { Levels = new int[] { 5 }, StorageMediums = new int[] { 0 } };
         }
     }
-    public static class ConfigExtension
+    internal static class ConfigExtension
     {
         public static LoggingConfig ExtendLevel(this LoggingConfig loggingConfig)
         {

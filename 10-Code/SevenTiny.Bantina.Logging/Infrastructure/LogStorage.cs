@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
-    public sealed class LogStorage
+    internal sealed class LogStorage
     {
         private const string FOLDER_NAME = "SevenTinyLogFiles";
 
