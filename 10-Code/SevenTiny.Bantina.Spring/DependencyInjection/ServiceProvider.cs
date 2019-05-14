@@ -9,7 +9,7 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
         /// <summary>
         /// save scaned type
         /// </summary>
-        private HashSet<Type> ScanedType = new HashSet<Type>();
+        private static HashSet<Type> ScanedType = new HashSet<Type>();
 
         /// <summary>
         /// dynamic proxy get service via this method
