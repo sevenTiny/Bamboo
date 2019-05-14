@@ -19,7 +19,6 @@ namespace Test.SevenTiny.Bantina.Spring
             services.AddSingleton(Assembly.Load("Test.SevenTiny.Bantina.Spring"));
             services.AddSingletonWithAop<IAService, AService>();
             services.AddSingletonWithAop<ICService, CService>();
-            services.AddSingleton(p => StorageProvider.Storage);
         }
 
         public override void Start()

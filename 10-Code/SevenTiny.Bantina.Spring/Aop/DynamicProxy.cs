@@ -262,6 +262,14 @@ namespace SevenTiny.Bantina.Spring.Aop
                             ilMethod.Emit(OpCodes.Stloc, result);
                     }
                 }
+                else
+                {
+                    //if no void return,set result
+                    if (method.ReturnType == typeof(void))
+                        ilMethod.Emit(OpCodes.Nop);
+                    else
+                        ilMethod.Emit(OpCodes.Stloc, result);
+                }
 
                 // pop the stack if return void
                 if (method.ReturnType == typeof(void))

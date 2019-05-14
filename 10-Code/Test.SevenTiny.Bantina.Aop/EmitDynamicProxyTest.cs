@@ -29,6 +29,8 @@ namespace Test.SevenTiny.Bantina.Aop
             Instance.GetOperateResults(new List<OperateResult>());
             Instance.GetDecimal(123.123m);
             Instance.GetDateTime(DateTime.Now);
+
+            Assert.NotNull(Instance);
         }
 
         [Fact]
@@ -50,6 +52,8 @@ namespace Test.SevenTiny.Bantina.Aop
             Instance.GetOperateResults(new List<OperateResult>());
             Instance.GetDecimal(123.123m);
             Instance.GetDateTime(DateTime.Now);
+
+            Assert.NotNull(Instance);
         }
 
         [Fact]

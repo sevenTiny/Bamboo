@@ -7,10 +7,11 @@ namespace Test.SevenTiny.Bantina.Spring
     {
         public override void Before(string method, object[] parameters)
         {
-            Trace.WriteLine("DomainService Action");
+            Trace.WriteLine("action before");
             base.Before(method, parameters);
         }
     }
+
     public interface ICService
     {
         void WriteLog();
