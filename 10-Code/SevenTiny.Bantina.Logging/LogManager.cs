@@ -56,7 +56,11 @@ namespace SevenTiny.Bantina.Logging
                 builder.Append($"Message:{exception.Message}\r\n");
                 builder.Append($"Source:{exception.Source}\r\n");
                 builder.Append($"StackTrace:{exception.StackTrace}\r\n");
-                builder.Append($"InnerException:{exception.InnerException}\r\n");
+                if (exception.InnerException != null)
+                {
+                    builder.Append($"InnerException:{exception.InnerException.Message}\r\n");
+                    builder.Append($"InnerExceptionStackTrace:{exception.InnerException.StackTrace}\r\n");
+                }
                 LogMessage(loggingLevel, builder.ToString());
             });
         }
@@ -69,11 +73,15 @@ namespace SevenTiny.Bantina.Logging
                 builder.Append($"Message:{exception.Message}\r\n");
                 builder.Append($"Source:{exception.Source}\r\n");
                 builder.Append($"StackTrace:{exception.StackTrace}\r\n");
-                builder.Append($"InnerException:{exception.InnerException}\r\n");
+                if (exception.InnerException != null)
+                {
+                    builder.Append($"InnerException:{exception.InnerException.Message}\r\n");
+                    builder.Append($"InnerExceptionStackTrace:{exception.InnerException.StackTrace}\r\n");
+                }
                 LogMessage(loggingLevel, builder.ToString());
             });
         }
-        
+
         /// <summary>
         /// Connon storage
         /// </summary>

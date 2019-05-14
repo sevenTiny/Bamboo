@@ -9,8 +9,8 @@ namespace SevenTiny.Bantina
     /// </summary>
     public class Result
     {
-        public bool IsSuccess { get; protected set; }
-        public string Message { get; protected set; }
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
 
         public static Result Success(string message = null)
             => new Result { IsSuccess = true, Message = message };
