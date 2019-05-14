@@ -11,6 +11,11 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
         /// </summary>
         private static HashSet<Type> ScanedType = new HashSet<Type>();
 
+        internal static void ResetScanedType()
+        {
+            ScanedType = new HashSet<Type>();
+        }
+
         /// <summary>
         /// dynamic proxy get service via this method
         /// </summary>
@@ -77,7 +82,7 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
 
             //check for circular references.
             if (ScanedType.Contains(serviceType))
-                throw new InvalidOperationException("Existence of circular references.");
+                throw new InvalidOperationException("Existence of circular references or repeat create instance operate.");
             else
                 ScanedType.Add(serviceType);
 

@@ -1,4 +1,6 @@
-﻿namespace SevenTiny.Bantina.Spring.Middleware
+﻿using SevenTiny.Bantina.Spring.DependencyInjection;
+
+namespace SevenTiny.Bantina.Spring.Middleware
 {
     internal static class DependencyControlMiddleware
     {
@@ -12,6 +14,8 @@
             {
                 var result = next();
                 SpringContext.RequestServices.ScanAbandonService();
+                //re-count next time!
+                ServiceProvider.ResetScanedType();
                 return result;
             });
         }

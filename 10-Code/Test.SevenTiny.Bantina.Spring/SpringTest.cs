@@ -43,5 +43,21 @@ namespace Test.SevenTiny.Bantina.Spring
 
             instance.ServiceTest();
         }
+
+        [Fact]
+        public void CreateInstance()
+        {
+            //这里将注册改为AddTransien模式，每次请求结束会重置循环引用操作记录
+            var instance = SpringContext.RequestServices.GetService<IAService>();
+            instance.Test();
+            var instance2 = SpringContext.RequestServices.GetService<IAService>();
+            instance2.Test();
+            var instance3 = SpringContext.RequestServices.GetService<IAService>();
+            instance3.Test();
+
+            Assert.NotNull(instance);
+            Assert.NotNull(instance2);
+            Assert.NotNull(instance3);
+        }
     }
 }
