@@ -6,6 +6,10 @@ namespace SevenTiny.Bantina.Spring.DependencyInjection
 {
     public class ServiceProvider : IServiceProvider
     {
+        /**
+         * Problem:在有两个子服务同时引用第三个服务时，如果采用Transien这里不支持，会抛出异常，因为已经扫描过一次了
+         * Tips:这里应该更换实现方式，将类型转为图模型，判断图是否有环这样一个模型来解决当前问题
+         * */
         /// <summary>
         /// save scaned type
         /// </summary>

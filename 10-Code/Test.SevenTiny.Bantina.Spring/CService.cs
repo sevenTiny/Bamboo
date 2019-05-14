@@ -1,4 +1,5 @@
 ﻿using SevenTiny.Bantina.Spring.Aop;
+using SevenTiny.Bantina.Spring.DependencyInjection;
 using System.Diagnostics;
 
 namespace Test.SevenTiny.Bantina.Spring
@@ -20,6 +21,9 @@ namespace Test.SevenTiny.Bantina.Spring
     [Action]
     public class CService : ICService
     {
+        [Service]
+        private IDService dService;
+
         public void WriteLog()
         {
             Trace.WriteLine("大吉大利，今晚吃鸡！");

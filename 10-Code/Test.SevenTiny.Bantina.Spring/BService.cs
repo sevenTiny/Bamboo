@@ -15,6 +15,9 @@ namespace Test.SevenTiny.Bantina.Spring
         [Service]
         private ICService cService;
 
+        [Service]
+        private IDService dService;
+
         public void Test()
         {
             cService.WriteLog();
