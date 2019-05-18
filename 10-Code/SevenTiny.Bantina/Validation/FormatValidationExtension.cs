@@ -20,6 +20,8 @@ namespace SevenTiny.Bantina.Validation
     public static class FormatValidationExtension
     {
         public static bool IsNull(this object data) => data == null;
+        public static bool IsNullOrEmpty(this string data) => string.IsNullOrEmpty(data);
+        public static bool IsNullOrWhiteSpace(this string data) => string.IsNullOrWhiteSpace(data);
 
         /// <summary>
         /// check match regex string

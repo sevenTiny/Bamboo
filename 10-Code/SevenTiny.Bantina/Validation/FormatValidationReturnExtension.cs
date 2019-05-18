@@ -21,6 +21,10 @@ namespace SevenTiny.Bantina.Validation
     {
         public static object CheckNull(this object data, string errorMessage)
         => data != null ? data : throw new Exception(errorMessage);
+        public static string CheckNullOrEmpty(this string data, string errorMessage)
+        => !data.IsNullOrEmpty() ? data : throw new Exception(errorMessage);
+        public static string CheckNullOrWhiteSpace(this string data, string errorMessage)
+        => !data.IsNullOrWhiteSpace() ? data : throw new Exception(errorMessage);
 
         /// <summary>
         /// Check match regex string
