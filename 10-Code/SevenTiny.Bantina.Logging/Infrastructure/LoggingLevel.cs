@@ -14,7 +14,7 @@
  *********************************************************/
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
-    public enum LoggingLevel
+    internal enum LoggingLevel
     {
         Info=1,
         Debug=2,

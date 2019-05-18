@@ -19,7 +19,7 @@ using System.Linq;
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
     [ConfigName("Logging")]
-    internal class LoggingConfig : MySqlConfigBase<LoggingConfig>
+    internal class LoggingConfig : MySqlRowConfigBase<LoggingConfig>
     {
         public static LoggingConfig Instance = new LoggingConfig();
 
@@ -49,7 +49,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
@@ -65,13 +65,13 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //load group config
-            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Instance.GetConfigList()?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;

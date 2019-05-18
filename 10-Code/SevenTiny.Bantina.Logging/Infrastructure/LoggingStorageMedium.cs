@@ -14,7 +14,7 @@
  *********************************************************/
 namespace SevenTiny.Bantina.Logging.Infrastructure
 {
-    public enum LoggingStorageMedium
+    internal enum LoggingStorageMedium
     {
         LocalFile=0,
         DataBase=1
