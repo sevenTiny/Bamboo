@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SevenTiny.Bantina.Logging" Version="1.0.8" />
+    <PackageReference Include="SevenTiny.Bantina.Logging" Version="1.0.9" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
 

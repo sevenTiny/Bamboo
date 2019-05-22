@@ -22,7 +22,7 @@ using System.Linq;
 namespace SevenTiny.Bantina.Redis
 {
     [ConfigName("Redis")]
-    internal class RedisConfig : MySqlConfigBase<RedisConfig>
+    internal class RedisConfig : MySqlRowConfigBase<RedisConfig>
     {
         private static RedisConfig Instance = new RedisConfig();
 
@@ -41,7 +41,7 @@ namespace SevenTiny.Bantina.Redis
 
         private static void Initial()
         {
-            var group = Instance.GetConfigList().GroupBy(t => t.KeySpace).Select(t => new { KeySpace = t.Key, RedisConfig = t }).ToList();
+            var group = Instance.Config.GroupBy(t => t.KeySpace).Select(t => new { KeySpace = t.Key, RedisConfig = t }).ToList();
             dictionary = new Dictionary<string, Dictionary<string, string>>();
             foreach (var item in group)
             {
