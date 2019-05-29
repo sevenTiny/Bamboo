@@ -69,11 +69,11 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
         {
             switch (loggingLevel)
             {
-                case LoggingLevel.Info: return LoggingConfig.Instance.Level_Info == 1;
-                case LoggingLevel.Debug: return LoggingConfig.Instance.Level_Debug == 1;
-                case LoggingLevel.Warn: return LoggingConfig.Instance.Level_Warn == 1;
-                case LoggingLevel.Error: return LoggingConfig.Instance.Level_Error == 1;
-                case LoggingLevel.Fatal: return LoggingConfig.Instance.Level_Fatal == 1;
+                case LoggingLevel.Info: return LoggingConfig.Get().Level_Info == 1;
+                case LoggingLevel.Debug: return LoggingConfig.Get().Level_Debug == 1;
+                case LoggingLevel.Warn: return LoggingConfig.Get().Level_Warn == 1;
+                case LoggingLevel.Error: return LoggingConfig.Get().Level_Error == 1;
+                case LoggingLevel.Fatal: return LoggingConfig.Get().Level_Fatal == 1;
                 default: return false;
             }
         }
