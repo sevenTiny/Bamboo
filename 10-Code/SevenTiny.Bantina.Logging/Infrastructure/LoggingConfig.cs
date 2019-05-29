@@ -26,17 +26,17 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
         [ConfigProperty]
         public string Group { get; set; }
         [ConfigProperty]
-        public string Level { get; set; }
-        [ConfigProperty]
-        public string StorageMedium { get; set; }
-        [ConfigProperty]
         public string Directory { get; set; }
         [ConfigProperty]
-        public string ConnectionString { get; set; }
+        public int Level_Info { get; set; }
         [ConfigProperty]
-        public int[] Levels { get; set; }
+        public int Level_Debug { get; set; }
         [ConfigProperty]
-        public int[] StorageMediums { get; set; }
+        public int Level_Warn { get; set; }
+        [ConfigProperty]
+        public int Level_Error { get; set; }
+        [ConfigProperty]
+        public int Level_Fatal { get; set; }
 
         protected override string _ConnectionString => GetConnectionStringFromAppSettings("SevenTinyConfig");
 
@@ -49,13 +49,13 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //load group config
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(AppSettingsConfigHelper.GetAppName()))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(AppSettingsConfigHelper.GetAppName()));
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Default"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Default"));
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
@@ -63,30 +63,18 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
             throw new EntryPointNotFoundException("[AppName] group not fount and [Default] goup not found also.please set least one group in logging config.");
         }
     }
-    internal static class ConfigExtension
+    internal static class LoggingConfigHelper
     {
-        public static LoggingConfig ExtendLevel(this LoggingConfig loggingConfig)
+        public static bool CheckLevelOpen(LoggingLevel loggingLevel)
         {
-            try
+            switch (loggingLevel)
             {
-                loggingConfig.Levels = loggingConfig.Level.Split(',')?.Select(t => Convert.ToInt32(t))?.ToArray();
-                return loggingConfig;
-            }
-            catch (Exception)
-            {
-                return loggingConfig;
-            }
-        }
-        public static LoggingConfig ExtendStorageMediums(this LoggingConfig loggingConfig)
-        {
-            try
-            {
-                loggingConfig.StorageMediums = loggingConfig.StorageMedium.Split(',')?.Select(t => Convert.ToInt32(t))?.ToArray();
-                return loggingConfig;
-            }
-            catch (Exception)
-            {
-                return loggingConfig;
+                case LoggingLevel.Info: return LoggingConfig.Instance.Level_Info == 1;
+                case LoggingLevel.Debug: return LoggingConfig.Instance.Level_Debug == 1;
+                case LoggingLevel.Warn: return LoggingConfig.Instance.Level_Warn == 1;
+                case LoggingLevel.Error: return LoggingConfig.Instance.Level_Error == 1;
+                case LoggingLevel.Fatal: return LoggingConfig.Instance.Level_Fatal == 1;
+                default: return false;
             }
         }
     }
