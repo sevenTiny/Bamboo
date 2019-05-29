@@ -24,11 +24,6 @@ namespace SevenTiny.Bantina
         {
             return result.IsSuccess ? executor(result) : result;
         }
-        public static Result<T> Continue<T>(this Result<T> result, Result<T> executor)
-        {
-            return result.IsSuccess ? executor : result;
-        }
-
         public static Result<T> ContinueAssert<T>(this Result<T> result, bool assertResult, string errorMessage)
         {
             return result.IsSuccess ? assertResult ? result : Result<T>.Error(errorMessage) : result;

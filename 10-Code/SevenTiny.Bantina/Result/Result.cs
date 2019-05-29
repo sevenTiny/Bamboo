@@ -25,10 +25,6 @@ namespace SevenTiny.Bantina
         {
             return result.IsSuccess ? executor(result) : result;
         }
-        public static Result Continue(this Result result, Result executor)
-        {
-            return result.IsSuccess ? executor : result;
-        }
         /// <summary>
         /// 继续一个断言（可以用来参数校验）
         /// </summary>
