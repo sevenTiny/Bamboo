@@ -48,35 +48,19 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
             {
                 return _loggingConfig;
             }
-            //if group not found,load root
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
-            if (_loggingConfig != null)
-            {
-                return _loggingConfig;
-            }
-            //if no config,return default
-            return new LoggingConfig() { Levels = new int[] { 5 }, StorageMediums = new int[] { 0 } };
-        }
-
-        public static LoggingConfig Get(string group)
-        {
-            if (_loggingConfig != null)
-            {
-                return _loggingConfig;
-            }
             //load group config
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(group))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(AppSettingsConfigHelper.GetAppName()))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Root"))?.ExtendLevel()?.ExtendStorageMediums();
+            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Default"))?.ExtendLevel()?.ExtendStorageMediums();
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
-            return new LoggingConfig() { Levels = new int[] { 5 }, StorageMediums = new int[] { 0 } };
+            throw new EntryPointNotFoundException("[AppName] group not fount and [Default] goup not found also.please set least one group in logging config.");
         }
     }
     internal static class ConfigExtension
