@@ -32,7 +32,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
 
         public static void Storage(LoggingLevel loggingLevel, string message)
         {
-            if (_LoggingConfig.Levels != null && _LoggingConfig.Levels.Contains((int)loggingLevel))
+            if (LoggingConfigHelper.CheckLevelOpen(loggingLevel))
             {
                 StorageForMedium(message);
             }
@@ -40,20 +40,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
 
         private static void StorageForMedium(string message)
         {
-            foreach (var item in _LoggingConfig.StorageMediums)
-            {
-                switch (item)
-                {
-                    case (int)LoggingStorageMedium.DataBase:
-                        ToDataBase(message);
-                        break;
-                    case (int)LoggingStorageMedium.LocalFile:
-                        ToFile(message);
-                        break;
-                    default:
-                        break;
-                }
-            }
+            ToFile(message);
         }
 
         /// <summary>

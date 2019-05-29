@@ -25,10 +25,6 @@ namespace SevenTiny.Bantina.Logging
         {
             LogStorage._LoggingConfig = LoggingConfig.Get();
         }
-        public LogManager(string group)
-        {
-            LogStorage._LoggingConfig = LoggingConfig.Get(group);
-        }
 
         public void Debug(string message) => LogMessage(LoggingLevel.Debug, message);
 
