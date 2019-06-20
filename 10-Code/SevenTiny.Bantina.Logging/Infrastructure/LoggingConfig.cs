@@ -21,8 +21,6 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
     [ConfigName("Logging")]
     internal class LoggingConfig : MySqlRowConfigBase<LoggingConfig>
     {
-        public static LoggingConfig Instance = new LoggingConfig();
-
         [ConfigProperty]
         public string Group { get; set; }
         [ConfigProperty]
@@ -38,8 +36,6 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
         [ConfigProperty]
         public int Level_Fatal { get; set; }
 
-        protected override string _ConnectionString => GetConnectionStringFromAppSettings("SevenTinyConfig");
-
         private static LoggingConfig _loggingConfig;
 
         public static LoggingConfig Get()
@@ -49,13 +45,13 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
                 return _loggingConfig;
             }
             //load group config
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals(AppSettingsConfigHelper.GetAppName()));
+            _loggingConfig = Instance?.FirstOrDefault(t => t.Group.Equals(AppSettingsConfigHelper.GetAppName()));
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
             }
             //if group not found,load root
-            _loggingConfig = Instance.Config?.FirstOrDefault(t => t.Group.Equals("Default"));
+            _loggingConfig = Instance?.FirstOrDefault(t => t.Group.Equals("Default"));
             if (_loggingConfig != null)
             {
                 return _loggingConfig;
