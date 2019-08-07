@@ -11,7 +11,7 @@ namespace Test.SevenTiny.Bantina
         [Fact]
         public void Get()
         {
-            var result = HttpHelper.Get(new GetRequestArgs { Url = "http://101.201.66.247/Home/About" });
+            var result = HttpHelper.Get(new GetRequestArgs { Url = "http://www.baidu.com" });
             Assert.NotNull(result);
         }
 
@@ -20,7 +20,7 @@ namespace Test.SevenTiny.Bantina
         {
             var arg = new PostRequestArgs
             {
-                Url = "http://101.201.66.247/Home/About"
+                Url = "http://www.baidu.com"
             };
             var result = HttpHelper.Post(arg);
 
@@ -32,7 +32,7 @@ namespace Test.SevenTiny.Bantina
         {
             var arg = new PutRequestArgs
             {
-                Url = "http://101.201.66.247/Home/About"
+                Url = "http://www.baidu.com"
             };
             var result = HttpHelper.Put(arg);
 
@@ -44,7 +44,7 @@ namespace Test.SevenTiny.Bantina
         {
             var arg = new DeleteRequestArgs
             {
-                Url = "http://101.201.66.247/Home/About"
+                Url = "http://www.baidu.com"
             };
             var result = HttpHelper.Delete(arg);
 

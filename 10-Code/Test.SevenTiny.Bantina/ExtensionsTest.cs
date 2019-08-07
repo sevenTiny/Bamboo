@@ -1,5 +1,7 @@
 using SevenTiny.Bantina.Extensions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
 
@@ -7,16 +9,28 @@ namespace Test.SevenTiny.Bantina
 {
     public class ExtensionsTest
     {
+        private IEnumerable<Student> GetTestData()
+        {
+            foreach (var item in Enumerable.Range(1, 100))
+            {
+                yield return new Student(item, item.ToString(), item);
+            }
+        }
+
         [Fact]
         public void ExpressionExtensions()
         {
-            Expression<Func<Student, bool>> func = t => t.Id == 1;
+            Expression<Func<Student, bool>> func = t => t.Id > 5;
 
-            func = func.And(tt => tt.Name.Contains("123"));
+            Func<Student, bool> where1 = func.And(tt => tt.Name.Contains("5")).And(tt => tt.Age < 20).Compile();
 
-            func = func.Or(tt => tt.HealthLevel == 2);
+            Func<Student, bool> where2 = t => t.Age < 20 && t.Name.Contains("5") && t.Id > 5;
 
-            Assert.NotNull(func);
+            var result1 = GetTestData().Where(where1)?.FirstOrDefault()?.GetName();
+
+            var result2 = GetTestData().Where(where2)?.FirstOrDefault()?.GetName();
+
+            Assert.Equal(result1, result2);
         }
     }
 
@@ -28,6 +42,13 @@ namespace Test.SevenTiny.Bantina
         public int GradeId { get; set; }
         public int BodyHigh { get; set; }
         public int HealthLevel { get; set; }
+
+        public Student(int id, string name, int age)
+        {
+            Id = id;
+            Name = name;
+            Age = age;
+        }
 
         public string GetName()
         {

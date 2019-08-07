@@ -29,7 +29,7 @@ namespace SevenTiny.Bantina.Extensions
             return Expression.Lambda<T>(merge(left.Body, rightBody), left.Parameters);
         }
 
-        partial class ParameterRebinder : ExpressionVisitor
+        internal class ParameterRebinder : ExpressionVisitor
         {
             private readonly Dictionary<ParameterExpression, ParameterExpression> map;
 

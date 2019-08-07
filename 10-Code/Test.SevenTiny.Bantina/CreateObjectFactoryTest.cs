@@ -80,7 +80,6 @@ namespace Test.SevenTiny.Bantina
         }
     }
 
-
     /// <summary>
     /// 为了测试Expression不带参数兼容性能损耗，特加个最简单的
     /// </summary>
@@ -124,7 +123,7 @@ namespace Test.SevenTiny.Bantina
 
 
         [Theory]
-        [InlineData(1000000)]
+        [InlineData(10000)]
         [Trait("description", "无参构造各方法调用性能对比")]
         public void PerformanceReportWithNoArguments(int count)
         {
@@ -173,7 +172,7 @@ namespace Test.SevenTiny.Bantina
         }
 
         [Theory]
-        [InlineData(1000000)]
+        [InlineData(10000)]
         [Trait("description", "带参构造各方法调用性能对比")]
         public void PerformanceReportWithArguments(int count)
         {
