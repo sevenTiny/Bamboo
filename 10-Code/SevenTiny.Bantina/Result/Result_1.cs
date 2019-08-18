@@ -12,10 +12,16 @@ namespace SevenTiny.Bantina
         public T Data { get; set; }
 
         public static Result<T> Success(string message = null, T data = default(T))
-            => new Result<T> { IsSuccess = true, Message = message, Data = data };
+            => new Result<T> { IsSuccess = true, TipType = TipType.Success, Message = message, Data = data };
+
+        public static Result<T> Warning(string message = null, T data = default(T))
+            => new Result<T> { IsSuccess = true, TipType = TipType.Warning, Message = message, Data = data };
+
+        public static Result<T> Info(string message = null, T data = default(T))
+            => new Result<T> { IsSuccess = true, TipType = TipType.Info, Message = message, Data = data };
 
         public static Result<T> Error(string message = null, T data = default(T))
-            => new Result<T> { IsSuccess = false, Message = message, Data = data };
+            => new Result<T> { IsSuccess = false, TipType = TipType.Error, Message = message, Data = data };
     }
 
     public static class Result_1_Extension
@@ -24,9 +30,20 @@ namespace SevenTiny.Bantina
         {
             return result.IsSuccess ? executor(result) : result;
         }
-        public static Result<T> ContinueAssert<T>(this Result<T> result, bool assertResult, string errorMessage)
+
+        /// <summary>
+        /// 继续一个断言（可以用来参数校验）
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="assertExecutor">断言执行方法，返回断言的结果</param>
+        /// <param name="errorMessage">断言返回的信息</param>
+        /// <returns></returns>
+        public static Result<T> ContinueAssert<T>(this Result<T> result, Func<Result<T>, bool> assertExecutor, string errorMessage)
         {
-            return result.IsSuccess ? assertResult ? result : Result<T>.Error(errorMessage) : result;
+            if (!result.IsSuccess)
+                return result;
+
+            return assertExecutor(result) ? result : Result<T>.Error(errorMessage);
         }
     }
 }
