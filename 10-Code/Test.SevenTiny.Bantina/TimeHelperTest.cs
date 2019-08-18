@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Test.SevenTiny.Bantina
 {
-    public class DateTimeHelperTest
+    public class TimeHelperTest
     {
         [Fact]
         public void TimeStamp()

@@ -7,28 +7,22 @@ using Xunit;
 
 namespace Test.SevenTiny.Bantina
 {
-    public class ExtensionsTest
+    public class ExpressionExtensionsTest
     {
-        private IEnumerable<Student> GetTestData()
-        {
-            foreach (var item in Enumerable.Range(1, 100))
-            {
-                yield return new Student(item, item.ToString(), item);
-            }
-        }
-
         [Fact]
-        public void ExpressionExtensions()
+        public void And()
         {
+            var testDatas = Student.GetTestData();
+
             Expression<Func<Student, bool>> func = t => t.Id > 5;
 
             Func<Student, bool> where1 = func.And(tt => tt.Name.Contains("5")).And(tt => tt.Age < 20).Compile();
 
             Func<Student, bool> where2 = t => t.Age < 20 && t.Name.Contains("5") && t.Id > 5;
 
-            var result1 = GetTestData().Where(where1)?.FirstOrDefault()?.GetName();
+            var result1 = testDatas.Where(where1)?.FirstOrDefault()?.GetName();
 
-            var result2 = GetTestData().Where(where2)?.FirstOrDefault()?.GetName();
+            var result2 = testDatas.Where(where2)?.FirstOrDefault()?.GetName();
 
             Assert.Equal(result1, result2);
         }
@@ -53,6 +47,14 @@ namespace Test.SevenTiny.Bantina
         public string GetName()
         {
             return this.Name;
+        }
+
+        internal static IEnumerable<Student> GetTestData()
+        {
+            foreach (var item in Enumerable.Range(1, 100))
+            {
+                yield return new Student(item, item.ToString(), item);
+            }
         }
     }
 }
