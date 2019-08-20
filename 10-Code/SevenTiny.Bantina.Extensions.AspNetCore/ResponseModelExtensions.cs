@@ -1,4 +1,6 @@
-﻿namespace SevenTiny.Bantina.Extensions.AspNetCore
+﻿using Microsoft.AspNetCore.Mvc;
+
+namespace SevenTiny.Bantina.Extensions.AspNetCore
 {
     public static class ResponseModelExtensions
     {
@@ -22,5 +24,17 @@
                 TipType = result.TipType,
                 Data = result.Data
             };
+
+        public static JsonResult ToJsonResult(this ResponseModel response)
+           =>
+           new JsonResult(response);
+
+        public static JsonResult ToJsonResult(this Result result)
+           =>
+           new JsonResult(result.ToResponseModel());
+
+        public static JsonResult ToJsonResult<T>(this Result<T> result)
+           =>
+           new JsonResult(result.ToResponseModel());
     }
 }
