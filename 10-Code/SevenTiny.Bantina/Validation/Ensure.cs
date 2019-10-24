@@ -9,27 +9,20 @@ namespace SevenTiny.Bantina.Validation
         [System.Diagnostics.DebuggerStepThrough]
         public static void ArgumentNotNullOrEmpty(object arg, string argName, string message = null)
         {
-            bool valid = true;
+            bool notValid = arg == null;
 
-            if (arg is string a && string.IsNullOrEmpty(a))
-                valid = false;
+            switch (arg)
+            {
+                case string b when string.IsNullOrEmpty(b):
+                case IEnumerable<int> c when !c.Any():
+                case IEnumerable<float> d when !d.Any():
+                case IEnumerable<double> e when !e.Any():
+                case IEnumerable<object> enumerable when !enumerable.Any():
+                    notValid = true;
+                    break;
+            }
 
-            else if (arg is IEnumerable<int> enumerable_int && (enumerable_int == null || !enumerable_int.Any()))
-                valid = false;
-
-            else if (arg is IEnumerable<float> enumerable_float && (enumerable_float == null || !enumerable_float.Any()))
-                valid = false;
-
-            else if (arg is IEnumerable<double> enumerable_double && (enumerable_double == null || !enumerable_double.Any()))
-                valid = false;
-
-            else if (arg is IEnumerable<object> enumerable && (enumerable == null || !enumerable.Any()))
-                valid = false;
-
-            else if (arg == null)
-                valid = false;
-
-            if (!valid)
+            if (notValid)
                 throw new ArgumentNullException(nameof(argName), message ?? "Parameter cannot be null or empty");
         }
     }
