@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SevenTiny.Bantina.Validation;
+using System;
 
 namespace SevenTiny.Bantina
 {
@@ -53,6 +54,7 @@ namespace SevenTiny.Bantina
         {
             return result.IsSuccess ? executor(result) : result;
         }
+
         /// <summary>
         /// 继续一个断言（可以用来参数校验）
         /// </summary>
@@ -66,6 +68,25 @@ namespace SevenTiny.Bantina
                 return result;
 
             return assertExecutor(result) ? result : Result.Error(errorMessage);
+        }
+
+        /// <summary>
+        /// 继续一个参数校验
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="argument">参数</param>
+        /// <param name="argumentName">参数名</param>
+        /// <param name="errorMessage">自定义错误信息</param>
+        /// <returns></returns>
+        public static Result ContinueEnsureArgumentNotNullOrEmpty(this Result result, object argument, string argumentName, string errorMessage = null)
+        {
+            if (!result.IsSuccess)
+                return result;
+
+            if (FormatValidationExtension.IsNullOrEmpty(argument))
+                return Result.Error(errorMessage ?? $"Parameter cannot be null or empty. Parameter name: {argumentName}");
+
+            return result;
         }
 
         /// <summary>

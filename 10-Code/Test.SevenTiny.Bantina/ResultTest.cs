@@ -96,5 +96,28 @@ namespace Test.SevenTiny.Bantina
             Assert.Equal(tipType, result.TipType);
             Assert.Equal(message, result.Message);
         }
+
+        [Fact]
+        public void Result_ContinueTryCatch()
+        {
+            var errorMessage = "参数不能为空";
+
+            var result = Result.Success()
+                .ContinueWithTryCatch(_ =>
+                {
+                    throw new ArgumentNullException(errorMessage);
+                }, errorMessage);
+
+            Assert.Equal(errorMessage, result.Message);
+        }
+
+        [Fact]
+        public void Result_ContinueEnsureArgumentNotNullOrEmpty()
+        {
+            var result = Result.Success()
+                .ContinueEnsureArgumentNotNullOrEmpty(null, "age");
+
+            Assert.Equal("Parameter cannot be null or empty. Parameter name: age", result.Message);
+        }
     }
 }

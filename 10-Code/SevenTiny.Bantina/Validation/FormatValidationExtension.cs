@@ -13,6 +13,8 @@
  * Thx , Best Regards ~
  *********************************************************/
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace SevenTiny.Bantina.Validation
@@ -20,8 +22,24 @@ namespace SevenTiny.Bantina.Validation
     public static class FormatValidationExtension
     {
         public static bool IsNull(this object data) => data == null;
-        public static bool IsNullOrEmpty(this string data) => string.IsNullOrEmpty(data);
         public static bool IsNullOrWhiteSpace(this string data) => string.IsNullOrWhiteSpace(data);
+        public static bool IsNullOrEmpty(this object arg)
+        {
+            bool notValid = arg == null;
+
+            switch (arg)
+            {
+                case string b when string.IsNullOrEmpty(b):
+                case IEnumerable<int> c when !c.Any():
+                case IEnumerable<float> d when !d.Any():
+                case IEnumerable<double> e when !e.Any():
+                case IEnumerable<object> enumerable when !enumerable.Any():
+                    notValid = true;
+                    break;
+            }
+
+            return notValid;
+        }
 
         /// <summary>
         /// check match regex string
