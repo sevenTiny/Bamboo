@@ -67,5 +67,27 @@ namespace SevenTiny.Bantina
 
             return assertExecutor(result) ? result : Result.Error(errorMessage);
         }
+
+        /// <summary>
+        /// 继续执行表达式，如果抛出异常，则返回自定义错误结果（如没有则默认返回错误结果）
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="executor"></param>
+        /// <param name="catchErrorMessage">自定义异常错误提示</param>
+        /// <returns></returns>
+        public static Result ContinueWithTryCatch(this Result result, Func<Result, Result> executor, string catchErrorMessage = null)
+        {
+            if (!result.IsSuccess)
+                return result;
+
+            try
+            {
+                return executor(result);
+            }
+            catch (Exception ex)
+            {
+                return Result.Error(catchErrorMessage ?? ex.Message);
+            }
+        }
     }
 }

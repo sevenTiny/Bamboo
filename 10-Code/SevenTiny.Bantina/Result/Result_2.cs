@@ -30,6 +30,7 @@ namespace SevenTiny.Bantina
         {
             return result.IsSuccess ? executor(result) : result;
         }
+
         /// <summary>
         /// 继续一个断言（可以用来参数校验）
         /// </summary>
@@ -43,6 +44,30 @@ namespace SevenTiny.Bantina
                 return result;
 
             return assertExecutor(result) ? result : Result<T1, T2>.Error(errorMessage);
+        }
+
+        /// <summary>
+        /// 继续执行表达式，如果抛出异常，则返回自定义错误结果（如没有则默认返回错误结果）
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <param name="result"></param>
+        /// <param name="executor"></param>
+        /// <param name="catchErrorMessage"></param>
+        /// <returns></returns>
+        public static Result<T1, T2> ContinueWithTryCatch<T1, T2>(this Result<T1, T2> result, Func<Result<T1, T2>, Result<T1, T2>> executor, string catchErrorMessage = null)
+        {
+            if (!result.IsSuccess)
+                return result;
+
+            try
+            {
+                return executor(result);
+            }
+            catch (Exception ex)
+            {
+                return Result<T1, T2>.Error(catchErrorMessage ?? ex.Message);
+            }
         }
     }
 }
