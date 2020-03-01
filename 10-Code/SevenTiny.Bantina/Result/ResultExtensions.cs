@@ -24,7 +24,7 @@
         }
 
         #region Result
-        public static Result<T> AsResult<T>(Result result, T t = default(T))
+        public static Result<T> AsResult<T>(this Result result, T t = default(T))
         {
             return new Result<T>
             {
@@ -33,7 +33,7 @@
             .CopyCommonProperties(result);
         }
 
-        public static Result<T1, T2> AsResult<T1, T2>(Result result, T1 t1 = default(T1), T2 t2 = default(T2))
+        public static Result<T1, T2> AsResult<T1, T2>(this Result result, T1 t1 = default(T1), T2 t2 = default(T2))
         {
             return new Result<T1, T2>
             {
@@ -43,7 +43,7 @@
             .CopyCommonProperties(result);
         }
 
-        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(Result result, T1 t1 = default(T1), T2 t2 = default(T2), T3 t3 = default(T3))
+        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(this Result result, T1 t1 = default(T1), T2 t2 = default(T2), T3 t3 = default(T3))
         {
             return new Result<T1, T2, T3>
             {
@@ -56,7 +56,7 @@
         #endregion
 
         #region Result<T>
-        public static Result<T1, T2> AsResult<T1, T2>(Result<T1> result, T2 t2 = default(T2))
+        public static Result<T1, T2> AsResult<T1, T2>(this Result<T1> result, T2 t2 = default(T2))
         {
             return new Result<T1, T2>
             {
@@ -66,7 +66,7 @@
             .CopyCommonProperties(result);
         }
 
-        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(Result<T1> result, T2 t2 = default(T2), T3 t3 = default(T3))
+        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(this Result<T1> result, T2 t2 = default(T2), T3 t3 = default(T3))
         {
             return new Result<T1, T2, T3>
             {
@@ -79,7 +79,7 @@
         #endregion
 
         #region Result<T1,T2>
-        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(Result<T1,T2> result, T3 t3 = default(T3))
+        public static Result<T1, T2, T3> AsResult<T1, T2, T3>(this Result<T1, T2> result, T3 t3 = default(T3))
         {
             return new Result<T1, T2, T3>
             {
