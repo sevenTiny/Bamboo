@@ -79,7 +79,7 @@ namespace SevenTiny.Bantina
         /// <param name="executor"></param>
         /// <param name="catchErrorMessage"></param>
         /// <returns></returns>
-        public static Result<T1, T2, T3> ContinueWithTryCatch<T1, T2, T3>(this Result<T1, T2, T3> result, Func<Result<T1, T2, T3>, Result<T1, T2, T3>> executor, string catchErrorMessage = null)
+        public static Result<T1, T2, T3> ContinueWithTryCatch<T1, T2, T3>(this Result<T1, T2, T3> result, Func<Result<T1, T2, T3>, Result<T1, T2, T3>> executor, Action catchExecutor = null, string catchErrorMessage = null)
         {
             if (!result.IsSuccess)
                 return result;
@@ -90,6 +90,7 @@ namespace SevenTiny.Bantina
             }
             catch (Exception ex)
             {
+                catchExecutor?.Invoke();
                 return Result<T1, T2, T3>.Error(catchErrorMessage ?? ex.Message);
             }
         }
