@@ -106,7 +106,7 @@ namespace Test.SevenTiny.Bantina
                 .ContinueWithTryCatch(_ =>
                 {
                     throw new ArgumentNullException(errorMessage);
-                }, errorMessage);
+                }, null, errorMessage);
 
             Assert.Equal(errorMessage, result.Message);
         }

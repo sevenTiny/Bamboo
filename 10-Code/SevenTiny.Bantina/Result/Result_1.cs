@@ -8,8 +8,13 @@ namespace SevenTiny.Bantina
     /// Author:7tiny
     /// Create:2019年5月6日 16点28分
     /// </summary>
-    public class Result<T> : Result
+    public struct Result<T>
     {
+        public bool IsSuccess { get; internal set; }
+        public string Message { get; set; }
+        public string MoreMessage { get; set; }
+        public TipType TipType { get; internal set; }
+
         public T Data { get; set; }
 
         public static Result<T> Success(string message = null, T data = default(T))

@@ -8,7 +8,7 @@ namespace SevenTiny.Bantina
     /// Author:7tiny
     /// Create:2019年5月6日 16点28分
     /// </summary>
-    public class Result
+    public struct Result
     {
         public bool IsSuccess { get; internal set; }
         public string Message { get; set; }
