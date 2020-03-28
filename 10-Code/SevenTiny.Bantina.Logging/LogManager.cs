@@ -5,6 +5,7 @@
  * Address: Earth
  * Create: 2018-02-18 21:10:21
  * Modify: 2018-02-18 21:10:21
+ * Modify: 2020-03-28 16:22:00
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -12,101 +13,47 @@
  * Description: 
  * Thx , Best Regards ~
  *********************************************************/
+using Microsoft.Extensions.Logging;
 using SevenTiny.Bantina.Logging.Infrastructure;
 using System;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SevenTiny.Bantina.Logging
 {
-    public class LogManager : ILog
+    public class LogManager : ILogger
     {
         public LogManager()
         {
-            LogStorage._LoggingConfig = LoggingConfig.Get();
+            CreateDefaultLogger();
         }
 
-        public void Debug(string message) => LogMessage(LoggingLevel.Debug, message);
+        private const string DefaultLog4NetConfigFileName = "./SevenTinyConfig/log4net.config";
 
-        public void Error(string message) => LogMessage(LoggingLevel.Error, message);
+        private static string CategoryName => AppSettingsConfigHelper.GetAppName();
 
-        public void Error(Exception exception) => ExceptionLog(LoggingLevel.Error, exception);
-
-        public void Error(string message, Exception exception) => ExceptionLog(LoggingLevel.Error, message, exception);
-
-        public void Fatal(string message) => LogMessage(LoggingLevel.Fatal, message);
-
-        public void Fatal(Exception exception) => ExceptionLog(LoggingLevel.Fatal, exception);
-
-        public void Fatal(string message, Exception exception) => ExceptionLog(LoggingLevel.Fatal, message, exception);
-
-        public void Info(string message) => LogMessage(LoggingLevel.Info, message);
-
-        public void Warn(string message) => LogMessage(LoggingLevel.Warn, message);
-
-        private void ExceptionLog(LoggingLevel loggingLevel, Exception exception)
-        {
-            Task.Run(() =>
-            {
-                StringBuilder builder = new StringBuilder();
-                builder.Append($"Message:{exception.Message}\r\n");
-                builder.Append($"Source:{exception.Source}\r\n");
-                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
-                if (exception.InnerException != null)
-                {
-                    builder.Append($"InnerException:{exception.InnerException.Message}\r\n");
-                    builder.Append($"InnerExceptionStackTrace:{exception.InnerException.StackTrace}\r\n");
-                }
-                LogMessage(loggingLevel, builder.ToString());
-            });
-        }
-        private void ExceptionLog(LoggingLevel loggingLevel, string message, Exception exception)
-        {
-            Task.Run(() =>
-            {
-                StringBuilder builder = new StringBuilder();
-                builder.Append($"CustomMessage:{message}\r\n");
-                builder.Append($"Message:{exception.Message}\r\n");
-                builder.Append($"Source:{exception.Source}\r\n");
-                builder.Append($"StackTrace:{exception.StackTrace}\r\n");
-                if (exception.InnerException != null)
-                {
-                    builder.Append($"InnerException:{exception.InnerException.Message}\r\n");
-                    builder.Append($"InnerExceptionStackTrace:{exception.InnerException.StackTrace}\r\n");
-                }
-                LogMessage(loggingLevel, builder.ToString());
-            });
-        }
+        private ILogger _logger;
 
         /// <summary>
-        /// Connon storage
+        /// 创建默认的logger对象
         /// </summary>
-        /// <param name="loggingLevel"></param>
-        /// <param name="message"></param>
-        private void LogMessage(LoggingLevel loggingLevel, string message)
+        private void CreateDefaultLogger()
         {
-            string loggingLevelString = "";
-            switch (loggingLevel)
-            {
-                case LoggingLevel.Info:
-                    loggingLevelString = "Info";
-                    break;
-                case LoggingLevel.Debug:
-                    loggingLevelString = "Debug";
-                    break;
-                case LoggingLevel.Warn:
-                    loggingLevelString = "Warn";
-                    break;
-                case LoggingLevel.Error:
-                    loggingLevelString = "Error";
-                    break;
-                case LoggingLevel.Fatal:
-                    loggingLevelString = "Fatal";
-                    break;
-                default:
-                    break;
-            }
-            LogStorage.Storage(loggingLevel, $"\r\n[{DateTime.Now.ToString("yyyy/MM/dd hh:mm:ss.fff")}] [{loggingLevelString}]:\r\n{message}");
+            var provider = new Log4NetProvider(DefaultLog4NetConfigFileName);
+            _logger = provider.CreateLogger(CategoryName);
+        }
+
+        public IDisposable BeginScope<TState>(TState state)
+        {
+            return _logger.BeginScope(state);
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return _logger.IsEnabled(logLevel);
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            _logger.Log<TState>(logLevel, eventId, state, exception, formatter);
         }
     }
 }
