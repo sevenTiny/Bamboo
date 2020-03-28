@@ -19,9 +19,21 @@ namespace Test.SevenTiny.Bantina.Logging
         }
 
         [Fact]
-        public void LogExceptioni()
+        public void LogException()
         {
             Logger.LogError(new Exception("7tiny exception"), "execute code error");
+        }
+
+        [Fact]
+        public void LogDebug()
+        {
+            Logger.LogDebug("this is a debug debugdebugdebug");
+        }
+
+        [Fact]
+        public void LogCritical()
+        {
+            Logger.LogCritical("this is a debug LogCritical");
         }
 
         [Theory]
