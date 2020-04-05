@@ -13,6 +13,7 @@
  * Thx , Best Regards ~
  *********************************************************/
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -30,6 +31,11 @@ namespace SevenTiny.Bantina.Validation
             switch (arg)
             {
                 case string b when string.IsNullOrEmpty(b):
+                case Guid guid when guid == Guid.Empty:
+                case int @int when @int == 0:
+                case double @double when @double == 0:
+                case float @float when @float == 0:
+                case decimal @decimal when @decimal == 0:
                 case IEnumerable<int> c when !c.Any():
                 case IEnumerable<float> d when !d.Any():
                 case IEnumerable<double> e when !e.Any():

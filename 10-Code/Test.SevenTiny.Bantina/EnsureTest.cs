@@ -11,6 +11,9 @@ namespace Test.SevenTiny.Bantina
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        [InlineData(0)]
+        [InlineData(0f)]
+        [InlineData(0d)]
         public void ArgumentNotNullOrEmpty(object data)
         {
             Assert.Throws<ArgumentNullException>(() => { Ensure.ArgumentNotNullOrEmpty(data, nameof(data)); });
@@ -50,6 +53,12 @@ namespace Test.SevenTiny.Bantina
         public void ArgumentNotNullOrEmpty7()
         {
             Assert.Throws<ArgumentNullException>(() => { Ensure.ArgumentNotNullOrEmpty(new List<object> { }, null); });
+        }
+
+        [Fact]
+        public void ArgumentNotNullOrEmpty8()
+        {
+            Assert.Throws<ArgumentNullException>(() => { Ensure.ArgumentNotNullOrEmpty(Guid.Empty, null); });
         }
     }
 }
