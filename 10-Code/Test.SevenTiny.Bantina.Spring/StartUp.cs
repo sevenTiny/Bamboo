@@ -14,13 +14,13 @@ namespace Test.SevenTiny.Bantina.Spring
 
         public override void ConfigureServices(IServiceCollection services)
         {
-            //services.AddSingleton(Assembly.Load("Test.SevenTiny.Bantina.Spring"));
-            //services.AddSingletonWithAop<IAService, AService>();
-            //services.AddSingletonWithAop<ICService, CService>();
+            services.AddSingleton(Assembly.Load("Test.SevenTiny.Bantina.Spring"));
+            services.AddSingletonWithAop<IAService, AService>();
+            services.AddSingletonWithAop<ICService, CService>();
 
-            services.AddTransien(Assembly.Load("Test.SevenTiny.Bantina.Spring"));
-            services.AddTransientWithAop<IAService, AService>();
-            services.AddTransientWithAop<ICService, CService>();
+            //services.AddTransien(Assembly.Load("Test.SevenTiny.Bantina.Spring"));
+            //services.AddTransientWithAop<IAService, AService>();
+            //services.AddTransientWithAop<ICService, CService>();
         }
 
         public override void Start()

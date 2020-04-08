@@ -16,7 +16,7 @@ namespace Test.SevenTiny.Bantina.Spring
 
         public override void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(Assembly.Load("Test.Framework"));
+            services.AddSingleton(Assembly.Load("Test.SevenTiny.Bantina.SpringNF"));
             services.AddSingletonWithAop<IAService, AService>();
             services.AddSingletonWithAop<ICService, CService>();
         }
