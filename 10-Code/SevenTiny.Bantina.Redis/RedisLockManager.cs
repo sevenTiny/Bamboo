@@ -1,4 +1,5 @@
-﻿using StackExchange.Redis;
+﻿using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 using System;
 using System.Threading;
 
@@ -98,7 +99,7 @@ namespace SevenTiny.Bantina.Redis
                 try
                 {
                     var result = Db.LockTake(lockName, Token, LockExpirySeconds);
-                    ;
+
                     if (!result && retryTime > 0)
                     {
                         retryTime--;
@@ -115,7 +116,7 @@ namespace SevenTiny.Bantina.Redis
                         Thread.Sleep(3000);
                         continue;
                     }
-                    log.Error($"redis lock release error,ex:{ex.ToString()}");
+                    log.LogError($"redis lock release error,ex:{ex.ToString()}");
                     throw ex;
                 }
             }
@@ -151,7 +152,7 @@ namespace SevenTiny.Bantina.Redis
                         Thread.Sleep(3000);
                         continue;
                     }
-                    log.Error($"redis lock release error,ex:{ex.ToString()}");
+                    log.LogError($"redis lock release error,ex:{ex.ToString()}");
                     throw ex;
                 }
             }
