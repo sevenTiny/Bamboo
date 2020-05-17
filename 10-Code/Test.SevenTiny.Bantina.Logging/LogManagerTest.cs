@@ -1,14 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using SevenTiny.Bantina.Logging;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Xunit;
 
 namespace Test.SevenTiny.Bantina.Logging
 {
-    public class Log4netTest
+    public class LogManagerTest
     {
         public static ILogger Logger => new LogManager();
 

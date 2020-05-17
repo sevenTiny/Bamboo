@@ -16,13 +16,25 @@
 using Microsoft.Extensions.Logging;
 using SevenTiny.Bantina.Logging.Infrastructure;
 using System;
+using System.IO;
+using System.Text;
 
 namespace SevenTiny.Bantina.Logging
 {
     public class LogManager : ILogger
     {
+        static LogManager()
+        {
+            //如果配置文件不存在，则输出配置文件
+            if (!File.Exists(DefaultLog4NetConfigFileName))
+            {
+                File.WriteAllText(DefaultLog4NetConfigFileName, LoggingConst.ConfigContent, Encoding.UTF8);
+            }
+        }
+
         public LogManager()
         {
+            //创建默认执行器
             CreateDefaultLogger();
         }
 
