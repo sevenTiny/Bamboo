@@ -24,8 +24,6 @@ namespace SevenTiny.Bantina.Redis
     [ConfigName("Redis")]
     internal class RedisConfig : MySqlRowConfigBase<RedisConfig>
     {
-        private static RedisConfig Instance = new RedisConfig();
-
         [ConfigProperty]
         public string KeySpace { get; set; }
         [ConfigProperty]
@@ -35,13 +33,11 @@ namespace SevenTiny.Bantina.Redis
         [ConfigProperty]
         public string Description { get; set; }
 
-        protected override string _ConnectionString => GetConnectionStringFromAppSettings("SeventinyConfig");
-
         private static Dictionary<string, Dictionary<string, string>> dictionary;
 
         private static void Initial()
         {
-            var group = Instance.Config.GroupBy(t => t.KeySpace).Select(t => new { KeySpace = t.Key, RedisConfig = t }).ToList();
+            var group = Instance.GroupBy(t => t.KeySpace).Select(t => new { KeySpace = t.Key, RedisConfig = t }).ToList();
             dictionary = new Dictionary<string, Dictionary<string, string>>();
             foreach (var item in group)
             {

@@ -2,6 +2,7 @@
 using StackExchange.Redis;
 using System;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 
 namespace SevenTiny.Bantina.Redis
 {
@@ -11,8 +12,8 @@ namespace SevenTiny.Bantina.Redis
         protected IDatabase Db { get; set; }
         private string KeySpace { get; set; }
 
-        protected static ILog log = new LogManager();
-        protected RedisServerManager(string keySpace,string server, string port)
+        protected static ILogger log = new LogManager();
+        protected RedisServerManager(string keySpace, string server, string port)
         {
             KeySpace = keySpace;
             //set establish retry mechanism (3 times)
@@ -33,7 +34,7 @@ namespace SevenTiny.Bantina.Redis
                         Thread.Sleep(1000);
                         continue;
                     }
-                    log.Error($"Redis server {server}:{port} establish  connection error!", ex);
+                    log.LogError(ex, $"Redis server {server}:{port} establish  connection error!");
                     throw new TimeoutException($"redis init timeout,server {server}:{port} reject or other.ex{ex.ToString()}");
                 }
             }
