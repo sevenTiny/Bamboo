@@ -6,8 +6,6 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
     [ConfigName("appsettings")]
     internal class AppSettingsConfig : JsonConfigBase<AppSettingsConfig>
     {
-        //[JsonProperty("ConnectionStrings")]
-        //public ConnectionStrings ConnectionStrings { get; set; }
         [JsonProperty("AppName")]
         public string AppName { get; set; }
     }
@@ -22,7 +20,7 @@ namespace SevenTiny.Bantina.Logging.Infrastructure
     {
         public static string GetAppName()
         {
-            return AppSettingsConfig.Instance?.AppName ?? "SevenTinyCloud";
+            return AppSettingsConfig.Instance?.AppName ?? LoggingConst.DefaultAppName;
         }
     }
 }
