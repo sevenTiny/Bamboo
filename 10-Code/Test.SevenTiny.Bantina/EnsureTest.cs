@@ -60,5 +60,18 @@ namespace Test.SevenTiny.Bantina
         {
             Assert.Throws<ArgumentNullException>(() => { Ensure.ArgumentNotNullOrEmpty(Guid.Empty, null); });
         }
+
+        [Fact]
+        public void ArgumentNotNullOrEmpty9()
+        {
+            List<int> list = null;
+            Assert.Throws<ArgumentNullException>(() => { Ensure.ArgumentNotNullOrEmpty(list, null); });
+        }
+
+        [Fact]
+        public void ArgumentNotNullOrEmpty10()
+        {
+            Assert.Throws<ArgumentException>(() => { Ensure.Assert(1 == 2, new ArgumentException()); });
+        }
     }
 }
