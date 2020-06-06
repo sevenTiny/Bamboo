@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina", "..\10-Code\SevenTiny.Bantina\SevenTiny.Bantina.csproj", "{91E2949D-D240-489A-801F-F86706DA6530}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "0-Test", "0-Test", "{AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Logging", "..\10-Code\SevenTiny.Bantina.Logging\SevenTiny.Bantina.Logging.csproj", "{DA01D74A-9421-4F91-9821-34BA9D499293}"
 EndProject
@@ -42,6 +42,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenTiny.Bantina.SpringNF", "..\10-Code\SevenTiny.Bantina.SpringNF\SevenTiny.Bantina.SpringNF.csproj", "{DA70F71E-A5E9-4216-B385-5480A9DC4D67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.SevenTiny.Bantina.SpringNF", "..\10-Code\Test.SevenTiny.Bantina.SpringNF\Test.SevenTiny.Bantina.SpringNF.csproj", "{71D66582-7D0F-4D23-88EC-D0175EB8105E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{EEE7A7BD-2A31-4946-A36C-B809F91FE4AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -136,6 +138,7 @@ Global
 		{2B069340-6627-498C-99FB-9089CC307EE0} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{A32681CF-0AC3-43F5-917B-7E5AAC06A960} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 		{45BE51C3-8A11-4060-9C52-9F202A84D6A1} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
+		{EBA45562-E2F8-418A-8C40-09AB621B2665} = {EEE7A7BD-2A31-4946-A36C-B809F91FE4AA}
 		{71D66582-7D0F-4D23-88EC-D0175EB8105E} = {AD0F34B2-DC13-4DD9-BFA2-9185CC1955A5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

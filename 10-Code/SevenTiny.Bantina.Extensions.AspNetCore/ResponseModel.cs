@@ -22,7 +22,7 @@ namespace SevenTiny.Bantina.Extensions.AspNetCore
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         public object Data { get; set; }
 
-        public static ResponseModel Success(object data, string message = null)
+        public static ResponseModel Success(string message = "操作成功", object data = null)
             => new ResponseModel
             {
                 IsSuccess = true,
@@ -31,7 +31,7 @@ namespace SevenTiny.Bantina.Extensions.AspNetCore
                 Data = data
             };
 
-        public static ResponseModel Error(string message, object data = null)
+        public static ResponseModel Error(string message = "操作失败", object data = null)
             => new ResponseModel
             {
                 IsSuccess = false,
