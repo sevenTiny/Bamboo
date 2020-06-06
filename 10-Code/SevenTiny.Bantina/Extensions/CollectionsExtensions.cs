@@ -86,6 +86,7 @@ namespace SevenTiny.Bantina.Extensions
             else
                 dictionary.Add(key, value);
         }
+
         /// <summary>
         /// Safe get,if key exist,return value. if not return default(TValue).
         /// </summary>
