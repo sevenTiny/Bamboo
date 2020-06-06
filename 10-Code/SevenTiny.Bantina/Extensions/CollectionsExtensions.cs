@@ -41,5 +41,49 @@ namespace SevenTiny.Bantina.Extensions
             }
             return result;
         }
+
+        /// <summary>
+        /// 安全获取字典数据的扩展方法
+        /// 如果字典不存在key，那么返回默认值（默认值可以手动传递）
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="sourse"></param>
+        /// <param name="key"></param>
+        /// <param name="ifNotGetSetValue"></param>
+        /// <returns></returns>
+        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> sourse, TKey key, TValue ifNotGetSetValue = default(TValue))
+        {
+            return sourse.TryGetValue(key, out TValue value) ? value : ifNotGetSetValue;
+        }
+
+        /// <summary>
+        /// Contains Key，Continue的方式处理安全转化为字典
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TElement"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="keySelector"></param>
+        /// <param name="elementSelector"></param>
+        /// <returns></returns>
+        public static Dictionary<TKey, TElement> SafeToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector)
+        {
+            if (source == null || !source.Any())
+                return new Dictionary<TKey, TElement>(0);
+
+            Dictionary<TKey, TElement> dic = new Dictionary<TKey, TElement>();
+
+            foreach (var item in source)
+            {
+                var key = keySelector(item);
+
+                if (dic.ContainsKey(key))
+                    continue;
+
+                dic.Add(key, elementSelector(item));
+            }
+            return dic;
+        }
     }
 }
