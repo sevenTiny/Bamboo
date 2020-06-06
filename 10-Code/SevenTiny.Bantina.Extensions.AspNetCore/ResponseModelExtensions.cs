@@ -14,6 +14,17 @@ namespace SevenTiny.Bantina.Extensions.AspNetCore
                 TipType = result.TipType
             };
 
+        public static ResponseModel ToResponseModel(this Result result, object data)
+            =>
+            new ResponseModel
+            {
+                IsSuccess = result.IsSuccess,
+                Message = result.Message,
+                MoreMessage = result.MoreMessage,
+                TipType = result.TipType,
+                Data = data
+            };
+
         public static ResponseModel ToResponseModel<T>(this Result<T> result)
             =>
             new ResponseModel
