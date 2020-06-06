@@ -43,21 +43,6 @@ namespace SevenTiny.Bantina.Extensions
         }
 
         /// <summary>
-        /// 安全获取字典数据的扩展方法
-        /// 如果字典不存在key，那么返回默认值（默认值可以手动传递）
-        /// </summary>
-        /// <typeparam name="TKey"></typeparam>
-        /// <typeparam name="TValue"></typeparam>
-        /// <param name="sourse"></param>
-        /// <param name="key"></param>
-        /// <param name="ifNotGetSetValue"></param>
-        /// <returns></returns>
-        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> sourse, TKey key, TValue ifNotGetSetValue = default(TValue))
-        {
-            return sourse.TryGetValue(key, out TValue value) ? value : ifNotGetSetValue;
-        }
-
-        /// <summary>
         /// Contains Key，Continue的方式处理安全转化为字典
         /// </summary>
         /// <typeparam name="TSource"></typeparam>
@@ -84,6 +69,34 @@ namespace SevenTiny.Bantina.Extensions
                 dic.Add(key, elementSelector(item));
             }
             return dic;
+        }
+
+        /// <summary>
+        /// If exist the key , update the value.
+        /// </summary>
+        /// <typeparam name="TKey">type of Key</typeparam>
+        /// <typeparam name="TValue">type of Value</typeparam>
+        /// <param name="dictionary">dictionary</param>
+        /// <param name="key">key</param>
+        /// <param name="value">value</param>
+        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (dictionary.ContainsKey(key))
+                dictionary[key] = value;
+            else
+                dictionary.Add(key, value);
+        }
+        /// <summary>
+        /// Safe get,if key exist,return value. if not return default(TValue).
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TValue"></typeparam>
+        /// <param name="dictionary"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> sourse, TKey key, TValue ifNotGetSetValue = default(TValue))
+        {
+            return sourse.TryGetValue(key, out TValue value) ? value : ifNotGetSetValue;
         }
     }
 }
