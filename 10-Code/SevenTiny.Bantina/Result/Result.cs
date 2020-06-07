@@ -111,5 +111,24 @@ namespace SevenTiny.Bantina
                 return Result.Error(catchErrorMessage ?? ex.Message);
             }
         }
+
+        /// <summary>
+        /// 转成Result_1
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <param name="result"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static Result<T1> ToResult<T1>(this Result result, T1 data)
+        {
+            return new Result<T1>
+            {
+                IsSuccess = result.IsSuccess,
+                Message = result.Message,
+                MoreMessage = result.MoreMessage,
+                TipType = result.TipType,
+                Data = data
+            };
+        }
     }
 }
