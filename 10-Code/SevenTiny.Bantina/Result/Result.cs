@@ -1,5 +1,6 @@
 ﻿using SevenTiny.Bantina.Validation;
 using System;
+using System.Collections.Generic;
 
 namespace SevenTiny.Bantina
 {
@@ -12,7 +13,7 @@ namespace SevenTiny.Bantina
     {
         public bool IsSuccess { get; internal set; }
         public string Message { get; set; }
-        public string MoreMessage { get; set; }
+        public List<string> MoreMessage { get; set; }
         public TipType TipType { get; internal set; }
 
         /// <summary>
