@@ -11,10 +11,10 @@ namespace SevenTiny.Bantina
     /// </summary>
     public struct Result<T1, T2>
     {
-        public bool IsSuccess { get; internal set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; }
         public List<string> MoreMessage { get; set; }
-        public TipType TipType { get; internal set; }
+        public TipType TipType { get; set; }
 
         public T1 Data { get; set; }
         public T2 Data2 { get; set; }
