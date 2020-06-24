@@ -28,6 +28,11 @@ namespace SevenTiny.Bantina.Logging
             //如果配置文件不存在，则输出配置文件
             if (!File.Exists(DefaultLog4NetConfigFileName))
             {
+                var directory = Path.GetDirectoryName(DefaultLog4NetConfigFileName);
+
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
                 File.WriteAllText(DefaultLog4NetConfigFileName, LoggingConst.ConfigContent, Encoding.UTF8);
             }
         }
@@ -38,7 +43,7 @@ namespace SevenTiny.Bantina.Logging
             CreateDefaultLogger();
         }
 
-        private const string DefaultLog4NetConfigFileName = "./SevenTinyConfig/log4net.config";
+        private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "SevenTinyConfig", "log4net.config");
 
         private static string CategoryName => AppSettingsConfigHelper.GetAppName();
 
