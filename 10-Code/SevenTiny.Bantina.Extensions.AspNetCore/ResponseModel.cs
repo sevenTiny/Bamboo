@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace SevenTiny.Bantina.Extensions.AspNetCore
@@ -16,7 +17,7 @@ namespace SevenTiny.Bantina.Extensions.AspNetCore
         [JsonProperty("msg")]
         public string Message { get; set; }
         [JsonProperty("more_msg")]
-        public string MoreMessage { get; set; }
+        public List<string> MoreMessage { get; set; }
         [JsonProperty("tip_type")]
         public TipType TipType { get; set; }
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
