@@ -84,7 +84,7 @@
   </appender >
 
   <root >
-    <level value=""ERROR"" />
+    <level value=""ALL"" />
     <appender-ref ref=""RollingFile"" />
     <appender-ref ref=""TraceAppender"" />
     <appender-ref ref=""ConsoleAppender"" />
