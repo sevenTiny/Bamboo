@@ -10,13 +10,16 @@ namespace SevenTiny.Bantina.Net.Http
     {
         private static string CommonProcess(CommonRequestArgs commonRequestArgs, Func<HttpClient, Byte[]> func)
         {
-            using (HttpClient client = new HttpClient())
+            var handler = new HttpClientHandler() { UseCookies = true };
+            using (HttpClient client = new HttpClient(handler))
             {
                 if (commonRequestArgs.Headers != null)
                 {
                     foreach (KeyValuePair<string, string> header in commonRequestArgs.Headers)
                     {
                         client.DefaultRequestHeaders.Add(header.Key, header.Value);
+                        client.DefaultRequestHeaders.Add("Connection", "Keep-Alive");
+                        client.DefaultRequestHeaders.Add("Keep-Alive", "timeout=600");
                     }
                 }
                 if (commonRequestArgs.Timeout > 0)
