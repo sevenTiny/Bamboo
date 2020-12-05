@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json;
-using Bamboo.Configuration.Core.Helpers;
+﻿using Bamboo.Configuration.Core.Helpers;
+using Bamboo.Logging;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,13 +13,14 @@ namespace Bamboo.Configuration
     internal class RemoteConfigurationManager : ConfigurationManagerBase
     {
         public static RemoteConfigurationManager Instance { get; set; } = new RemoteConfigurationManager();
+        private ILogger _logger = new BambooLogger<RemoteConfigurationManager>();
 
         /// <summary>
         /// get remote method conllection
         /// </summary>
         private ConcurrentDictionary<string, Func<object>> _RemoteFunctions;
 
-        private RemoteConfigurationManager() : base()
+        private RemoteConfigurationManager()
         {
             _RemoteFunctions = new ConcurrentDictionary<string, Func<object>>();
 
@@ -71,13 +74,15 @@ namespace Bamboo.Configuration
         {
             //get remote config download func
             var func = _RemoteFunctions.SafeGet<string, Func<object>>(configName_Type_Key) ?? throw new KeyNotFoundException($"The Configuration key[{configName_Type_Key}] is not registered!");
-            
+
             string fileFullPath = ConfigPathHelper.GetConfigFileFullPath(configName_Type_Key.Substring(0, configName_Type_Key.IndexOf(ConfigurationConst.SPLITE_SYMBOL)));
-            
+
             string tmpFile = fileFullPath + "." + Guid.NewGuid().ToString("N");
-            
+
             try
             {
+                _logger.LogDebug($"config '{fileFullPath}' pulling...");
+
                 //get remote config
                 var config = func.Invoke();
                 SaveToFile(tmpFile, config);
@@ -91,10 +96,12 @@ namespace Bamboo.Configuration
                     File.Delete(fileFullPath);
 
                 File.Move(tmpFile, fileFullPath);
+
+                _logger.LogDebug($"config '{fileFullPath}' pull success.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //log
+                _logger.LogError(ex, $"config '{fileFullPath}' pull error");
             }
             finally
             {

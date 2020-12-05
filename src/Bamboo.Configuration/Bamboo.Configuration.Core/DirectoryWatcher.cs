@@ -1,4 +1,6 @@
 ﻿using Bamboo.Configuration.Core.Helpers;
+using Bamboo.Logging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ namespace Bamboo.Configuration
         private List<string> pendingFileReloads;
         private string directory;
         private static readonly SafeReaderWriterLock fileLoadResourceLock = new SafeReaderWriterLock();
+        private ILogger _logger = new BambooLogger<DirectoryWatcher>();
 
         public DirectoryWatcher(string directory)
         {
@@ -88,9 +91,9 @@ namespace Bamboo.Configuration
                 CountdownTimer timer = new CountdownTimer();
                 timer.BeginCountdown(ConfigurationConst.CHANGE_FILE_DELAY, DelayedProcessFileChanged, fileName);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //logger.HandleException(ex, "FileWatcher");
+                _logger.LogError(ex, "FileWatcher Error");
             }
         }
 
@@ -104,9 +107,9 @@ namespace Bamboo.Configuration
                     string filePath = Path.Combine(directory, fileName);
                     delegateMethod(filePath, EventArgs.Empty);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    //logger.HandleException(ex, "FileWatcher");
+                    _logger.LogError(ex, "FileWatcher Error");
                 }
             }
         }
@@ -125,9 +128,9 @@ namespace Bamboo.Configuration
                 //only one Handler for one file!!
                 ProcessFileChanged(fileName);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //logger.HandleException(ex, "FileWatcher");
+                _logger.LogError(ex, "FileWatcher Error");
             }
         }
     }

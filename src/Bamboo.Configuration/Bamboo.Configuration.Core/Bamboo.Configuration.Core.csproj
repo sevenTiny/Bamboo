@@ -6,7 +6,7 @@
     <RepositoryType>dotnet</RepositoryType>
     <PackageProjectUrl>https://github.com/Bamboo/Bamboo.Configuration</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Bamboo/Bamboo.Configuration.git</RepositoryUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Bamboo/src/master/images/7tiny.ico</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
     <Copyright>7tiny</Copyright>
     <PackageLicenseUrl>https://github.com/Bamboo/Bamboo.Bantina</PackageLicenseUrl>
     <Company>www.7tiny.com</Company>
@@ -15,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bamboo.Logging" Version="1.0.4" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>

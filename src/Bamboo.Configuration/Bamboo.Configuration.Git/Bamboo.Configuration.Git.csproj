@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>分布式配置中心git扩展，支持各种git源</Description>
     <PackageProjectUrl>https://github.com/Bamboo/Bamboo.Configuration</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/Bamboo/src/master/images/7tiny.ico</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
     <RepositoryUrl>https://github.com/Bamboo/Bamboo.Configuration.git</RepositoryUrl>
     <RepositoryType>dotnet</RepositoryType>
     <Copyright>7tiny</Copyright>
