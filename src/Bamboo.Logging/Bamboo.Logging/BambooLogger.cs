@@ -18,11 +18,11 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace SevenTiny.Bantina.Logging
+namespace Bamboo.Logging
 {
-    public class LogManager : ILogger
+    public class BambooLogger<TCategoryName> : ILogger<TCategoryName>
     {
-        static LogManager()
+        static BambooLogger()
         {
             //如果配置文件不存在，则输出配置文件
             if (!File.Exists(DefaultLog4NetConfigFileName))
@@ -36,25 +36,14 @@ namespace SevenTiny.Bantina.Logging
             }
         }
 
-        public LogManager()
-        {
-            //创建默认执行器
-            CreateDefaultLogger();
-        }
-
         private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "SevenTinyConfig", "log4net.config");
-
-        private static string CategoryName => "";
-
         private ILogger _logger;
 
-        /// <summary>
-        /// 创建默认的logger对象
-        /// </summary>
-        private void CreateDefaultLogger()
+        public BambooLogger()
         {
+            //创建默认执行器
             var provider = new Log4NetProvider(DefaultLog4NetConfigFileName);
-            _logger = provider.CreateLogger(CategoryName);
+            _logger = provider.CreateLogger(typeof(TCategoryName).Name);
         }
 
         public IDisposable BeginScope<TState>(TState state)
