@@ -7,9 +7,7 @@ namespace Bamboo.Configuration
     {
         protected abstract object OnCreate(string configName, Type type);
 
-        protected ConfigurationManagerBase()
-        {
-        }
+        protected ConfigurationManagerBase() { }
 
         internal void UpdateEntry(string configName, object configInstance, Type configType)
         {

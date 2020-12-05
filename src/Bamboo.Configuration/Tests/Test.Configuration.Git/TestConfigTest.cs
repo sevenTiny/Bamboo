@@ -7,7 +7,8 @@ using Xunit;
 namespace Test.Configuration.Git
 {
     [ConfigName("test")]
-    [ConfigSettingUse("PrivateRepo")]
+    //[ConfigName("test.json")]
+    [ConfigSettingUse("PublicRepo")]
     public class TestConfig : GitConfigBase<TestConfig>
     {
         public string Key { get; set; }

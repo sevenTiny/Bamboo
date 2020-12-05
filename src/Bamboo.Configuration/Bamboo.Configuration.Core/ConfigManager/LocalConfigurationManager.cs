@@ -2,12 +2,16 @@
 using Bamboo.Configuration.Core.Helpers;
 using System;
 using System.IO;
+using Bamboo.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Bamboo.Configuration
 {
     internal class LocalConfigurationManager : ConfigurationManagerBase
     {
         public static LocalConfigurationManager Instance => new LocalConfigurationManager();
+        private ILogger _logger = new BambooLogger<LocalConfigurationManager>();
+        private LocalConfigurationManager() { }
 
         protected override object OnCreate(string configName, Type type)
         {
@@ -39,14 +43,20 @@ namespace Bamboo.Configuration
 
         private void OnConfigFileChanged(object sender, EventArgs args)
         {
+            string configFullPath = string.Empty;
             try
             {
                 var fileChangedEventArgs = (FileChangedEventArgs)args;
+
+                configFullPath = fileChangedEventArgs.FileFullPath;
+
+                _logger.LogDebug($"config '{configFullPath}' refresh finished.");
+
                 UpdateEntry(Path.GetFileNameWithoutExtension(fileChangedEventArgs.FileFullPath), fileChangedEventArgs.ConfigInstance, fileChangedEventArgs.ConfigType);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                //log
+                _logger.LogError(ex, $"config '{configFullPath}' refresh error.");
             }
         }
     }

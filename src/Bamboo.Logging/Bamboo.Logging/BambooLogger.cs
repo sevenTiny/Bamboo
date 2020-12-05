@@ -36,7 +36,7 @@ namespace Bamboo.Logging
             }
         }
 
-        private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "SevenTinyConfig", "log4net.config");
+        private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "BambooConfig", "log4net.config");
         private ILogger _logger;
 
         public BambooLogger()

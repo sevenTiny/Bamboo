@@ -6,10 +6,6 @@
     internal static class LoggingConst
     {
         /// <summary>
-        /// 默认应用名
-        /// </summary>
-        public const string DefaultAppName = "SevenTinyCloud";
-        /// <summary>
         /// 配置文件内容
         /// </summary>
         public const string ConfigContent = @"
@@ -55,7 +51,7 @@
   <!--RollingFile模式的输出配置-->
   <appender name = ""RollingFile"" type=""log4net.Appender.RollingFileAppender"">
     <!--输出的文件夹-->
-    <file value = ""SevenTinyLogs/log.log"" />
+    <file value = ""BambooLogs/log.log"" />
 
     <!--追加日志内容-->
     <appendToFile value=""true"" />
