@@ -1,4 +1,4 @@
-﻿namespace SevenTiny.Bantina.Logging
+﻿namespace Bamboo.Logging
 {
     /// <summary>
     /// 常量
