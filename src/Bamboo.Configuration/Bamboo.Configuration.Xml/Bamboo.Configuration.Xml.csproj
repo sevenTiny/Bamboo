@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>1.0.0</Version>
+    <Description>分布式配置中心xml扩展，支持本地xml源</Description>
+    <RepositoryType>dotnet</RepositoryType>
+    <PackageProjectUrl>https://github.com/Bamboo/Bamboo.Configuration</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Bamboo/Bamboo.Configuration.git</RepositoryUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/Bamboo/src/master/images/7tiny.ico</PackageIconUrl>
+    <Copyright>7tiny</Copyright>
+    <PackageLicenseUrl>https://github.com/Bamboo/Bamboo.Bantina</PackageLicenseUrl>
+    <Company>www.7tiny.com</Company>
+    <Authors>7tiny</Authors>
+    <Description></Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bamboo.Configuration.Core\Bamboo.Configuration.Core.csproj" />
+  </ItemGroup>
+
+</Project>

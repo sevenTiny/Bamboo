@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>分布式配置中心git扩展，支持各种git源</Description>
+    <PackageProjectUrl>https://github.com/Bamboo/Bamboo.Configuration</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/Bamboo/src/master/images/7tiny.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/Bamboo/Bamboo.Configuration.git</RepositoryUrl>
+    <RepositoryType>dotnet</RepositoryType>
+    <Copyright>7tiny</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bamboo.Configuration.Core\Bamboo.Configuration.Core.csproj" />
+  </ItemGroup>
+
+</Project>
