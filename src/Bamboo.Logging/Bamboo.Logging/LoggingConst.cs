@@ -14,7 +14,7 @@
   <appender name=""Console"" type=""log4net.Appender.ConsoleAppender"">
     <layout type = ""log4net.Layout.PatternLayout"" >
       <!--Pattern to output the caller's file name and line number -->
-      <conversionPattern value = ""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline %exception"" />
+      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline %exception"" />
     </layout >
   </appender >
 
