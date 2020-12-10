@@ -65,7 +65,7 @@ namespace Bamboo.Configuration.Git
                 var configSetting = section.GetSection(settingKey);
 
                 if (configSetting == null || !configSetting.Exists())
-                    throw new FileNotFoundException($"'appsettings.json' not find in {baseDirectory}, if existed,maybe '{DefaultAppSettingsKey}' node has not exist in the 'appsettings.json' ConnectionStrings file.");
+                    throw new FileNotFoundException($"'appsettings.json' not find in {baseDirectory}, if existed,maybe '{DefaultAppSettingsKey}.{settingKey}' node has not exist in the 'appsettings.json' ConnectionStrings file.");
 
                 var configSettingInstance = configSetting.Get<ConfigSetting>();
 
