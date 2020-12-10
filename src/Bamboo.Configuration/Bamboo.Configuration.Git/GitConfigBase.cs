@@ -93,7 +93,8 @@ namespace Bamboo.Configuration
         private static string FindFileAndGetFullPath(string workSpace, string configName)
         {
             //if config name contains extension
-            if (!string.IsNullOrEmpty(Path.GetExtension(configName)))
+            var fileExtension = Path.GetExtension(configName);
+            if (!string.IsNullOrEmpty(fileExtension) && SupportedConfigurationExtensions.Any(t => t.Equals(fileExtension)))
             {
                 var fileFullPath = Path.Combine(workSpace, configName);
 
@@ -113,6 +114,8 @@ namespace Bamboo.Configuration
 
             return foundFiles[0];
         }
+
+        private static string[] SupportedConfigurationExtensions = new[] { ".json", ".xml" };
 
         private static ConfigSerializerBase GetSerializerByConfigType(string fileFullName)
         {
