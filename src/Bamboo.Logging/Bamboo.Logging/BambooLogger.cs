@@ -20,7 +20,7 @@ using System.Text;
 
 namespace Bamboo.Logging
 {
-    public class BambooLogger<TCategoryName> : ILogger<TCategoryName>
+    public class BambooLogger : ILogger
     {
         static BambooLogger()
         {
@@ -39,11 +39,11 @@ namespace Bamboo.Logging
         private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "BambooConfig", "log4net.config");
         private ILogger _logger;
 
-        public BambooLogger()
+        public BambooLogger(string categoryName = "BambooLogger")
         {
             //创建默认执行器
             var provider = new Log4NetProvider(DefaultLog4NetConfigFileName);
-            _logger = provider.CreateLogger(typeof(TCategoryName).Name);
+            _logger = provider.CreateLogger(categoryName);
         }
 
         public IDisposable BeginScope<TState>(TState state)
