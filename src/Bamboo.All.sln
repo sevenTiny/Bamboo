@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bamboo.Configuration", "Bamboo.Configuration", "{49B3D648-088C-4CCD-82FF-397567F24B3D}"
 EndProject
@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Logging", "Bamboo.Lo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01-Tests", "01-Tests", "{0C0A4E77-D085-40C9-9812-B8183ED34F0E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Bamboo.Logging", "Bamboo.Logging\Tests\Test.Bamboo.Logging\Test.Bamboo.Logging.csproj", "{03B6159C-5F42-40F1-BCF8-E756C857E8AF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Bamboo.Logging", "Bamboo.Logging\Tests\Test.Bamboo.Logging\Test.Bamboo.Logging.csproj", "{032671D2-0166-423D-8016-D88CD0C69E73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,10 +121,10 @@ Global
 		{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{03B6159C-5F42-40F1-BCF8-E756C857E8AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03B6159C-5F42-40F1-BCF8-E756C857E8AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03B6159C-5F42-40F1-BCF8-E756C857E8AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03B6159C-5F42-40F1-BCF8-E756C857E8AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{032671D2-0166-423D-8016-D88CD0C69E73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{032671D2-0166-423D-8016-D88CD0C69E73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{032671D2-0166-423D-8016-D88CD0C69E73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{032671D2-0166-423D-8016-D88CD0C69E73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,7 +150,7 @@ Global
 		{8A6E8A88-FEA5-4D35-9DAE-A2B66DDD43DB} = {CA77426C-C254-4BAB-BFCD-548F16E07FA7}
 		{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7} = {9BDB0061-6734-45B0-91A8-CB77B1B24BBE}
 		{0C0A4E77-D085-40C9-9812-B8183ED34F0E} = {9BDB0061-6734-45B0-91A8-CB77B1B24BBE}
-		{03B6159C-5F42-40F1-BCF8-E756C857E8AF} = {0C0A4E77-D085-40C9-9812-B8183ED34F0E}
+		{032671D2-0166-423D-8016-D88CD0C69E73} = {0C0A4E77-D085-40C9-9812-B8183ED34F0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {50A912D9-BBF1-4BBD-AA9C-6ABEAC291671}
