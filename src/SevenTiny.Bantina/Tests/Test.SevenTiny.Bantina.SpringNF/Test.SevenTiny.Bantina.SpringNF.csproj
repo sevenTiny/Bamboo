@@ -61,7 +61,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SevenTiny.Bantina.SpringNF\SevenTiny.Bantina.SpringNF.csproj">
+    <ProjectReference Include="..\..\SevenTiny.Bantina.SpringNF\SevenTiny.Bantina.SpringNF.csproj">
       <Project>{da70f71e-a5e9-4216-b385-5480a9dc4d67}</Project>
       <Name>SevenTiny.Bantina.SpringNF</Name>
     </ProjectReference>

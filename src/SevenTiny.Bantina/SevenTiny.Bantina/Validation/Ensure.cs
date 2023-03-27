@@ -14,7 +14,7 @@ namespace SevenTiny.Bantina.Validation
         public static void ArgumentNotNullOrEmpty(object arg, string argName, string message = null)
         {
             if (FormatValidationExtension.IsNullOrEmpty(arg))
-                throw new ArgumentNullException(nameof(argName), message ?? "Parameter cannot be null or empty.");
+                throw new ArgumentNullException(argName, message ?? "Parameter cannot be null or empty.");
         }
 
         /// <summary>
