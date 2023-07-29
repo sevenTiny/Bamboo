@@ -55,7 +55,7 @@ namespace Bamboo.Configuration
                     .AddJsonFile("appsettings.json", false, false)
                     .Build();
 
-                string connectionString = config.GetConnectionString(ConnectionStringUseAttribute.GetName(typeof(T)) ?? DefaultAppSettingsConnectionStringKey);
+                string connectionString = config.GetConnectionString(ConfigConnectionStringAttribute.GetName(typeof(T)) ?? DefaultAppSettingsConnectionStringKey);
 
                 return connectionString ?? throw new FileNotFoundException($"'appsettings.json' not find in {baseDirectory}, if existed,maybe '{configName}' node has not exist in the 'appsettings.json' ConnectionStrings file.");
             });

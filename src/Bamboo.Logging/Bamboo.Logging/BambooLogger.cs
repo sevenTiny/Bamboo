@@ -42,7 +42,7 @@ namespace Bamboo.Logging
         public BambooLogger(string categoryName = "BambooLogger")
         {
             //创建默认执行器
-            var provider = new Log4NetProvider(DefaultLog4NetConfigFileName);
+            var provider = new Log4NetProvider(DefaultLog4NetConfigFileName, true);
             _logger = provider.CreateLogger(categoryName);
         }
 

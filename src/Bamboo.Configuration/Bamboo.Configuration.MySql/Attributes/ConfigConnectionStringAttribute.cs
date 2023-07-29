@@ -4,17 +4,17 @@ using System.Reflection;
 namespace Bamboo.Configuration
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    public class ConnectionStringUseAttribute : Attribute
+    public class ConfigConnectionStringAttribute : Attribute
     {
         public string ConnectionStringKey { get; }
-        public ConnectionStringUseAttribute(string key)
+        public ConfigConnectionStringAttribute(string key)
         {
             ConnectionStringKey = key;
         }
 
         internal static string GetName(Type type)
         {
-            if (type.GetCustomAttribute(typeof(ConnectionStringUseAttribute)) is ConnectionStringUseAttribute connectionStringKey)
+            if (type.GetCustomAttribute(typeof(ConfigConnectionStringAttribute)) is ConfigConnectionStringAttribute connectionStringKey)
                 return connectionStringKey.ConnectionStringKey;
 
             return null;

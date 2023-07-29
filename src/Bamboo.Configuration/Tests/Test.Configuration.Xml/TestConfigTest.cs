@@ -1,4 +1,5 @@
 ﻿using Bamboo.Configuration;
+using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Threading;
 using Xunit;
@@ -15,12 +16,13 @@ namespace Test.Configuration.Xml
 </TestConfig>
     */
 
-    [ConfigName("XmlTest")]
+    [ConfigFile("XmlTest.xml")]
     public class TestConfig : XmlConfigBase<TestConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
     }
+
     public class TestConfigTest
     {
         [Fact]
@@ -28,11 +30,11 @@ namespace Test.Configuration.Xml
         {
             for (int i = 0; i < 10000; i++)
             {
-                var config = TestConfig.Instance;
-                var key = config?.Key;
-                var value = config?.Value;
-                Trace.WriteLine($"read config succeed: key={key},value={value}.");
-                Thread.Sleep(3000);
+                var config = TestConfig.Get();
+
+                Trace.WriteLine(JsonConvert.SerializeObject(config));
+
+                Thread.Sleep(500);
             }
         }
     }

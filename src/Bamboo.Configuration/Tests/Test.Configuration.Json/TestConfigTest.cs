@@ -5,6 +5,7 @@ using Xunit;
 using Bamboo.Configuration;
 using System.Diagnostics;
 using System.Threading;
+using Newtonsoft.Json;
 
 namespace Test.Configuration.Json
 {
@@ -14,9 +15,7 @@ namespace Test.Configuration.Json
      * 格式：
     {"Key":"chuanqi","Value":"111"}
      */
-
-
-    [ConfigName("JsonTest")]
+    [ConfigFile("JsonTest.json")]
     public class TestConfig : JsonConfigBase<TestConfig>
     {
         public string Key { get; set; }
@@ -30,11 +29,11 @@ namespace Test.Configuration.Json
         {
             for (int i = 0; i < 10000; i++)
             {
-                var config = TestConfig.Instance;
-                var key = config?.Key;
-                var value = config?.Value;
-                Trace.WriteLine($"read config succeed: key={key},value={value}.");
-                Thread.Sleep(3000);
+                var config = TestConfig.Get();
+
+                Trace.WriteLine(JsonConvert.SerializeObject(config));
+
+                Thread.Sleep(500);
             }
         }
     }
