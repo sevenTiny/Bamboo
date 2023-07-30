@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Bamboo Script Engine Core</Description>
+    <PackageProjectUrl>https://github.com/sevenTiny/Chameleon.FaaS</PackageProjectUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
+    <RepositoryUrl>https://github.com/sevenTiny/Chameleon.FaaS</RepositoryUrl>
+    <RepositoryType>dotnet</RepositoryType>
+    <Copyright>7tiny</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Bamboo.Configuration.Json" Version="1.0.1" />
+    <PackageReference Include="Bamboo.Logging" Version="1.0.4" />
+    <PackageReference Include="fasterflect" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+</Project>

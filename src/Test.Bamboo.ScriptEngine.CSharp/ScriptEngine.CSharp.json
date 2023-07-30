@@ -1,0 +1,32 @@
+/*
+  CSharp脚本引擎配置示范
+*/
+{
+  //全局Nuget源，配置在根的源会应用到所有的应用节点
+  "NugetSources": [ "https://api.nuget.org/v3/index.json" ],
+  "Nodes": [
+    {
+      // 所属应用，系统路径用SYSTEM
+      "AppName": "SYSTEM",
+      // 是否DebugMode编译，默认Release模式编译
+      "IsDebugModeCompile": false,
+      // 输出编译文件
+      "IsOutPutCompileFiles": false,
+      // dll扫描并全部加载的路径，该目录下的dll会全部加载
+      "DllScanAndLoadPath": [
+        "./"
+      ],
+      //Nuget源，应用下的源仅会应用到当前应用的Nuget包，如果已经全局配置，则无需应用下单独配置
+      "NugetSources": [],
+      // 需要下载的包
+      "InstallPackages": [
+        {
+          // nuget包Id
+          "PackageId": "Newtonsoft.Json",
+          // 包版本
+          "Version": "12.0.3"
+        }
+      ]
+    }
+  ]
+}
