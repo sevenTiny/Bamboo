@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace Bamboo.Configuration
 {
@@ -14,6 +15,11 @@ namespace Bamboo.Configuration
                 .AddJsonFile(ConfigurationFilePath, optional: false, reloadOnChange: true)
                 .Build();
             });
+        }
+
+        protected override string SerializeConfigurationInstance()
+        {
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

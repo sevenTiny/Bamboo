@@ -23,7 +23,14 @@ namespace Bamboo.Configuration
         {
             RegisterInitializer(() =>
             {
-                Initializer();
+                //get group name
+                string group = ConfigGroupAttribute.GetGroup(typeof(T)) ?? DefaultGroup;
+
+                var groupSetting = GetGroupSetting(group);
+
+                var isLocalMode = AppSettingsConfig.IsLocalMode();
+
+                Initializer(isLocalMode, groupSetting);
 
                 IConfigurationRoot config = null;
 
@@ -42,24 +49,34 @@ namespace Bamboo.Configuration
                         throw new NotSupportedException($"the extension of configuration file '{ConfigurationFilePath}' is not support");
                 }
 
-                _timer = new Timer(GetGroupSetting().FetchInterval);
-                _timer.Elapsed += (s, e) => Initializer();
-                _timer.AutoReset = true;
-                _timer.Enabled = true;
+                //if local mode, not start fetch remote schedule
+                if (!isLocalMode)
+                {
+                    _timer = new Timer(groupSetting.FetchInterval);
+                    _timer.Elapsed += (s, e) => Initializer(isLocalMode, groupSetting);
+                    _timer.AutoReset = true;
+                    _timer.Enabled = true;
+                }
 
                 return config;
             });
         }
 
-        private static void Initializer()
+        private static void Initializer(bool isLocalMode, GroupSetting groupSetting)
         {
-            //download
-            var workSpace = DownloadConfigurationAndGetWorkSpace();
-
             var configFilePath = ConfigFileAttribute.GetFilePath(typeof(T));
+            string configurationFullPath;
 
-            //find file
-            var configurationFullPath = FindFileAndGetFullPath(workSpace, configFilePath);
+            //pull git repository
+            if (!isLocalMode && DownloadConfigurationAndGetWorkSpace(groupSetting, out string workSpace))
+            {
+                //find file
+                configurationFullPath = FindFileAndGetFullPath(workSpace, configFilePath);
+            }
+            else
+            {
+                configurationFullPath = Path.Combine("BambooConfig", configFilePath);
+            }
 
             InitializeConfigurationFile(configurationFullPath);
         }
@@ -84,7 +101,7 @@ namespace Bamboo.Configuration
                 group = ConfigGroupAttribute.GetGroup(typeof(T)) ?? DefaultGroup;
 
             //get config
-            var configSetting = AppSettings.GetGroupSetting(group);
+            var configSetting = AppSettingsConfigurationHelper.GetGroupSetting(group);
 
             if (string.IsNullOrEmpty(configSetting.RemoteAddress))
                 throw new ArgumentNullException(nameof(configSetting.RemoteAddress));
@@ -98,14 +115,12 @@ namespace Bamboo.Configuration
             return configSetting;
         }
 
-        private static string DownloadConfigurationAndGetWorkSpace()
+        private static bool DownloadConfigurationAndGetWorkSpace(GroupSetting groupSetting, out string workSpace)
         {
             //get group name
             string group = ConfigGroupAttribute.GetGroup(typeof(T)) ?? DefaultGroup;
 
-            var configSetting = GetGroupSetting(group);
-
-            var workSpace = Path.Combine(GitConfigDefaultDownloadDirectoryFullPath, group);
+            workSpace = Path.Combine(GitConfigDefaultDownloadDirectoryFullPath, group);
 
             //Ensure directory exist
             if (!Directory.Exists(workSpace))
@@ -117,7 +132,7 @@ namespace Bamboo.Configuration
 
                 //download files
                 if (!Repository.IsValid(workSpace))
-                    Repository.Clone(configSetting.RemoteAddress, workSpace);
+                    Repository.Clone(groupSetting.RemoteAddress, workSpace);
 
                 using (var repo = new Repository(workSpace))
                 {
@@ -126,10 +141,10 @@ namespace Bamboo.Configuration
                     Commands.Fetch(repo, "origin", new string[0], null, null);
 
                     //get branch
-                    var branch = repo.Branches.FirstOrDefault(t => t.FriendlyName.Equals(string.Concat("origin/", configSetting.Branch)));
+                    var branch = repo.Branches.FirstOrDefault(t => t.FriendlyName.Equals(string.Concat("origin/", groupSetting.Branch)));
 
                     if (branch == null)
-                        throw new ArgumentOutOfRangeException(nameof(branch), $"the branch '{configSetting.Branch}'in configuration is not found");
+                        throw new ArgumentOutOfRangeException(nameof(branch), $"the branch '{groupSetting.Branch}'in configuration is not found");
 
                     //checkout
                     Commands.Checkout(repo, branch);
@@ -142,10 +157,10 @@ namespace Bamboo.Configuration
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"git config '{ConfigurationName}' pull error");
-                throw;
+                return false;
             }
 
-            return workSpace;
+            return true;
         }
 
         private static string FindFileAndGetFullPath(string workSpace, string configName)
@@ -167,6 +182,11 @@ namespace Bamboo.Configuration
                 throw new FileNotFoundException($"More than one configuration file was found. The application does not know which one to take. configuration files:[{string.Join(",", foundFiles)}].");
 
             return foundFiles[0];
+        }
+
+        protected override string SerializeConfigurationInstance()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -17,6 +17,7 @@ using Bamboo.Configuration.Core.Helpers;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
+using System.Text;
 
 namespace Bamboo.Configuration
 {
@@ -57,24 +58,28 @@ namespace Bamboo.Configuration
         /// </summary>
         public bool LocalMode { get; set; }
 
-        //private static T _instance = new T();
-
         /// <summary>
         /// copy configuration file to bamboo configuration directory
         /// </summary>
         /// <param name="configurationFilePath">The configuration file path, If not provided, try to get it from </param>
         protected static void InitializeConfigurationFile(string configurationFilePath = null)
         {
-            if (string.IsNullOrEmpty(configurationFilePath))
-                configurationFilePath = ConfigFileAttribute.GetFilePath(typeof(T));
-
-            if (string.IsNullOrWhiteSpace(configurationFilePath))
-                throw new ArgumentException("config file path must be provide in the correct file path format");
+            configurationFilePath = GetConfigurationFilePath(configurationFilePath);
 
             if (!File.Exists(configurationFilePath))
-                throw new FileNotFoundException("config file not found", configurationFilePath);
+                throw new FileNotFoundException("configuration file not found", configurationFilePath);
 
             var newPath = Path.Combine(ConfigPathHelper.BaseConfigDir, Path.GetFileName(configurationFilePath));
+
+            if (File.Exists(newPath))
+            {
+                //if it is same file, no copy
+                if (new FileInfo(configurationFilePath).FullName.Equals(new FileInfo(newPath).FullName))
+                {
+                    ConfigurationFilePath = newPath;
+                    return;
+                }
+            }
 
             File.Copy(configurationFilePath, newPath, true);
 
@@ -135,6 +140,48 @@ namespace Bamboo.Configuration
         public static TValue GetValue<TValue>(string key)
         {
             return ConfigurationRoot.GetValue<TValue>(key);
+        }
+
+        protected abstract string SerializeConfigurationInstance();
+
+        /// <summary>
+        /// write configuration serilized string to file
+        /// </summary>
+        /// <param name="configurationFilePath">configuration save path, default is configuration path</param>
+        public void WriteToFile(string configurationFilePath = null)
+        {
+            configurationFilePath = GetConfigurationFilePath(configurationFilePath);
+
+            var configContent = SerializeConfigurationInstance();
+
+            File.WriteAllText(configurationFilePath, configContent, Encoding.UTF8);
+
+            // initialize the configuration root, that it will re-build next time
+            _ConfigurationRoot = null;
+        }
+
+        private static string GetConfigurationFilePath(string configurationFilePath = null)
+        {
+            if (string.IsNullOrEmpty(configurationFilePath))
+                configurationFilePath = ConfigFileAttribute.GetFilePath(typeof(T));
+
+            if (string.IsNullOrWhiteSpace(configurationFilePath))
+                throw new ArgumentException("config file path must be provide in the correct file path format");
+
+            return configurationFilePath;
+        }
+    }
+
+    public static class ConfigurationExtension
+    {
+        /// <summary>
+        /// bind the configuration to instance
+        /// </summary>
+        /// <returns></returns>
+        public static T Bind<T>(this T instance) where T : class, new()
+        {
+            ConfigBase<T>.ConfigurationRoot.Bind(instance);
+            return instance;
         }
     }
 }

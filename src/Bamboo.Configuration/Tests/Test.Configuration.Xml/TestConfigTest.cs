@@ -1,7 +1,4 @@
 ﻿using Bamboo.Configuration;
-using Newtonsoft.Json;
-using System.Diagnostics;
-using System.Threading;
 using Xunit;
 
 namespace Test.Configuration.Xml
@@ -11,8 +8,8 @@ namespace Test.Configuration.Xml
     * 文件名：XmlTest.xml
     * 格式：
 <TestConfig>
-	<Key>TestKey</Key>
-	<Value>TestValue</Value>
+	<Key>chuanqi</Key>
+	<Value>111</Value>
 </TestConfig>
     */
 
@@ -28,14 +25,34 @@ namespace Test.Configuration.Xml
         [Fact]
         public void Test()
         {
-            for (int i = 0; i < 10000; i++)
-            {
-                var config = TestConfig.Get();
+            var config = TestConfig.Get();
 
-                Trace.WriteLine(JsonConvert.SerializeObject(config));
+            Assert.Equal("chuanqi", config.Key);
+            Assert.Equal("111", config.Value);
+        }
 
-                Thread.Sleep(500);
-            }
+        [Fact]
+        public void StoreConfigTest()
+        {
+            //use Bind can bind configuration entry to instance
+            var instance = new TestConfig().Bind();
+
+            Assert.Equal("111", instance.Value);
+
+            instance.Key = "write test key";
+            instance.Value = "222";
+
+            //write the configuration instance to file
+            instance.WriteToFile();
+
+            Assert.Equal("222", instance.Value);
+
+            //if writen to file, call Bind immediately is neccessary.
+            //it will rebind the configuration entry to instance
+            instance.Value = "333";
+            instance.Bind();
+
+            Assert.Equal("222", instance.Value);
         }
     }
 }

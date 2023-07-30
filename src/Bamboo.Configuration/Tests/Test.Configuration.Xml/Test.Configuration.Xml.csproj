@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="XmlTest.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="XmlTest.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0" />
@@ -14,12 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Bamboo.Configuration.Xml\Bamboo.Configuration.Xml.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="XmlTest.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
