@@ -7,41 +7,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bamboo.Configuration", "Bam
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extends", "Extends", "{9CF0F9AE-AB17-42EB-88E8-3842EADEDC9E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Core", "Bamboo.Configuration\Bamboo.Configuration.Core\Bamboo.Configuration.Core.csproj", "{C7DA55D6-5F2B-4140-954E-30753CBF65D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Core", "Bamboo.Configuration.Core\Bamboo.Configuration.Core.csproj", "{C7DA55D6-5F2B-4140-954E-30753CBF65D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Apollo", "Bamboo.Configuration\Bamboo.Configuration.Apollo\Bamboo.Configuration.Apollo.csproj", "{2BEC4647-14FE-4C3D-B2AD-0B2D229417DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Apollo", "Bamboo.Configuration.Apollo\Bamboo.Configuration.Apollo.csproj", "{2BEC4647-14FE-4C3D-B2AD-0B2D229417DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Git", "Bamboo.Configuration\Bamboo.Configuration.Git\Bamboo.Configuration.Git.csproj", "{B798E75D-4333-422E-ADFA-50E857181E56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Git", "Bamboo.Configuration.Git\Bamboo.Configuration.Git.csproj", "{B798E75D-4333-422E-ADFA-50E857181E56}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Json", "Bamboo.Configuration\Bamboo.Configuration.Json\Bamboo.Configuration.Json.csproj", "{4EE089BB-0548-4D5C-8709-80ED1CDB5484}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Json", "Bamboo.Configuration.Json\Bamboo.Configuration.Json.csproj", "{4EE089BB-0548-4D5C-8709-80ED1CDB5484}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.MySql", "Bamboo.Configuration\Bamboo.Configuration.MySql\Bamboo.Configuration.MySql.csproj", "{853C524D-9C25-4AA6-A62E-FCEAF437916D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.MySql", "Bamboo.Configuration.MySql\Bamboo.Configuration.MySql.csproj", "{853C524D-9C25-4AA6-A62E-FCEAF437916D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Xml", "Bamboo.Configuration\Bamboo.Configuration.Xml\Bamboo.Configuration.Xml.csproj", "{6F40CE39-FA41-409D-98AE-8A9B859CF206}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Configuration.Xml", "Bamboo.Configuration.Xml\Bamboo.Configuration.Xml.csproj", "{6F40CE39-FA41-409D-98AE-8A9B859CF206}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Git", "Bamboo.Configuration\Tests\Test.Configuration.Git\Test.Configuration.Git.csproj", "{0E93A198-8925-4AD7-BFEA-78A953F1C9A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Git", "Test.Configuration.Git\Test.Configuration.Git.csproj", "{0E93A198-8925-4AD7-BFEA-78A953F1C9A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Json", "Bamboo.Configuration\Tests\Test.Configuration.Json\Test.Configuration.Json.csproj", "{70DFBE4B-FDA9-4D80-A8AF-D4D906D1C15E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Json", "Test.Configuration.Json\Test.Configuration.Json.csproj", "{70DFBE4B-FDA9-4D80-A8AF-D4D906D1C15E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.MySql", "Bamboo.Configuration\Tests\Test.Configuration.MySql\Test.Configuration.MySql.csproj", "{8F521E86-5132-4CDA-AC40-EBBA3A8E2196}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.MySql", "Test.Configuration.MySql\Test.Configuration.MySql.csproj", "{8F521E86-5132-4CDA-AC40-EBBA3A8E2196}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Xml", "Bamboo.Configuration\Tests\Test.Configuration.Xml\Test.Configuration.Xml.csproj", "{60354A66-0852-4AB2-B9D1-CA13EB395B09}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Configuration.Xml", "Test.Configuration.Xml\Test.Configuration.Xml.csproj", "{60354A66-0852-4AB2-B9D1-CA13EB395B09}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Nuget", "Bamboo.Configuration\Tests\Test.Nuget\Test.Nuget.csproj", "{B81080DD-1A7E-4E23-A5F0-4F2E28A93629}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Nuget", "Test.Nuget\Test.Nuget.csproj", "{B81080DD-1A7E-4E23-A5F0-4F2E28A93629}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SevenTiny.Bantina", "SevenTiny.Bantina", "{CFE764D1-A6DC-4E34-868D-FC065FE81D40}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina", "SevenTiny.Bantina\SevenTiny.Bantina\SevenTiny.Bantina.csproj", "{5639640B-3974-43AB-BC45-3156B9615930}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina", "SevenTiny.Bantina\SevenTiny.Bantina.csproj", "{5639640B-3974-43AB-BC45-3156B9615930}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Extensions.AspNetCore", "SevenTiny.Bantina\SevenTiny.Bantina.Extensions.AspNetCore\SevenTiny.Bantina.Extensions.AspNetCore.csproj", "{4A714115-3F52-4D1D-AB7B-24ACEE91972C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SevenTiny.Bantina.Extensions.AspNetCore", "SevenTiny.Bantina.Extensions.AspNetCore\SevenTiny.Bantina.Extensions.AspNetCore.csproj", "{4A714115-3F52-4D1D-AB7B-24ACEE91972C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina", "SevenTiny.Bantina\Tests\Test.SevenTiny.Bantina\Test.SevenTiny.Bantina.csproj", "{8A6E8A88-FEA5-4D35-9DAE-A2B66DDD43DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.SevenTiny.Bantina", "Test.SevenTiny.Bantina\Test.SevenTiny.Bantina.csproj", "{8A6E8A88-FEA5-4D35-9DAE-A2B66DDD43DB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bamboo.Logging", "Bamboo.Logging", "{9BDB0061-6734-45B0-91A8-CB77B1B24BBE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Logging", "Bamboo.Logging\Bamboo.Logging\Bamboo.Logging.csproj", "{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bamboo.Logging", "Bamboo.Logging\Bamboo.Logging.csproj", "{4DA79032-C40D-4B88-A0E2-7CAE2A27B2B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Bamboo.Logging", "Bamboo.Logging\Tests\Test.Bamboo.Logging\Test.Bamboo.Logging.csproj", "{03B6159C-5F42-40F1-BCF8-E756C857E8AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Bamboo.Logging", "Test.Bamboo.Logging\Test.Bamboo.Logging.csproj", "{03B6159C-5F42-40F1-BCF8-E756C857E8AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

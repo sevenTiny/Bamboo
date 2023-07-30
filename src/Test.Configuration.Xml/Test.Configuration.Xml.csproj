@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="JsonTest.json" />
+    <None Remove="XmlTest.xml" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="JsonTest.json">
+    <Content Include="XmlTest.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -23,13 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bamboo.Configuration.Json\Bamboo.Configuration.Json.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\Bamboo.Configuration.Xml\Bamboo.Configuration.Xml.csproj" />
   </ItemGroup>
 
 </Project>

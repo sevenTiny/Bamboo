@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bamboo.Configuration.Git\Bamboo.Configuration.Git.csproj" />
+    <ProjectReference Include="..\Bamboo.Configuration.Git\Bamboo.Configuration.Git.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Bamboo.Logging\Bamboo.Logging.csproj" />
+    <ProjectReference Include="..\Bamboo.Logging\Bamboo.Logging.csproj" />
   </ItemGroup>
 
 </Project>
