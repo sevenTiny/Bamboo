@@ -1,5 +1,4 @@
 ﻿using Bamboo.Logging;
-using Bamboo.ScriptEngine.Configs;
 using Bamboo.ScriptEngine.CSharp.Configs;
 using Fasterflect;
 using Microsoft.CodeAnalysis;
@@ -30,7 +29,7 @@ namespace Bamboo.ScriptEngine.CSharp
         private static readonly object _lock = new object();
         private static IDictionary<string, Type> _scriptTypeDict = new ConcurrentDictionary<string, Type>();
         private static readonly ILogger _logger = new BambooLogger<CSharpScriptEngine>();
-        private readonly static string _currentAppName = AppSettingsConfigHelper.GetAppName();
+        private readonly static string _currentAppName = ScriptEngineCSharpConfigHelper.GetCurrentAppName();
 
         static CSharpScriptEngine()
         {

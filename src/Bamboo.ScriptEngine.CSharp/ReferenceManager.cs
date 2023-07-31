@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
-using Bamboo.ScriptEngine.Configs;
 using Bamboo.ScriptEngine.CSharp.Configs;
 using System;
 using System.Collections.Concurrent;
@@ -15,6 +14,7 @@ using NuGet.Protocol;
 using System.Threading;
 using NuGet.Common;
 using NuGet.Packaging;
+using SevenTiny.Bantina.Extensions;
 
 namespace Bamboo.ScriptEngine.CSharp
 {
@@ -22,7 +22,7 @@ namespace Bamboo.ScriptEngine.CSharp
     {
         private static readonly Microsoft.Extensions.Logging.ILogger _logger = new BambooLogger<CSharpScriptEngine>();
 
-        private static string _currentAppName => AppSettingsConfigHelper.GetAppName();
+        private static string _currentAppName => ScriptEngineCSharpConfigHelper.GetCurrentAppName();
 
         private static ConcurrentDictionary<string, List<MetadataReference>> _metadataReferences = new ConcurrentDictionary<string, List<MetadataReference>>();
 
@@ -42,13 +42,16 @@ namespace Bamboo.ScriptEngine.CSharp
             //下载并安装程序集
             LoadPackageAssembly(loadLocations);
 
-            var metaDataReferenceList = new List<MetadataReference>(loadLocations.Count);
+            //将路径不同，但是dll名称相同的，视为同一个dll，取最后一个路径的dll
+            var dllNameLocationsDic = loadLocations
+                .SafeToDictionary(
+                    k => Path.GetFileName(k),
+                    v => v,
+                    SevenTiny.Bantina.RepeatActionEnum.Replace
+                );
 
             //添加到引用
-            foreach (var item in loadLocations)
-            {
-                metaDataReferenceList.Add(MetadataReference.CreateFromFile(item));
-            }
+            var metaDataReferenceList = dllNameLocationsDic.Select(item => (MetadataReference)MetadataReference.CreateFromFile(item.Value)).ToList();
 
             _metadataReferences.TryAdd(_currentAppName, metaDataReferenceList);
 

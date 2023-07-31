@@ -1,9 +1,7 @@
 ﻿using Bamboo.Configuration;
 using Bamboo.Logging;
-using Bamboo.ScriptEngine.Configs;
 using Microsoft.Extensions.Logging;
 using SevenTiny.Bantina.Extensions;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +10,7 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
     /// <summary>
     /// 该配置文件采用git作为远程配置，请参考Bamboo.Configuration组件的git配置
     /// </summary>
-    [ConfigName("ScriptEngine.CSharp")]
+    [ConfigFile("ScriptEngine.CSharp.json")]
     internal class ScriptEngineCSharpConfig : GitConfigBase<ScriptEngineCSharpConfig>
     {
         /// <summary>
@@ -75,19 +73,21 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
 
         private static ScriptEngineCSharpConfig GetScriptEngineCSharpConfig()
         {
-            if (ScriptEngineCSharpConfig.Instance == null)
+            var config = ScriptEngineCSharpConfig.Get();
+
+            if (config == null)
             {
                 _logger.LogError("Get ScriptEngine.Csharp Config Faild!");
                 return null;
             }
 
-            if (ScriptEngineCSharpConfig.Instance.Nodes == null)
+            if (config.Nodes == null)
             {
                 _logger.LogError("Get ScriptEngine.Csharp Config Faild! 'Nodes' is null.");
                 return null;
             }
 
-            return ScriptEngineCSharpConfig.Instance;
+            return config;
         }
 
         private static Node GetNodeByAppName(string appName)
@@ -105,12 +105,12 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
 
         public static bool IsDebugModeCompile()
         {
-            return GetNodeByAppName(AppSettingsConfig.Instance.AppName)?.IsDebugModeCompile ?? false;
+            return GetNodeByAppName(GetCurrentAppName())?.IsDebugModeCompile ?? false;
         }
 
         public static bool IsIsOutPutCompileFiles()
         {
-            return GetNodeByAppName(AppSettingsConfig.Instance.AppName)?.IsOutPutCompileFiles ?? false;
+            return GetNodeByAppName(GetCurrentAppName())?.IsOutPutCompileFiles ?? false;
         }
 
         /// <summary>
@@ -131,7 +131,7 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
             //先保证加载系统资源
             referenceDirs.AddRange(GetNodeByAppName(DefaultAppName)?.DllScanAndLoadPath ?? new string[0]);
             //加载应用资源
-            referenceDirs.AddRange(GetNodeByAppName(AppSettingsConfig.Instance.AppName)?.DllScanAndLoadPath ?? new string[0]);
+            referenceDirs.AddRange(GetNodeByAppName(GetCurrentAppName())?.DllScanAndLoadPath ?? new string[0]);
 
             return referenceDirs;
         }
@@ -183,13 +183,18 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
             }
 
             //加载应用资源
-            foreach (var item in GetNodeByAppName(AppSettingsConfig.Instance.AppName)?.InstallPackages ?? new Package[0])
+            foreach (var item in GetNodeByAppName(GetCurrentAppName())?.InstallPackages ?? new Package[0])
             {
                 if (item != null)
-                    packagesInfoDic.AddOrUpdate(item, GetNugetSources(AppSettingsConfig.Instance.AppName));
+                    packagesInfoDic.AddOrUpdate(item, GetNugetSources(GetCurrentAppName()));
             }
 
             return packagesInfoDic;
+        }
+
+        internal static string GetCurrentAppName()
+        {
+            return AppSettingsConfig.GetValue<string>("AppName");
         }
     }
 }
