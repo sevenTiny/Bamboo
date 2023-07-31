@@ -1,5 +1,4 @@
 ﻿using Bamboo.Configuration;
-using Xunit;
 
 namespace Test.Configuration.Xml
 {
@@ -14,45 +13,49 @@ namespace Test.Configuration.Xml
     */
 
     [ConfigFile("XmlTest.xml")]
-    public class TestConfig : XmlConfigBase<TestConfig>
+    public class XmlTestConfig : XmlConfigBase<XmlTestConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
     }
 
-    public class TestConfigTest
+    [TestClass]
+    public class XmlConfigTest
     {
-        [Fact]
+        [TestMethod]
         public void Test()
         {
-            var config = TestConfig.Get();
+            var config = XmlTestConfig.Get();
 
-            Assert.Equal("chuanqi", config.Key);
-            Assert.Equal("111", config.Value);
+            Assert.AreEqual("chuanqi", config.Key);
+            Assert.AreEqual("111", config.Value);
         }
 
-        [Fact]
+        [TestMethod]
         public void StoreConfigTest()
         {
             //use Bind can bind configuration entry to instance
-            var instance = new TestConfig().Bind();
+            var instance = new XmlTestConfig().Bind();
 
-            Assert.Equal("111", instance.Value);
+            Assert.AreEqual("111", instance.Value);
 
-            instance.Key = "write test key";
             instance.Value = "222";
 
             //write the configuration instance to file
             instance.WriteToFile();
 
-            Assert.Equal("222", instance.Value);
+            Assert.AreEqual("222", instance.Value);
 
             //if writen to file, call Bind immediately is neccessary.
             //it will rebind the configuration entry to instance
             instance.Value = "333";
             instance.Bind();
 
-            Assert.Equal("222", instance.Value);
+            Assert.AreEqual("222", instance.Value);
+
+            //roll back
+            instance.Value = "111";
+            instance.WriteToFile();
         }
     }
 }

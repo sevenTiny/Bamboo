@@ -2,13 +2,12 @@ using Bamboo.Configuration;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Threading;
-using Xunit;
 
 namespace Test.Configuration.Git
 {
     [ConfigFile("test.json")]
     [ConfigGroup("PublicRepo")]
-    public class TestConfig : GitConfigBase<TestConfig>
+    public class GitTestConfig : GitConfigBase<GitTestConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
@@ -33,14 +32,15 @@ namespace Test.Configuration.Git
         public string Value { get; set; }
     }
 
-    public class TestConfigTest
+    [TestClass]
+    public class GitConfigTest
     {
-        [Fact]
+        [TestMethod]
         public void Get()
         {
             for (int i = 0; i < 10; i++)
             {
-                var config = TestConfig.Get();
+                var config = GitTestConfig.Get();
 
                 Trace.WriteLine(JsonConvert.SerializeObject(config));
 
@@ -48,25 +48,25 @@ namespace Test.Configuration.Git
             }
         }
 
-        [Fact]
+        [TestMethod]
         public void GetNotExistRepoTest()
         {
             var config = GitErrorTestConfig.Get();
 
-            Assert.Equal("chuanqi", config.Key);
-            Assert.Equal("111", config.Value);
+            Assert.AreEqual("chuanqi", config.Key);
+            Assert.AreEqual("111", config.Value);
         }
 
         /// <summary>
         /// if you test the local mode, please set the LocalMode = true in appsettings.json
         /// </summary>
-        [Fact]
+        [TestMethod]
         public void GetLocalModeTest()
         {
             var config = LocalModeTestConfig.Get();
 
-            Assert.Equal("chuanqi", config.Key);
-            Assert.Equal("111", config.Value);
+            Assert.AreEqual("chuanqi", config.Key);
+            Assert.AreEqual("111", config.Value);
         }
     }
 }
