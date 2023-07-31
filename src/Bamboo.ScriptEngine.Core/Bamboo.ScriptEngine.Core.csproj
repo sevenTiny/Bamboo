@@ -13,7 +13,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bamboo.Configuration.Json" Version="1.0.1" />
 		<PackageReference Include="Bamboo.Logging" Version="1.0.4" />
 		<PackageReference Include="fasterflect" Version="3.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
