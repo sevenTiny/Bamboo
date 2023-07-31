@@ -51,8 +51,9 @@ namespace SevenTiny.Bantina.Extensions
         /// <param name="source"></param>
         /// <param name="keySelector"></param>
         /// <param name="elementSelector"></param>
+        /// <param name="keyRepeatAction">Actions performed when key repeats, skip is default</param>
         /// <returns></returns>
-        public static Dictionary<TKey, TElement> SafeToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector)
+        public static Dictionary<TKey, TElement> SafeToDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector, RepeatActionEnum keyRepeatAction = RepeatActionEnum.Skip)
         {
             if (source == null || !source.Any())
                 return new Dictionary<TKey, TElement>(0);
@@ -64,9 +65,16 @@ namespace SevenTiny.Bantina.Extensions
                 var key = keySelector(item);
 
                 if (dic.ContainsKey(key))
-                    continue;
-
-                dic.Add(key, elementSelector(item));
+                {
+                    if (keyRepeatAction == RepeatActionEnum.Skip)
+                        continue;
+                    else if (keyRepeatAction == RepeatActionEnum.Replace)
+                        dic[key] = elementSelector(item);
+                }
+                else
+                {
+                    dic.Add(key, elementSelector(item));
+                }
             }
             return dic;
         }
