@@ -1,25 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>1.0.0</Version>
-    <RepositoryType>dotnet</RepositoryType>
-    <PackageProjectUrl>https://github.com/Bamboo/Bamboo.Configuration</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/Bamboo/Bamboo.Configuration.git</RepositoryUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
-    <Copyright>7tiny</Copyright>
-    <PackageLicenseUrl>https://github.com/Bamboo/Bamboo.Bantina</PackageLicenseUrl>
-    <Company>www.7tiny.com</Company>
-    <Authors>7tiny</Authors>
-    <Description>分布式配置中心核心</Description>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Version>1.0.0</Version>
+		<RepositoryType>dotnet</RepositoryType>
+		<Authors>7tiny</Authors>
+		<Copyright>7tiny</Copyright>
+		<Company>www.7tiny.com</Company>
+		<PackageLicenseUrl>https://github.com/sevenTiny/Bamboo/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/sevenTiny/Bamboo</PackageProjectUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
+		<RepositoryUrl>https://github.com/sevenTiny/Bamboo</RepositoryUrl>
+		<Description>分布式配置中心核心</Description>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Bamboo.Logging" Version="1.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Bamboo.Logging" Version="1.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
 
 </Project>

@@ -1,23 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Bamboo Script Engine with CSharp</Description>
-    <PackageProjectUrl>https://github.com/sevenTiny/Chameleon.FaaS</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
-    <RepositoryUrl>https://github.com/sevenTiny/Chameleon.FaaS</RepositoryUrl>
-    <RepositoryType>dotnet</RepositoryType>
-    <Copyright>7tiny</Copyright>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Description>Bamboo Script Engine with CSharp</Description>
+		<Authors>7tiny</Authors>
+		<Copyright>7tiny</Copyright>
+		<Company>www.7tiny.com</Company>
+		<PackageLicenseUrl>https://github.com/sevenTiny/Bamboo/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/sevenTiny/Bamboo</PackageProjectUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
+		<RepositoryUrl>https://github.com/sevenTiny/Bamboo</RepositoryUrl>
+		<RepositoryType>dotnet</RepositoryType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Bamboo.Configuration.Git" Version="1.0.2" />
-    <PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.1" />
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="3.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="NuGet.Packaging" Version="5.8.0" />
-    <PackageReference Include="NuGet.Protocol" Version="5.8.0" />
-    <PackageReference Include="SevenTiny.Bantina" Version="1.0.64" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Bamboo.Configuration.Git" Version="1.0.2" />
+		<PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.1" />
+		<PackageReference Include="Microsoft.CodeAnalysis" Version="3.5.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="NuGet.Packaging" Version="5.8.0" />
+		<PackageReference Include="NuGet.Protocol" Version="5.8.0" />
+		<PackageReference Include="SevenTiny.Bantina" Version="1.0.64" />
+	</ItemGroup>
 
 </Project>
