@@ -54,11 +54,6 @@ namespace Bamboo.Configuration
         }
 
         /// <summary>
-        /// local mode signal（set true，nolonger pull remote）
-        /// </summary>
-        public bool LocalMode { get; set; }
-
-        /// <summary>
         /// copy configuration file to bamboo configuration directory
         /// </summary>
         /// <param name="configurationFilePath">The configuration file path, If not provided, try to get it from </param>
