@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<Copyright>7tiny</Copyright>
+		<Company>www.7tiny.com</Company>
+		<PackageLicenseUrl>https://github.com/sevenTiny/Bamboo/blob/master/LICENSE</PackageLicenseUrl>
+		<PackageProjectUrl>https://github.com/sevenTiny/Bamboo</PackageProjectUrl>
+		<PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
+		<RepositoryUrl>https://github.com/sevenTiny/Bamboo</RepositoryUrl>
+		<RepositoryType>.net core</RepositoryType>
+	</PropertyGroup>
+</Project>
