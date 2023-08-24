@@ -1,20 +1,20 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.Extensions.Logging;
+﻿using Bamboo.Logging;
 using Bamboo.ScriptEngine.CSharp.Configs;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using NuGet.Common;
+using NuGet.Packaging;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
+using NuGet.Versioning;
+using SevenTiny.Bantina.Extensions;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Bamboo.Logging;
-using Newtonsoft.Json;
-using NuGet.Protocol.Core.Types;
-using NuGet.Versioning;
-using NuGet.Protocol;
 using System.Threading;
-using NuGet.Common;
-using NuGet.Packaging;
-using SevenTiny.Bantina.Extensions;
 
 namespace Bamboo.ScriptEngine.CSharp
 {
@@ -132,19 +132,23 @@ namespace Bamboo.ScriptEngine.CSharp
 
             ConcurrentBag<string> concurrentBag = new ConcurrentBag<string>();
 
+            var nugetSoursces = ScriptEngineCSharpConfigHelper.GetNugetSources();
+
+#if DEBUG
+            foreach (var current in ScriptEngineCSharpConfigHelper.GetInstallPackages())
+#else
             //并行下载
-            ScriptEngineCSharpConfigHelper.GetInstallPackageSourceDic().AsParallel().ForAll(current =>
-            //foreach (var current in ScriptEngineCSharpConfigHelper.GetInstallPackageSourceDic())//Debug
+            ScriptEngineCSharpConfigHelper.GetInstallPackages().AsParallel().ForAll(current =>
+#endif
             {
                 SourceCacheContext cache = new SourceCacheContext();
-                var package = current.Key;
 
-                var currentVersionPath = Path.Combine(downloadPath, package.PackageId.ToLower(), package.Version.ToLower());
+                var currentVersionPath = Path.Combine(downloadPath, current.PackageId.ToLower(), current.Version.ToLower());
 
                 //先查询本地文件是否存在，如果存在，就无需再去下载
                 if (Directory.Exists(currentVersionPath))
                 {
-                    var file = Directory.GetFiles(currentVersionPath, "*.dll", SearchOption.AllDirectories).FirstOrDefault(t => Path.GetFileName(t).Equals(string.Concat(package.PackageId, ".dll")));
+                    var file = Directory.GetFiles(currentVersionPath, string.Concat(current.PackageId, ".dll"), SearchOption.AllDirectories).FirstOrDefault();
                     if (file != null)
                     {
                         concurrentBag.Add(file);
@@ -154,7 +158,7 @@ namespace Bamboo.ScriptEngine.CSharp
 
                 //标记是否当前包已经成功匹配，如果成功，则不会继续在后续的源中查找
                 bool isCurrentPackageMatchSuccess = false;
-                foreach (var source in current.Value)
+                foreach (var source in nugetSoursces)
                 {
                     if (isCurrentPackageMatchSuccess)
                         break;
@@ -163,21 +167,23 @@ namespace Bamboo.ScriptEngine.CSharp
                     FindPackageByIdResource resource = repository.GetResourceAsync<FindPackageByIdResource>().Result;
 
                     //当前源没有找到这个包，换下一个源下载
-                    if (!resource.DoesPackageExistAsync(package.PackageId, new NuGetVersion(package.Version), cache, logger, cancellationToken).Result)
+                    if (!resource.DoesPackageExistAsync(current.PackageId, new NuGetVersion(current.Version), cache, logger, cancellationToken).Result)
                         continue;
 
                     using (MemoryStream packageStream = new MemoryStream())
                     {
                         //复制包
-                        if (!resource.CopyNupkgToStreamAsync(package.PackageId, new NuGetVersion(package.Version), packageStream, cache, logger, cancellationToken).Result)
+                        if (!resource.CopyNupkgToStreamAsync(current.PackageId, new NuGetVersion(current.Version), packageStream, cache, logger, cancellationToken).Result)
                         {
-                            _logger.LogError($"copy package of {package.PackageId} {package.Version} from source [{source}] error");
+                            _logger.LogError($"copy package of {current.PackageId} {current.Version} from source [{source}] error");
                             break;
                         }
 
                         using (PackageArchiveReader packageReader = new PackageArchiveReader(packageStream))
                         {
-                            _logger.LogDebug($"copy package of {package.PackageId} {package.Version} from source [{source}] success");
+                            _logger.LogDebug($"copy package of {current.PackageId} {current.Version} from source [{source}] success");
+
+                            var fs = packageReader.GetFiles();
 
                             var files = packageReader.GetFiles().Where(t => Path.GetExtension(t).Equals(".dll")).ToArray();
 
@@ -205,9 +211,11 @@ namespace Bamboo.ScriptEngine.CSharp
                         }
                     }
                 }
-                //}//DEBUG
+#if DEBUG
+            }
+#else
             });
-
+#endif
             //添加到dll引用目录
             loadLocations.AddRange(concurrentBag);
         }
