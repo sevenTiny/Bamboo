@@ -75,7 +75,7 @@ namespace Bamboo.Configuration
             }
             else
             {
-                configurationFullPath = Path.Combine("BambooConfig", configFilePath);
+                configurationFullPath = Path.Combine("BambooConfig", Path.GetFileName(configFilePath));
             }
 
             InitializeConfigurationFile(configurationFullPath);
