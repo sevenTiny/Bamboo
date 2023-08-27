@@ -73,9 +73,11 @@ namespace Bamboo.Configuration
                 //find file
                 configurationFullPath = FindFileAndGetFullPath(workSpace, configFilePath);
             }
+            //local mode or download failure
             else
             {
-                configurationFullPath = Path.Combine("BambooConfig", Path.GetFileName(configFilePath));
+                //maybe old configuration exist path (It's a compatible solution)
+                configurationFullPath = Path.Combine(AppContext.BaseDirectory, "BambooConfig", Path.GetFileName(configFilePath));
             }
 
             InitializeConfigurationFile(configurationFullPath);
