@@ -19,12 +19,12 @@ namespace Bamboo.Configuration.Git
             var gitGroup = section.GetSection(GitGroup);
 
             if (gitGroup == null || !gitGroup.Exists())
-                throw new KeyNotFoundException($"'{BambooConfig}.{GitGroup}' node has not exist in the 'appsettings.json' ConnectionStrings file.");
+                throw new KeyNotFoundException($"'{BambooConfig}.{GitGroup}' node has not exist in the 'appsettings.json' configuration file.");
 
             var configSetting = gitGroup.GetSection(group);
 
             if (configSetting == null || !configSetting.Exists())
-                throw new KeyNotFoundException($"'{BambooConfig}.{GitGroup}.{group}' node has not exist in the 'appsettings.json' ConnectionStrings file.");
+                throw new KeyNotFoundException($"'{BambooConfig}.{GitGroup}.{group}' node has not exist in the 'appsettings.json' configuration file.");
 
             var configSettingInstance = configSetting.Get<GroupSetting>();
 
