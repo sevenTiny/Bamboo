@@ -163,6 +163,11 @@ namespace Bamboo.Configuration
             if (string.IsNullOrWhiteSpace(configurationFilePath))
                 throw new ArgumentException("config file path must be provide in the correct file path format");
 
+            //if relative path, combine the base path
+            //Directory.GetCurrentDirectory() is different in web programs and test programs.
+            if (!Path.IsPathRooted(configurationFilePath))
+                configurationFilePath = Path.Combine(AppContext.BaseDirectory, configurationFilePath);
+
             return configurationFilePath;
         }
     }

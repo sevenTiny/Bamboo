@@ -53,5 +53,11 @@ namespace Test.Configuration.Json
             instance.Value = "111";
             instance.WriteToFile();
         }
+
+        [TestMethod]
+        public void AppSettingsConfigTest()
+        {
+            Assert.AreEqual("123", AppSettingsConfig.GetValue<string>("Key1"));
+        }
     }
 }
