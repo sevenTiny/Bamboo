@@ -15,6 +15,13 @@ namespace Test.Configuration.Json
         public string Value { get; set; }
     }
 
+    [ConfigFile("NotExistJsonConfigFile.json")]
+    public class NotExistJsonConfigFileConfig : JsonConfigBase<NotExistJsonConfigFileConfig>
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
     [TestClass]
     public class JsonConfigTest
     {
@@ -58,6 +65,22 @@ namespace Test.Configuration.Json
         public void AppSettingsConfigTest()
         {
             Assert.AreEqual("123", AppSettingsConfig.GetValue<string>("Key1"));
+        }
+
+        [TestMethod]
+        public void NotExistFileTest()
+        {
+            var exist = NotExistJsonConfigFileConfig.FileExists();
+
+            Assert.AreEqual(false, exist);
+        }
+
+        [TestMethod]
+        public void GetConfigurationFileFullPathTest()
+        {
+            var path = NotExistJsonConfigFileConfig.GetFileFullPath();
+
+            Assert.AreNotEqual(string.Empty, path);
         }
     }
 }

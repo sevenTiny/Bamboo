@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <None Remove="appsettings.json" />
-    <None Remove="BambooConfig\GitErrorTest.json" />
+    <None Remove="BambooConfig\LocalModeTest.json" />
     <None Remove="JsonTest.json" />
     <None Remove="XmlTest.xml" />
   </ItemGroup>
@@ -20,7 +20,7 @@
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="BambooConfig\GitErrorTest.json">
+    <Content Include="BambooConfig\LocalModeTest.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="JsonTest.json">
@@ -39,9 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Bamboo.Configuration.Git\Bamboo.Configuration.Git.csproj" />
-    <ProjectReference Include="..\Bamboo.Configuration.MySql\Bamboo.Configuration.MySql.csproj" />
-    <ProjectReference Include="..\Bamboo.Configuration.Xml\Bamboo.Configuration.Xml.csproj" />
+    <ProjectReference Include="..\Bamboo.Configuration\Bamboo.Configuration.csproj" />
   </ItemGroup>
 
 </Project>
