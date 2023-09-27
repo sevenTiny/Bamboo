@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Timers;
 
-namespace Bamboo.Configuration.Helpers
+namespace Bamboo.Configuration.Remote
 {
     internal static class ConfigDownloadManager
     {

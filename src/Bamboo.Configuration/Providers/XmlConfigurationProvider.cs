@@ -4,25 +4,20 @@ using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
 
-namespace Bamboo.Configuration
+namespace Bamboo.Configuration.Providers
 {
-    public class XmlConfigBase<T> : ConfigBase<T> where T : class, new()
+    internal class XmlConfigurationProvider : ConfigurationProviderBase
     {
-        static XmlConfigBase()
+        public override IConfigurationRoot GetConfigurationRoot(string configurationFullPath)
         {
-            RegisterInitializer(() =>
-            {
-                InitializeConfigurationFile();
-
-                return new ConfigurationBuilder()
-                .AddXmlFile(ConfigurationFilePath, optional: false, reloadOnChange: true)
+            return new ConfigurationBuilder()
+                .AddXmlFile(configurationFullPath, optional: false, reloadOnChange: true)
                 .Build();
-            });
         }
 
-        protected override string SerializeConfigurationInstance()
+        public override string Serilize(object instance)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            XmlSerializer serializer = new XmlSerializer(instance.GetType());
 
             using (var writer = new StringWriterWithEncoding(Encoding.UTF8))
             {
@@ -39,7 +34,7 @@ namespace Bamboo.Configuration
                     var xmlNamespaces = new XmlSerializerNamespaces();
                     xmlNamespaces.Add("", "");
 
-                    serializer.Serialize(xmlWriter, this, xmlNamespaces);
+                    serializer.Serialize(xmlWriter, instance, xmlNamespaces);
                     return writer.ToString();
                 }
             }

@@ -2,11 +2,9 @@
  * CopyRight: 7TINY CODE BUILDER. 
  * Version: 5.0.0
  * Author: 7tiny
- * Address: Earth
+ * Address: Chengdu
  * Create: 2018-02-13 22:32:44
- * Modify: 2023年7月29日
- * Modify: 2019年6月19日 23点14分 基本完成了自动同步远程模式
- * E-mail: dong@7tiny.com | Bamboo@foxmail.com 
+ * E-mail: dong@7tiny.com | seventiny@foxmail.com
  * GitHub: https://github.com/Bamboo 
  * Personal web site: http://www.7tiny.com 
  * Technical WebSit: http://www.cnblogs.com/7tiny/ 
@@ -14,6 +12,8 @@
  * Thx , Best Regards ~
  *********************************************************/
 using Bamboo.Configuration.Helpers;
+using Bamboo.Configuration.Providers;
+using Bamboo.Configuration.Remote;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
@@ -24,21 +24,13 @@ namespace Bamboo.Configuration
     public abstract class ConfigBase<T> where T : class, new()
     {
         /// <summary>
-        /// the real configuration file path
-        /// </summary>
-        protected static string ConfigurationFilePath = string.Empty;
-        /// <summary>
         /// the configuration name
         /// </summary>
-        protected static string ConfigurationName = typeof(T).Name;
+        private static string ConfigurationName = typeof(T).Name;
         /// <summary>
         /// Current configuration root
         /// </summary>
-        private static IConfigurationRoot _ConfigurationRoot { get; set; }
-        /// <summary>
-        /// configuration initializer
-        /// </summary>
-        private static Func<IConfigurationRoot> _initializer;
+        protected static IConfigurationRoot _ConfigurationRoot { get; set; }
         /// <summary>
         /// initializer lock
         /// </summary>
@@ -49,41 +41,8 @@ namespace Bamboo.Configuration
             if (!Directory.Exists(ConfigPathHelper.BaseConfigDir))
                 Directory.CreateDirectory(ConfigPathHelper.BaseConfigDir);
 
-            //This code aim to trigger child class static structurer execute
-            new T();
-        }
-
-        /// <summary>
-        /// copy configuration file to bamboo configuration directory
-        /// </summary>
-        /// <param name="configurationFilePath">The configuration file path, If not provided, try to get it from </param>
-        protected static void InitializeConfigurationFile(string configurationFilePath = null)
-        {
-            configurationFilePath = GetConfigurationFilePath(configurationFilePath);
-
-            if (!File.Exists(configurationFilePath))
-                throw new FileNotFoundException("configuration file not found", configurationFilePath);
-
-            var newPath = Path.Combine(ConfigPathHelper.BaseConfigDir, Path.GetFileName(configurationFilePath));
-
-            if (File.Exists(newPath))
-            {
-                //if it is same file, no copy
-                if (new FileInfo(configurationFilePath).FullName.Equals(new FileInfo(newPath).FullName))
-                {
-                    ConfigurationFilePath = newPath;
-                    return;
-                }
-            }
-
-            File.Copy(configurationFilePath, newPath, true);
-
-            ConfigurationFilePath = newPath;
-        }
-
-        protected static void RegisterInitializer(Func<IConfigurationRoot> initializer)
-        {
-            _initializer = initializer;
+            //fetch remote
+            RemoteManager.Fetch();
         }
 
         /// <summary>
@@ -98,14 +57,16 @@ namespace Bamboo.Configuration
             {
                 if (_ConfigurationRoot == null)
                 {
-                    if (_initializer == null)
-                        throw new ArgumentException("The initializer is not set correctly");
-
                     lock (_initializerLock)
                     {
                         if (_ConfigurationRoot == null)
                         {
-                            _ConfigurationRoot = _initializer();
+                            var configurationFilePath = GetConfigurationFilePath();
+
+                            if (!File.Exists(configurationFilePath))
+                                throw new FileNotFoundException("configuration file not found", configurationFilePath);
+
+                            _ConfigurationRoot = ConfigurationProviderManager.GetProvider(configurationFilePath).GetConfigurationRoot(configurationFilePath);
 
                             if (_ConfigurationRoot == null)
                                 throw new ApplicationException($"The config '{ConfigurationName}' initialization fail");
@@ -147,6 +108,15 @@ namespace Bamboo.Configuration
         }
 
         /// <summary>
+        /// get the configuration file setting path in attribute
+        /// </summary>
+        /// <returns></returns>
+        public static string GetFilePath()
+        {
+            return ConfigFileAttribute.GetFilePath(typeof(T));
+        }
+
+        /// <summary>
         /// get the configuration file full path
         /// </summary>
         /// <returns></returns>
@@ -155,18 +125,15 @@ namespace Bamboo.Configuration
             return GetConfigurationFilePath();
         }
 
-        protected abstract string SerializeConfigurationInstance();
-
         /// <summary>
         /// write configuration serilized string to file
         /// </summary>
-        /// <param name="configurationFilePath">configuration save path, default is configuration path</param>
         /// <returns>file save path</returns>
-        public string WriteToFile(string configurationFilePath = null)
+        public string WriteToFile()
         {
-            configurationFilePath = GetConfigurationFilePath(configurationFilePath);
+            var configurationFilePath = GetConfigurationFilePath();
 
-            var configContent = SerializeConfigurationInstance();
+            var configContent = ConfigurationProviderManager.GetProvider(configurationFilePath).Serilize(this);
 
             File.WriteAllText(configurationFilePath, configContent, Encoding.UTF8);
 
@@ -176,18 +143,17 @@ namespace Bamboo.Configuration
             return configurationFilePath;
         }
 
-        private static string GetConfigurationFilePath(string configurationFilePath = null)
+        private static string GetConfigurationFilePath()
         {
-            if (string.IsNullOrEmpty(configurationFilePath))
-                configurationFilePath = ConfigFileAttribute.GetFilePath(typeof(T));
+            var configurationFilePath = ConfigFileAttribute.GetFilePath(typeof(T));
 
             if (string.IsNullOrWhiteSpace(configurationFilePath))
                 throw new ArgumentException("config file path must be provide in the correct file path format");
 
-            //if relative path, combine the base path
-            //Directory.GetCurrentDirectory() is different in web programs and test programs.
-            if (!Path.IsPathRooted(configurationFilePath))
-                configurationFilePath = Path.Combine(AppContext.BaseDirectory, configurationFilePath);
+            // if relative path, combine the base path
+            // Note: Directory.GetCurrentDirectory() is different in web programs and test programs.
+            if (!Path.IsPathRooted(configurationFilePath) && !"appsettings.json".Equals(configurationFilePath))
+                configurationFilePath = Path.Combine(ConfigurationConst.ConfigurationBaseFolder, configurationFilePath);
 
             return configurationFilePath;
         }

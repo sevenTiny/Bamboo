@@ -1,22 +1,17 @@
 ﻿using Bamboo.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Configuration.Json
+namespace Test.Bamboo.Configuration
 {
-    /*
-     * 要测试该单元测试请手动在生成dll的相同输出目录添加测试配置文件
-     * 文件名：JsonTest.json
-     * 格式：
-    {"Key":"chuanqi","Value":"111"}
-     */
     [ConfigFile("JsonTest.json")]
-    public class JsonTestConfig : JsonConfigBase<JsonTestConfig>
+    public class JsonTestConfig : ConfigBase<JsonTestConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
     }
 
-    [ConfigFile("NotExistJsonConfigFile.json")]
-    public class NotExistJsonConfigFileConfig : JsonConfigBase<NotExistJsonConfigFileConfig>
+    [ConfigFile("RuntimeJson.json")]
+    public class RuntimeJsonConfig : ConfigBase<RuntimeJsonConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
@@ -32,55 +27,27 @@ namespace Test.Configuration.Json
 
             Assert.AreEqual("chuanqi", config.Key);
             Assert.AreEqual("111", config.Value);
+            Assert.AreEqual("chuanqi", JsonTestConfig.GetValue<string>("Key"));
+            Assert.AreEqual("111", JsonTestConfig.GetValue<string>("Value"));
         }
 
         [TestMethod]
-        public void StoreConfigTest()
+        public void WriteToFile()
         {
-            //use Bind can bind configuration entry to instance
-            var instance = new JsonTestConfig().Bind();
+            // If file exists, delete firstly
+            if (RuntimeJsonConfig.FileExists())
+                File.Delete(RuntimeJsonConfig.GetFileFullPath());
 
-            Assert.AreEqual("111", instance.Value);
-
-            instance.Value = "222";
+            var instance = new RuntimeJsonConfig()
+            {
+                Key = "111",
+                Value = "222"
+            };
 
             //write the configuration instance to file
             instance.WriteToFile();
 
-            Assert.AreEqual("222", instance.Value);
-
-            //if writen to file, call Bind immediately is neccessary.
-            //it will rebind the configuration entry to instance
-            instance.Value = "333";
-            instance.Bind();
-
-            Assert.AreEqual("222", instance.Value);
-
-            //roll back
-            instance.Value = "111";
-            instance.WriteToFile();
-        }
-
-        [TestMethod]
-        public void AppSettingsConfigTest()
-        {
-            Assert.AreEqual("123", AppSettingsConfig.GetValue<string>("Key1"));
-        }
-
-        [TestMethod]
-        public void NotExistFileTest()
-        {
-            var exist = NotExistJsonConfigFileConfig.FileExists();
-
-            Assert.AreEqual(false, exist);
-        }
-
-        [TestMethod]
-        public void GetConfigurationFileFullPathTest()
-        {
-            var path = NotExistJsonConfigFileConfig.GetFileFullPath();
-
-            Assert.AreNotEqual(string.Empty, path);
+            Assert.AreEqual("222", RuntimeJsonConfig.GetValue<string>("Value"));
         }
     }
 }

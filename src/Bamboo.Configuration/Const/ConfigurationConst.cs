@@ -1,10 +1,11 @@
-﻿namespace Bamboo.Configuration
+﻿using System;
+using System.IO;
+
+namespace Bamboo.Configuration
 {
     internal class ConfigurationConst
     {
-        /// <summary>
-        /// save directory name
-        /// </summary>
-        internal const string OUTPUT_PATH_SCHEMA = "BambooConfig";
+        internal const string DefaultPath = "BambooConfig";
+        internal static string ConfigurationBaseFolder = Path.Combine(AppContext.BaseDirectory, DefaultPath);
     }
 }

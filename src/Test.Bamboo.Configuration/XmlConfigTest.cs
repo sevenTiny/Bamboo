@@ -1,19 +1,17 @@
 ﻿using Bamboo.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Configuration.Xml
+namespace Test.Bamboo.Configuration
 {
-    /*
-    * 要测试该单元测试请手动在编译生成dll的相同输出目录添加测试配置文件
-    * 文件名：XmlTest.xml
-    * 格式：
-<TestConfig>
-	<Key>chuanqi</Key>
-	<Value>111</Value>
-</TestConfig>
-    */
-
     [ConfigFile("XmlTest.xml")]
-    public class XmlTestConfig : XmlConfigBase<XmlTestConfig>
+    public class XmlTestConfig : ConfigBase<XmlTestConfig>
+    {
+        public string Key { get; set; }
+        public string Value { get; set; }
+    }
+
+    [ConfigFile("RuntimeXml.xml")]
+    public class RuntimeXmlConfig : ConfigBase<RuntimeXmlConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
@@ -23,39 +21,33 @@ namespace Test.Configuration.Xml
     public class XmlConfigTest
     {
         [TestMethod]
-        public void Test()
+        public void Get()
         {
             var config = XmlTestConfig.Get();
 
             Assert.AreEqual("chuanqi", config.Key);
             Assert.AreEqual("111", config.Value);
+            Assert.AreEqual("chuanqi", XmlTestConfig.GetValue<string>("Key"));
+            Assert.AreEqual("111", XmlTestConfig.GetValue<string>("Value"));
         }
 
         [TestMethod]
-        public void StoreConfigTest()
+        public void WriteToFile()
         {
-            //use Bind can bind configuration entry to instance
-            var instance = new XmlTestConfig().Bind();
+            // If file exists, delete firstly
+            if (RuntimeXmlConfig.FileExists())
+                File.Delete(RuntimeXmlConfig.GetFileFullPath());
 
-            Assert.AreEqual("111", instance.Value);
-
-            instance.Value = "222";
+            var instance = new RuntimeXmlConfig()
+            {
+                Key = "111",
+                Value = "222"
+            };
 
             //write the configuration instance to file
             instance.WriteToFile();
 
-            Assert.AreEqual("222", instance.Value);
-
-            //if writen to file, call Bind immediately is neccessary.
-            //it will rebind the configuration entry to instance
-            instance.Value = "333";
-            instance.Bind();
-
-            Assert.AreEqual("222", instance.Value);
-
-            //roll back
-            instance.Value = "111";
-            instance.WriteToFile();
+            Assert.AreEqual("222", RuntimeXmlConfig.GetValue<string>("Value"));
         }
     }
 }

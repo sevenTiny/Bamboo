@@ -8,7 +8,7 @@ namespace Bamboo.Configuration.Helpers
         /// <summary>
         /// config base directory
         /// </summary>
-        public static string BaseConfigDir = Path.Combine(AppContext.BaseDirectory, ConfigurationConst.OUTPUT_PATH_SCHEMA);
+        public static string BaseConfigDir = Path.Combine(AppContext.BaseDirectory, ConfigurationConst.DefaultPath);
 
         /// <summary>
         /// config file full path xxx.json

@@ -1,39 +1,32 @@
 using Bamboo.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
-namespace Test.Configuration.Git
+namespace Test.Bamboo.Configuration
 {
     [ConfigFile("test.json")]
-    public class GitTestConfig : GitConfigBase<GitTestConfig>
+    public class GitTestConfig : ConfigBase<GitTestConfig>
     {
         public string Key { get; set; }
         public string Value { get; set; }
     }
 
-    [ConfigFile("test.json")]
-    public class Git2TestConfig : GitConfigBase<Git2TestConfig>
+    [ConfigFile("subfolder\\sub_user_info.json")]
+    public class SubUserInfoConfig : ConfigBase<SubUserInfoConfig>
     {
-        public string Key { get; set; }
-        public string Value { get; set; }
-    }
-
-    [ConfigFile("LocalModeTest.json")]
-    public class LocalModeTestConfig : GitConfigBase<LocalModeTestConfig>
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
+        public string Name { get; set; }
+        public string Age { get; set; }
     }
 
     [TestClass]
     public class GitConfigTest
     {
         /// <summary>
-        /// if you test git download ability, please un-comment [TestMethod]
-        /// and ensure the local mode is disable
+        /// To Debug fetch logic
         /// </summary>
         //[TestMethod]
-        public void RemoteDebug()
+        public void Debug()
         {
             for (int i = 0; i < 100; i++)
             {
@@ -41,26 +34,30 @@ namespace Test.Configuration.Git
 
                 Trace.WriteLine(JsonConvert.SerializeObject(config));
 
-                // add second config to test when many config instance use git base, only download once
-                var config2 = Git2TestConfig.Get();
-
                 Thread.Sleep(1000);
             }
         }
 
-        /// <summary>
-        /// if you test the local mode, please set the LocalMode = true in appsettings.json
-        /// </summary>
         [TestMethod]
-        public void GetLocalModeTest()
+        public void GetTest()
         {
-            // ensure it is local mode before local mode test
-            Assert.AreEqual(true, AppSettingsConfig.IsLocalMode());
-
-            var config = LocalModeTestConfig.Get();
+            var config = GitTestConfig.Get();
 
             Assert.AreEqual("chuanqi", config.Key);
-            Assert.AreEqual("111", config.Value);
+            Assert.AreEqual("333", config.Value);
+            Assert.AreEqual("chuanqi", GitTestConfig.GetValue<string>("Key"));
+            Assert.AreEqual("333", GitTestConfig.GetValue<string>("Value"));
+        }
+
+        [TestMethod]
+        public void GetUserInfo()
+        {
+            var config = SubUserInfoConfig.Get();
+
+            Assert.AreEqual("john", config.Name);
+            Assert.AreEqual("13", config.Age);
+            Assert.AreEqual("john", SubUserInfoConfig.GetValue<string>("Name"));
+            Assert.AreEqual("13", SubUserInfoConfig.GetValue<string>("Age"));
         }
     }
 }
