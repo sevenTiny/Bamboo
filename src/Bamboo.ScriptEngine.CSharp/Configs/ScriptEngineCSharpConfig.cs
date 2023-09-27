@@ -8,8 +8,8 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
     /// <summary>
     /// 该配置文件采用git作为远程配置，请参考Bamboo.Configuration组件的git配置
     /// </summary>
-    [ConfigFile("BambooConfig/ScriptEngine.CSharp.json")]
-    internal class ScriptEngineCSharpConfig : JsonConfigBase<ScriptEngineCSharpConfig>
+    [ConfigFile("ScriptEngine.CSharp.json")]
+    internal class ScriptEngineCSharpConfig : ConfigBase<ScriptEngineCSharpConfig>
     {
         /// <summary>
         /// Nuget源，配置在根的源会应用到所有的应用节点
