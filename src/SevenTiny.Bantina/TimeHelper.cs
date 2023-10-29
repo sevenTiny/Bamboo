@@ -19,27 +19,16 @@ namespace SevenTiny.Bantina
     public static class TimeHelper
     {
         /// <summary>
-        /// convert timestamp to datetime
+        /// get current timestamp
         /// </summary>
-        /// <param name="timestamp">unix timestamp length 13</param>
-        /// <returns>datetime</returns>
-        public static DateTime GetDateTime(long timestamp)
-        {
-            return TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local).Add(new TimeSpan(timestamp * 10000));
-        }
-
-        /// <summary>
-        /// 获取当前时间戳
-        /// </summary>
-        /// <param name="time">时间，如不填默认当前时刻</param>
+        /// <param name="datetime">UTC is default</param>
         /// <returns></returns>
-        public static long GetTimeStamp(DateTime time = default(DateTime))
+        public static long GetTimeStamp(DateTime datetime = default)
         {
-            if (DateTime.Equals(time, default(DateTime)))
-                time = DateTime.UtcNow;
+            if (DateTime.Equals(datetime, default))
+                datetime = DateTime.UtcNow;
 
-            TimeSpan ts = time - TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
-            return Convert.ToInt64(ts.TotalMilliseconds);
+            return new DateTimeOffset(datetime).ToUnixTimeMilliseconds();
         }
     }
 }
