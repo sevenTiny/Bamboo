@@ -1,5 +1,7 @@
 ﻿using Bamboo.Configuration.Providers;
+using Bamboo.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +34,10 @@ namespace Bamboo.Configuration.Helpers
             var section = Root.GetSection(BambooConfig);
 
             if (section == null || !section.Exists())
-                throw new KeyNotFoundException($"'{BambooConfig}' node has not exist in the 'appsettings.json' configuration file.");
+            {
+                new BambooLogger().LogDebug($"Bamboo.Configuration: '{BambooConfig}' node has not exist in the 'appsettings.json' configuration file.");
+                return null;
+            }
 
             return section;
         }
@@ -46,6 +51,12 @@ namespace Bamboo.Configuration.Helpers
         internal static (bool, List<GitSetting>) GetGitSettings()
         {
             var section = GetBambooConfigurationSection();
+
+            if (section == null)
+            {
+                new BambooLogger().LogDebug($"Bamboo.Configuration: '{Git}' node has not exist in the 'appsettings.json' configuration file's '{BambooConfig}' note.");
+                return (false, null);
+            }
 
             var gitSection = section.GetSection(Git);
 
