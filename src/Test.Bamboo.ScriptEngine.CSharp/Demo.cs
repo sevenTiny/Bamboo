@@ -1,6 +1,5 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
-using System.Diagnostics;
 using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
