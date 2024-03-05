@@ -14,6 +14,6 @@
         /// </summary>
         /// <param name="dynamicScript">动态脚本</param>
         /// <returns></returns>
-        ExecutionResult CheckScript(DynamicScript dynamicScript);
+        void CheckScript(DynamicScript dynamicScript);
     }
 }
