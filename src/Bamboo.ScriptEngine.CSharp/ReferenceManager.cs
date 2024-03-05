@@ -61,8 +61,10 @@ namespace Bamboo.ScriptEngine.CSharp
         //加载系统程序集
         private static void LoadSystemAssembly(HashSet<string> loadLocations)
         {
+
             var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
 
+            //这里不能把所有dll都加载上，因为有些dll是无法加载的，执行会抛出异常，只能遇到需要的再加
             loadLocations.Add(Path.Combine(assemblyPath, "System.dll"));
             loadLocations.Add(Path.Combine(assemblyPath, "mscorlib.dll"));
             loadLocations.Add(Path.Combine(assemblyPath, "netstandard.dll"));
@@ -71,12 +73,41 @@ namespace Bamboo.ScriptEngine.CSharp
             loadLocations.Add(Path.Combine(assemblyPath, "Microsoft.CSharp.dll"));
             loadLocations.Add(Path.Combine(assemblyPath, "System.Collections.dll"));
             loadLocations.Add(Path.Combine(assemblyPath, "System.Linq.dll"));
+            loadLocations.Add(Path.Combine(assemblyPath, "System.Linq.Expressions.dll"));
             loadLocations.Add(typeof(object).Assembly.Location);
             loadLocations.Add(typeof(System.Xml.XmlReader).Assembly.Location);
             loadLocations.Add(typeof(System.Net.HttpWebRequest).Assembly.Location);
             loadLocations.Add(typeof(System.Net.Http.HttpClient).Assembly.Location);
             loadLocations.Add(typeof(Enumerable).Assembly.Location);
             loadLocations.Add(typeof(System.Runtime.Serialization.DataContractSerializer).Assembly.Location);
+
+            //系统dll加载的目录
+            var dllScanAndLoadPath = ScriptEngineCSharpConfigHelper.GetSystemDllScanAndLoadPath();
+
+            foreach (var dllPath in dllScanAndLoadPath)
+            {
+                //如果配置的是文件，则按文件加载（绝对路径）
+                if (Path.IsPathRooted(dllPath) && File.Exists(dllPath))
+                {
+                    loadLocations.Add(dllPath);
+                }
+                //如果配置的是文件，则按文件加载（相对路径）
+                else if (File.Exists(Path.Combine(assemblyPath, dllPath)))
+                {
+                    loadLocations.Add(Path.Combine(assemblyPath, dllPath));
+                }
+                //如果配置的是文件夹，那么将目录下的所有dll都加载
+                else if (Directory.Exists(dllPath))
+                {
+                    //拿到目录下全部dll
+                    var dlls = Directory.GetFiles(dllPath, "*.dll", SearchOption.AllDirectories) ?? new string[0];
+
+                    foreach (var item in dlls)
+                    {
+                        loadLocations.Add(item);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -94,7 +125,7 @@ namespace Bamboo.ScriptEngine.CSharp
             foreach (var dllPath in dllScanAndLoadPath)
             {
                 //如果配置的是文件，则按文件加载（绝对路径）
-                if (File.Exists(dllPath))
+                if (Path.IsPathRooted(dllPath) && File.Exists(dllPath))
                 {
                     loadLocations.Add(dllPath);
                 }

@@ -24,6 +24,10 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
         /// </summary>
         public bool IsOutPutCompileFiles { get; set; }
         /// <summary>
+        /// 系统dll目录下需要加载的dll文件名，因为不同操作系统dotnet dll文件地址不同，文件路径会根据不同系统动态查找
+        /// </summary>
+        public string[] SystemDllScanAndLoadPath { get; set; }
+        /// <summary>
         /// dll扫描并全部加载的路径，该目录下的dll会全部加载
         /// </summary>
         public string[] DllScanAndLoadPath { get; set; }
@@ -67,6 +71,11 @@ namespace Bamboo.ScriptEngine.CSharp.Configs
         public static bool IsIsOutPutCompileFiles()
         {
             return GetScriptEngineCSharpConfig()?.IsOutPutCompileFiles ?? false;
+        }
+
+        public static string[] GetSystemDllScanAndLoadPath()
+        {
+            return GetScriptEngineCSharpConfig()?.SystemDllScanAndLoadPath ?? new string[0];
         }
 
         /// <summary>
