@@ -1,5 +1,6 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Xunit;
@@ -193,6 +194,42 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             Assert.Equal(3, result2.Data[0]);
             Assert.Equal(3, (script.Parameters[0] as List<int>)[0]);
+        }
+
+        [Trait("desc", "执行受信任的脚本 execute trasted code")]
+        [Fact]
+        public void ThrowExceptionTest()
+        {
+            try
+            {
+                IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
+                DynamicScript script = new DynamicScript();
+                script.Language = DynamicScriptLanguage.CSharp;
+                script.Script =
+                @"
+                using System;
+
+                public class Test
+                {
+                    public int GetA(int a)
+                    {
+                        throw new ArgumentNullException(""test"");
+
+                        return a;
+                    }
+                }
+                ";
+                script.ClassFullName = "Test";
+                script.FunctionName = "GetA";
+                script.Parameters = new object[] { 111 };
+                script.IsExecutionInSandbox = false;
+
+                var result = scriptEngineProvider.Execute<int>(script);
+            }
+            catch (Exception ex)
+            {
+                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
+            }
         }
     }
 }

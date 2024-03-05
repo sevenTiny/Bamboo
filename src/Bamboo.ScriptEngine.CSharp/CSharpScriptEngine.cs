@@ -102,19 +102,20 @@ namespace Bamboo.ScriptEngine.CSharp
             {
                 _logger.LogError(missingMethod, string.Format("ClassName:{0},FunctionName:{1},Language:{2},AppName:{3},ScriptHash:{4},ParameterCount:{5},ErrorMsg: {6}", dynamicScript.ClassFullName, dynamicScript.FunctionName, "CSharp", _currentAppName, _scriptHash, dynamicScript.Parameters?.Length, missingMethod.Message));
 
-                return ExecutionResult<T>.Error($"function name can not be null.");
+                throw;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, string.Format("Script objectId:{0},appName:{1},functionName:{2},errorMsg:{3}", null, _currentAppName, dynamicScript.FunctionName, ex.Message));
 
-                return ExecutionResult<T>.Error(ex.Message + ",innerEx:" + ex.InnerException?.Message);
+                throw;
             }
         }
 
         private bool BuildDynamicScript(DynamicScript dynamicScript, out string errorMessage)
         {
             errorMessage = string.Empty;
+
             try
             {
                 if (_scriptTypeDict.ContainsKey(_scriptHash))
@@ -138,6 +139,7 @@ namespace Bamboo.ScriptEngine.CSharp
                         return true;
                     }
                 }
+
                 return false;
             }
             catch (Exception ex)
@@ -146,7 +148,7 @@ namespace Bamboo.ScriptEngine.CSharp
 
                 _logger.LogError(ex, "BuildDynamicScript Error");
 
-                return false;
+                throw;
             }
         }
 
@@ -205,7 +207,7 @@ namespace Bamboo.ScriptEngine.CSharp
                 }
             }
 
-            _logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_currentAppName},{_scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{ ReferenceManager.GetMetaDataReferences()[_currentAppName]?.Count}");
+            _logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_currentAppName},{_scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{ReferenceManager.GetMetaDataReferences()[_currentAppName]?.Count}");
 
             return assembly;
         }
