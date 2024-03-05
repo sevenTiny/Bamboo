@@ -1,4 +1,5 @@
 ﻿using Bamboo.Logging;
+using Bamboo.ScriptEngine.Core;
 using Bamboo.ScriptEngine.CSharp.Configs;
 using Fasterflect;
 using Microsoft.CodeAnalysis;
@@ -37,11 +38,11 @@ namespace Bamboo.ScriptEngine.CSharp
             ReferenceManager.InitMetadataReferences();
         }
 
-        public ExecutionResult CheckScript(DynamicScript dynamicScript)
+        public void CheckScript(DynamicScript dynamicScript)
         {
             ArgumentsCheck(dynamicScript);
             PreProcessing(dynamicScript);
-            return BuildDynamicScript(dynamicScript, out string errorMsg) ? ExecutionResult.Success() : ExecutionResult.Error(errorMsg);
+            BuildDynamicScript(dynamicScript);
         }
 
         public ExecutionResult<T> Execute<T>(DynamicScript dynamicScript)
@@ -73,11 +74,7 @@ namespace Bamboo.ScriptEngine.CSharp
         private ExecutionResult<T> RunningDynamicScript<T>(DynamicScript dynamicScript)
         {
             //检查编译
-            if (!BuildDynamicScript(dynamicScript, out string errorMessage))
-            {
-                _logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
-                return ExecutionResult<T>.Error(errorMessage);
-            }
+            BuildDynamicScript(dynamicScript);
 
             try
             {
@@ -112,19 +109,19 @@ namespace Bamboo.ScriptEngine.CSharp
             }
         }
 
-        private bool BuildDynamicScript(DynamicScript dynamicScript, out string errorMessage)
+        private void BuildDynamicScript(DynamicScript dynamicScript)
         {
-            errorMessage = string.Empty;
+            var errorMessage = string.Empty;
 
             try
             {
                 if (_scriptTypeDict.ContainsKey(_scriptHash))
-                    return true;
+                    return;
 
                 lock (_lock)
                 {
                     if (_scriptTypeDict.ContainsKey(_scriptHash))
-                        return true;
+                        return;
 
                     var asm = CreateAsmExecutor(dynamicScript.Script, out errorMessage);
                     if (asm != null)
@@ -133,21 +130,21 @@ namespace Bamboo.ScriptEngine.CSharp
                         if (type == null)
                         {
                             errorMessage = $"type [{dynamicScript.ClassFullName}] not found in the assembly [{asm.FullName}].";
-                            return false;
+                            _logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
+                            throw new ScriptEngineException(errorMessage);
                         }
                         _scriptTypeDict.Add(_scriptHash, type);
-                        return true;
+
+                        return;
                     }
                 }
 
-                return false;
+                _logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
+                throw new ScriptEngineException(errorMessage);
             }
             catch (Exception ex)
             {
-                errorMessage = ex.ToString();
-
                 _logger.LogError(ex, "BuildDynamicScript Error");
-
                 throw;
             }
         }
@@ -261,17 +258,17 @@ namespace Bamboo.ScriptEngine.CSharp
         private ExecutionResult<T> CallFunction<T>(DynamicScript dynamicScript)
         {
             if (dynamicScript.FunctionName.IsNullOrEmpty())
-                return ExecutionResult<T>.Error($"function name can not be null.");
+                throw new ScriptEngineException($"function name can not be null.");
 
             if (_scriptHash.IsNullOrEmpty() || !_scriptTypeDict.ContainsKey(_scriptHash))
-                return ExecutionResult<T>.Error($"type not found.");
+                throw new ScriptEngineException($"type not found.");
 
             var type = _scriptTypeDict[_scriptHash];
 
             var methodInfo = type.Method(dynamicScript.FunctionName);
 
             if (methodInfo == null)
-                return ExecutionResult<T>.Error($"function name can not be null.");
+                throw new ScriptEngineException($"function name can not be null.");
 
             if (!dynamicScript.IsExecutionInSandbox)
             {
@@ -280,7 +277,7 @@ namespace Bamboo.ScriptEngine.CSharp
             else
             {
                 if (dynamicScript.ExecutionInSandboxMillisecondsTimeout <= 0)
-                    return ExecutionResult<T>.Error("if execute untrusted code,please setting the milliseconds timeout!");
+                    throw new ScriptEngineException("if execute untrusted code,please setting the milliseconds timeout!");
 
                 return ExecuteUntrustedCode<T>(type, methodInfo, dynamicScript.ExecutionInSandboxMillisecondsTimeout, dynamicScript.Parameters);
             }
@@ -296,12 +293,13 @@ namespace Bamboo.ScriptEngine.CSharp
             else
                 result = Activator.CreateInstance(type).TryCallMethod(methodInfo.Name, true, parms.Select(t => t.Name).ToArray(), parms.Select(t => t.ParameterType).ToArray(), safeParameters);
 
-            return ExecutionResult<T>.Success(data: (T)result);
+            return ExecutionResult<T>.Success((T)result);
         }
+
         private ExecutionResult<T> ExecuteUntrustedCode<T>(Type type, MethodInfo methodInfo, int millisecondsTimeout, params object[] parameters)
         {
             string errorMessage = string.Format("[Assembly:{0},Method:{1},Timeout:{2}, execution timed out.", type.Assembly.FullName, methodInfo.Name, millisecondsTimeout);
-            ExecutionResult<T> result = ExecutionResult<T>.Error(errorMessage);
+            ExecutionResult<T> result = new ExecutionResult<T>();
 
             var tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
@@ -317,10 +315,11 @@ namespace Bamboo.ScriptEngine.CSharp
 
                 _logger.LogError(errorMessage);
 
-                return ExecutionResult<T>.Error("execution timed out!");
+                throw new ScriptEngineException(errorMessage);
             }
 
             return result;
+
             //这里用不同的应用程序域重构，增强沙箱支持
             //Note:.NET Core 3.0 Preview 5 start support
             //暂时不支持沙箱环境

@@ -40,7 +40,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             var result = scriptEngineProvider.Execute<string>(script);
 
-            Assert.True(result.IsSuccess);
             Assert.Equal("888999", result.Data);
         }
     }

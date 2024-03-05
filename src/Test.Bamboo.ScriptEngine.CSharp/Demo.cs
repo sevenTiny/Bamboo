@@ -33,7 +33,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             var result = scriptEngineProvider.Execute<int>(script);
 
-            Assert.True(result.IsSuccess);
             Assert.Equal(111, result.Data);
         }
 
@@ -70,7 +69,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             var result = scriptEngineProvider.Execute<int>(script);
 
-            Assert.False(result.IsSuccess);
             Assert.Equal("execution timed out!", result.Message);
         }
     }

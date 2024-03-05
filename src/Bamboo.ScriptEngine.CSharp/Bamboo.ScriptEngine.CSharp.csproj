@@ -14,9 +14,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bamboo.Configuration" Version="1.0.4" />
+		<PackageReference Include="Bamboo.Configuration" Version="1.0.5" />
 		<PackageReference Include="Bamboo.Logging" Version="1.0.8" />
-		<PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.2" />
+		<PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.3" />
 		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.6.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="NuGet.Packaging" Version="6.6.1" />

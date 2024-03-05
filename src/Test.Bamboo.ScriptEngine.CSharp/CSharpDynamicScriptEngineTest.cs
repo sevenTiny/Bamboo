@@ -43,10 +43,8 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             {
                 var result = scriptEngineProvider.Execute<int>(script);
                 //Trace.WriteLine($"Execute{i} -> IsSuccess:{result.IsSuccess},Data={result.Data},Message={result.Message},TotalMemoryAllocated={result.TotalMemoryAllocated},ProcessorTime={result.ProcessorTime.TotalSeconds}");
-                if (result.IsSuccess)
-                {
-                    sum += result.Data;
-                }
+
+                sum += result.Data;
             }
             stopwatch.Stop();
             var cos = stopwatch.ElapsedMilliseconds;
@@ -139,7 +137,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             var result = scriptEngineProvider.Execute<int>(script);
 
-            Assert.False(result.IsSuccess);
             Assert.Equal("execution timed out!", result.Message);
         }
 
