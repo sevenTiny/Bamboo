@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Version>1.0.0</Version>
 		<RepositoryType>dotnet</RepositoryType>
 		<Authors>7tiny</Authors>
@@ -15,11 +15,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bamboo.Logging" Version="1.0.8" />
-		<PackageReference Include="LibGit2Sharp" Version="0.26.2" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+		<PackageReference Include="Bamboo.Logging" Version="1.0.10" />
+		<PackageReference Include="LibGit2Sharp" Version="0.30.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 </Project>
