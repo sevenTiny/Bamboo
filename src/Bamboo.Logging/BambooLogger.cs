@@ -16,33 +16,22 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using System.Text;
 
 namespace Bamboo.Logging
 {
     public class BambooLogger : ILogger
     {
-        static BambooLogger()
-        {
-            //如果配置文件不存在，则输出配置文件
-            if (!File.Exists(DefaultLog4NetConfigFileName))
-            {
-                var directory = Path.GetDirectoryName(DefaultLog4NetConfigFileName);
-
-                if (!Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
-
-                File.WriteAllText(DefaultLog4NetConfigFileName, LoggingConst.ConfigContent, Encoding.UTF8);
-            }
-        }
-
         private static string DefaultLog4NetConfigFileName = Path.Combine(AppContext.BaseDirectory, "BambooConfig", "log4net.config");
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         public BambooLogger(string categoryName = "BambooLogger")
         {
             //创建默认执行器
-            var provider = new Log4NetProvider(DefaultLog4NetConfigFileName, true);
+            var provider = new Log4NetProvider(new Log4NetProviderOptions
+            {
+                Log4NetConfigFileName = DefaultLog4NetConfigFileName,
+            });
+
             _logger = provider.CreateLogger(categoryName);
         }
 

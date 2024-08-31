@@ -14,7 +14,7 @@
   <appender name=""Console"" type=""log4net.Appender.ConsoleAppender"">
     <layout type = ""log4net.Layout.PatternLayout"" >
       <!--Pattern to output the caller's file name and line number -->
-      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline %exception"" />
+      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - MESSAGE: %message%newline %exception"" />
     </layout >
   </appender >
 
@@ -37,14 +37,14 @@
       <foreColor value=""Green"" />
     </mapping>
     <layout type = ""log4net.Layout.PatternLayout"" >
-      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline %exception"" />
+      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - MESSAGE: %message%newline %exception"" />
     </layout>
   </appender>
 
   <!--Trace模式的输出配置-->
   <appender name = ""TraceAppender"" type=""log4net.Appender.TraceAppender"">
     <layout type = ""log4net.Layout.PatternLayout"" >
-      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline %exception"" />
+      <conversionPattern value=""%date [%thread] %5level %logger.%method [%line] - MESSAGE: %message%newline %exception"" />
     </layout>
   </appender>
 
@@ -75,7 +75,7 @@
 
     <!--日志模板-->
     <layout type=""log4net.Layout.PatternLayout"">
-      <conversionPattern value = ""%date [%thread] %5level %logger.%method [%line] - %property{scope} %property{test} MESSAGE: %message%newline%exception"" />
+      <conversionPattern value = ""%date [%thread] %5level %logger.%method [%line] - MESSAGE: %message%newline%exception"" />
     </layout >
   </appender >
 
