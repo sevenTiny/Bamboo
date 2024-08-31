@@ -13,16 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="BambooConfig\log4net.config" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="BambooConfig\log4net.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
   </ItemGroup>
