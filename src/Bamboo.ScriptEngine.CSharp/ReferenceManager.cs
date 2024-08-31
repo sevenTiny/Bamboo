@@ -14,11 +14,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 
 namespace Bamboo.ScriptEngine.CSharp
 {
-    internal static class ReferenceManager
+    public static class ReferenceManager
     {
         private static readonly Microsoft.Extensions.Logging.ILogger _logger = new BambooLogger<CSharpScriptEngine>();
 
@@ -28,10 +29,25 @@ namespace Bamboo.ScriptEngine.CSharp
 
         public static IDictionary<string, List<MetadataReference>> GetMetaDataReferences() => _metadataReferences;
 
+
+        /// <summary>
+        /// 手动注册dll加载地址（有些配置文件不好描述的，可以根据程序运行时动态获取程序集地址）
+        /// </summary>
+        private static HashSet<string> _registerAssemblyLocations { get; set; } = new HashSet<string>();
+
+        public static void RegisterDependentAssembly(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException(nameof(assembly));
+
+            _registerAssemblyLocations.Add(assembly.Location);
+        }
+
+
         /// <summary>
         /// 初始化元数据引用
         /// </summary>
-        public static void InitMetadataReferences()
+        internal static void InitMetadataReferences()
         {
             var loadLocations = new HashSet<string>();
 
@@ -39,6 +55,8 @@ namespace Bamboo.ScriptEngine.CSharp
             LoadSystemAssembly(loadLocations);
             //加载自定义程序集地址
             LoadCustomAssembly(loadLocations);
+            //加载手动注册的程序集地址
+            LoadRegisterLocations(loadLocations);
             //下载并安装程序集
             LoadPackageAssembly(loadLocations);
 
@@ -61,7 +79,6 @@ namespace Bamboo.ScriptEngine.CSharp
         //加载系统程序集
         private static void LoadSystemAssembly(HashSet<string> loadLocations)
         {
-
             var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
 
             //这里不能把所有dll都加载上，因为有些dll是无法加载的，执行会抛出异常，只能遇到需要的再加
@@ -84,30 +101,7 @@ namespace Bamboo.ScriptEngine.CSharp
             //系统dll加载的目录
             var dllScanAndLoadPath = ScriptEngineCSharpConfigHelper.GetSystemDllScanAndLoadPath();
 
-            foreach (var dllPath in dllScanAndLoadPath)
-            {
-                //如果配置的是文件，则按文件加载（绝对路径）
-                if (Path.IsPathRooted(dllPath) && File.Exists(dllPath))
-                {
-                    loadLocations.Add(dllPath);
-                }
-                //如果配置的是文件，则按文件加载（相对路径）
-                else if (File.Exists(Path.Combine(assemblyPath, dllPath)))
-                {
-                    loadLocations.Add(Path.Combine(assemblyPath, dllPath));
-                }
-                //如果配置的是文件夹，那么将目录下的所有dll都加载
-                else if (Directory.Exists(dllPath))
-                {
-                    //拿到目录下全部dll
-                    var dlls = Directory.GetFiles(dllPath, "*.dll", SearchOption.AllDirectories) ?? new string[0];
-
-                    foreach (var item in dlls)
-                    {
-                        loadLocations.Add(item);
-                    }
-                }
-            }
+            ParseAndLoadLocations(loadLocations, assemblyPath, dllScanAndLoadPath);
         }
 
         /// <summary>
@@ -122,7 +116,22 @@ namespace Bamboo.ScriptEngine.CSharp
 
             var currentPath = AppDomain.CurrentDomain.BaseDirectory;
 
-            foreach (var dllPath in dllScanAndLoadPath)
+            ParseAndLoadLocations(loadLocations, currentPath, dllScanAndLoadPath);
+        }
+
+        private static void LoadRegisterLocations(HashSet<string> loadLocations)
+        {
+            if (_registerAssemblyLocations == null || _registerAssemblyLocations.Count == 0)
+                return;
+
+            var currentPath = AppDomain.CurrentDomain.BaseDirectory;
+
+            ParseAndLoadLocations(loadLocations, currentPath, _registerAssemblyLocations);
+        }
+
+        private static void ParseAndLoadLocations(HashSet<string> loadLocations, string currentPath, IEnumerable<string> preLoadLocations)
+        {
+            foreach (var dllPath in preLoadLocations)
             {
                 //如果配置的是文件，则按文件加载（绝对路径）
                 if (Path.IsPathRooted(dllPath) && File.Exists(dllPath))
