@@ -1,18 +1,18 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class PackageReferenceTest
     {
+        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
         [Trait("desc", "下载第三方包")]
         [Fact]
         public void DownloadPackage()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =
@@ -42,10 +42,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         [Fact]
         public void DependentAssembly()
         {
-            ReferenceManager.RegisterDependentAssembly(typeof(ILogger).Assembly);
-
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =

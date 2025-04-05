@@ -1,17 +1,18 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class Demo
     {
+        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
         [Trait("desc", "执行受信任的脚本 execute trasted code")]
         [Fact]
         public void Execute()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =
@@ -40,8 +41,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         [Fact]
         public void ExecuteUntrastedCode()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =

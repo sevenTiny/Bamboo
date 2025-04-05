@@ -1,6 +1,7 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
 using Chameleon.Common.Context;
+using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using Xunit;
 
@@ -8,12 +9,12 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class DataTransmitTest
     {
+        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
         [Trait("desc", "对象跨脚本传递")]
         [Fact]
         public void DownloadPackage()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =

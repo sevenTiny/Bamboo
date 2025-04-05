@@ -1,10 +1,10 @@
-﻿using Bamboo.Logging;
-using Bamboo.ScriptEngine.Core;
+﻿using Bamboo.ScriptEngine.Core;
 using Bamboo.ScriptEngine.CSharp.Configs;
 using Fasterflect;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SevenTiny.Bantina.Security;
 using SevenTiny.Bantina.Validation;
@@ -21,22 +21,17 @@ using System.Threading.Tasks;
 
 namespace Bamboo.ScriptEngine.CSharp
 {
+    public interface ICSharpScriptEngine : IScriptEngine { }
+
     /// <summary>
     ///  .NET Compiler Platform ("Roslyn")
     /// </summary>
-    public class CSharpScriptEngine : IScriptEngine
+    public class CSharpScriptEngine(IOptions<ScriptEngineCSharpConfig> options, ILogger<CSharpScriptEngine> logger, ReferenceManager referenceManager) : ICSharpScriptEngine
     {
         private string _scriptHash;
-        private static readonly object _lock = new object();
-        private static IDictionary<string, Type> _scriptTypeDict = new ConcurrentDictionary<string, Type>();
-        private static readonly ILogger _logger = new BambooLogger<CSharpScriptEngine>();
-        private readonly static string _currentAppName = ScriptEngineCSharpConfigHelper.GetCurrentAppName();
-
-        static CSharpScriptEngine()
-        {
-            //初始化引用
-            ReferenceManager.InitMetadataReferences();
-        }
+        private static readonly object _lock = new();
+        private static readonly IDictionary<string, Type> _scriptTypeDict = new ConcurrentDictionary<string, Type>();
+        private ScriptEngineCSharpConfig _scriptEngineCSharpConfig = options?.Value ?? throw new ArgumentNullException(nameof(_scriptEngineCSharpConfig), "ScriptEngineCSharpConfig is not registered at startup. Please register part of appsetting as ScriptEngineCSharpConfig configuration instance.");
 
         public void CheckScript(DynamicScript dynamicScript)
         {
@@ -97,13 +92,13 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (MissingMethodException missingMethod)
             {
-                _logger.LogError(missingMethod, string.Format("ClassName:{0},FunctionName:{1},Language:{2},AppName:{3},ScriptHash:{4},ParameterCount:{5},ErrorMsg: {6}", dynamicScript.ClassFullName, dynamicScript.FunctionName, "CSharp", _currentAppName, _scriptHash, dynamicScript.Parameters?.Length, missingMethod.Message));
+                logger.LogError(missingMethod, string.Format("ClassName:{0},FunctionName:{1},Language:{2},AppName:{3},ScriptHash:{4},ParameterCount:{5},ErrorMsg: {6}", dynamicScript.ClassFullName, dynamicScript.FunctionName, "CSharp", _scriptEngineCSharpConfig.AppName, _scriptHash, dynamicScript.Parameters?.Length, missingMethod.Message));
 
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Script objectId:{0},appName:{1},functionName:{2},errorMsg:{3}", null, _currentAppName, dynamicScript.FunctionName, ex.Message));
+                logger.LogError(ex, string.Format("Script objectId:{0},appName:{1},functionName:{2},errorMsg:{3}", null, _scriptEngineCSharpConfig.AppName, dynamicScript.FunctionName, ex.Message));
 
                 throw;
             }
@@ -130,7 +125,7 @@ namespace Bamboo.ScriptEngine.CSharp
                         if (type == null)
                         {
                             errorMessage = $"type [{dynamicScript.ClassFullName}] not found in the assembly [{asm.FullName}].";
-                            _logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
+                            logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
                             throw new ScriptEngineException(errorMessage);
                         }
                         _scriptTypeDict.Add(_scriptHash, type);
@@ -139,19 +134,19 @@ namespace Bamboo.ScriptEngine.CSharp
                     }
                 }
 
-                _logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
+                logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
                 throw new ScriptEngineException(errorMessage);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "BuildDynamicScript Error");
+                logger.LogError(ex, "BuildDynamicScript Error");
                 throw;
             }
         }
 
         private string GetScriptKeyHash(string script)
         {
-            return _scriptHash = string.Format(Consts.AssemblyScriptKey, DynamicScriptLanguage.CSharp, _currentAppName, MD5Helper.GetMd5Hash(script));
+            return _scriptHash = string.Format(Consts.AssemblyScriptKey, DynamicScriptLanguage.CSharp, _scriptEngineCSharpConfig.AppName, MD5Helper.GetMd5Hash(script));
         }
 
         #region Build and Create Assembly
@@ -167,44 +162,43 @@ namespace Bamboo.ScriptEngine.CSharp
 
             var assemblyName = _scriptHash;
 
-            var references = ReferenceManager.GetMetaDataReferences()[_currentAppName];
+            var references = referenceManager.GetMetaDataReferences()[_scriptEngineCSharpConfig.AppName];
 
             var compilation = CSharpCompilation.Create(assemblyName,
-                new[] { GetSyntaxTree(script) }, references,
-                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithOptimizationLevel(ScriptEngineCSharpConfigHelper.IsDebugModeCompile() ? OptimizationLevel.Debug : OptimizationLevel.Release));
+                [GetSyntaxTree(script)], references,
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary).WithOptimizationLevel(_scriptEngineCSharpConfig.IsDebugModeCompile ? OptimizationLevel.Debug : OptimizationLevel.Release));
 
             Assembly assembly = null;
             using (var assemblyStream = new MemoryStream())
             {
-                using (var pdbStream = new MemoryStream())
+                using var pdbStream = new MemoryStream();
+
+                var emitExecutionResult = compilation.Emit(assemblyStream, pdbStream);
+
+                if (emitExecutionResult.Success)
                 {
-                    var emitExecutionResult = compilation.Emit(assemblyStream, pdbStream);
+                    var assemblyBytes = assemblyStream.GetBuffer();
+                    var pdbBytes = pdbStream.GetBuffer();
+                    assembly = Assembly.Load(assemblyBytes, pdbBytes);
+                    //output files
+                    if (_scriptEngineCSharpConfig.IsOutPutCompileFiles)
+                        OutputDynamicScriptAllFile(script, assemblyName, assemblyBytes, pdbBytes);
+                }
+                else
+                {
+                    var msgs = new StringBuilder();
+                    foreach (var msg in emitExecutionResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).Select(d => string.Format("[{0}]:{1}({2})", d.Id, d.GetMessage(), d.Location.GetLineSpan().StartLinePosition)))
+                        msgs.AppendLine(msg);
 
-                    if (emitExecutionResult.Success)
-                    {
-                        var assemblyBytes = assemblyStream.GetBuffer();
-                        var pdbBytes = pdbStream.GetBuffer();
-                        assembly = Assembly.Load(assemblyBytes, pdbBytes);
-                        //output files
-                        if (ScriptEngineCSharpConfigHelper.IsIsOutPutCompileFiles())
-                            OutputDynamicScriptAllFile(script, assemblyName, assemblyBytes, pdbBytes);
-                    }
-                    else
-                    {
-                        var msgs = new StringBuilder();
-                        foreach (var msg in emitExecutionResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error).Select(d => string.Format("[{0}]:{1}({2})", d.Id, d.GetMessage(), d.Location.GetLineSpan().StartLinePosition)))
-                            msgs.AppendLine(msg);
+                    if (_scriptEngineCSharpConfig.IsOutPutCompileFiles)
+                        WriteDynamicScriptCs(Path.Combine(EnsureOutputPath(), assemblyName + ".cs"), script);
 
-                        if (ScriptEngineCSharpConfigHelper.IsIsOutPutCompileFiles())
-                            WriteDynamicScriptCs(Path.Combine(EnsureOutputPath(), assemblyName + ".cs"), script);
-
-                        errorMsg = msgs.ToString();
-                        _logger.LogError(string.Format("{0}：{1}：{2}：{3}", "CSharp", _currentAppName, errorMsg, _scriptHash));
-                    }
+                    errorMsg = msgs.ToString();
+                    logger.LogError(string.Format("{0}：{1}：{2}：{3}", "CSharp", _scriptEngineCSharpConfig.AppName, errorMsg, _scriptHash));
                 }
             }
 
-            _logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_currentAppName},{_scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{ReferenceManager.GetMetaDataReferences()[_currentAppName]?.Count}");
+            logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_scriptEngineCSharpConfig.AppName},{_scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{referenceManager.GetMetaDataReferences()[_scriptEngineCSharpConfig.AppName]?.Count}");
 
             return assembly;
         }
@@ -237,7 +231,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WriteDynamicScriptFile Error");
+                logger.LogError(ex, "WriteDynamicScriptFile Error");
             }
         }
         private void WriteDynamicScriptCs(string filePathName, string script)
@@ -249,7 +243,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "WriteDynamicScriptCs Error");
+                logger.LogError(ex, "WriteDynamicScriptCs Error");
             }
         }
         #endregion
@@ -313,7 +307,7 @@ namespace Bamboo.ScriptEngine.CSharp
             {
                 tokenSource.Cancel();
 
-                _logger.LogError(errorMessage);
+                logger.LogError(errorMessage);
 
                 throw new ScriptEngineException(errorMessage);
             }

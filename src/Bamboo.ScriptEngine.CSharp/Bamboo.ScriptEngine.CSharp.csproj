@@ -14,11 +14,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Bamboo.Configuration" Version="1.0.7" />
-		<PackageReference Include="Bamboo.Logging" Version="1.0.10" />
-		<PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.3" />
+		<PackageReference Include="Bamboo.ScriptEngine.Core" Version="1.0.4" />
 		<PackageReference Include="Microsoft.CodeAnalysis" Version="4.11.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="NuGet.Common" Version="6.13.2" />
 		<PackageReference Include="NuGet.Packaging" Version="6.11.0" />
 		<PackageReference Include="NuGet.Protocol" Version="6.11.0" />
 		<PackageReference Include="SevenTiny.Bantina" Version="1.0.74" />

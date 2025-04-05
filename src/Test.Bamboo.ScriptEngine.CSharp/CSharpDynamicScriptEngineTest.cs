@@ -1,5 +1,6 @@
 ﻿using Bamboo.ScriptEngine;
 using Bamboo.ScriptEngine.CSharp;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,12 +10,12 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class CSharpDynamicScriptEngineTest
     {
+        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
         [Trait("desc", "多次执行")]
         [Fact]
         public void MultiExecute()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =
@@ -37,11 +38,15 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
+            var builder = ServiceProviderBuilder.Build();
+
             //结果相加
             int sum = 0;
             for (int i = 0; i < 10000; i++)
             {
-                var result = scriptEngineProvider.Execute<int>(script);
+                IScriptEngine scriptEngineProvider2 = builder.GetRequiredService<ICSharpScriptEngine>();
+
+                var result = scriptEngineProvider2.Execute<int>(script);
                 //Trace.WriteLine($"Execute{i} -> IsSuccess:{result.IsSuccess},Data={result.Data},Message={result.Message},TotalMemoryAllocated={result.TotalMemoryAllocated},ProcessorTime={result.ProcessorTime.TotalSeconds}");
 
                 sum += result.Data;
@@ -56,8 +61,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         [Fact]
         public void RepeatClassExecute()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
 
@@ -112,8 +115,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         [Fact]
         public void DeadCycile()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =
@@ -144,8 +145,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         [Fact]
         public void ReferenceArguments()
         {
-            IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
-
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
             script.Script =
@@ -199,7 +198,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         {
             try
             {
-                IScriptEngine scriptEngineProvider = new CSharpScriptEngine();
                 DynamicScript script = new DynamicScript();
                 script.Language = DynamicScriptLanguage.CSharp;
                 script.Script =
