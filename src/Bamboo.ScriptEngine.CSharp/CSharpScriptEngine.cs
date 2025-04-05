@@ -28,10 +28,9 @@ namespace Bamboo.ScriptEngine.CSharp
     /// </summary>
     public class CSharpScriptEngine(IOptions<ScriptEngineCSharpConfig> options, ILogger<CSharpScriptEngine> logger, ReferenceManager referenceManager) : ICSharpScriptEngine
     {
-        private string _scriptHash;
         private static readonly object _lock = new();
         private static readonly IDictionary<string, Type> _scriptTypeDict = new ConcurrentDictionary<string, Type>();
-        private ScriptEngineCSharpConfig _scriptEngineCSharpConfig = options?.Value ?? throw new ArgumentNullException(nameof(_scriptEngineCSharpConfig), "ScriptEngineCSharpConfig is not registered at startup. Please register part of appsetting as ScriptEngineCSharpConfig configuration instance.");
+        private readonly ScriptEngineCSharpConfig _scriptEngineCSharpConfig = options?.Value ?? throw new ArgumentNullException(nameof(_scriptEngineCSharpConfig), "ScriptEngineCSharpConfig is not registered at startup. Please register part of appsetting as ScriptEngineCSharpConfig configuration instance.");
 
         public void CheckScript(DynamicScript dynamicScript)
         {
@@ -69,7 +68,7 @@ namespace Bamboo.ScriptEngine.CSharp
         private ExecutionResult<T> RunningDynamicScript<T>(DynamicScript dynamicScript)
         {
             //检查编译
-            BuildDynamicScript(dynamicScript);
+            var scriptHash = BuildDynamicScript(dynamicScript);
 
             try
             {
@@ -92,7 +91,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (MissingMethodException missingMethod)
             {
-                logger.LogError(missingMethod, string.Format("ClassName:{0},FunctionName:{1},Language:{2},AppName:{3},ScriptHash:{4},ParameterCount:{5},ErrorMsg: {6}", dynamicScript.ClassFullName, dynamicScript.FunctionName, "CSharp", _scriptEngineCSharpConfig.AppName, _scriptHash, dynamicScript.Parameters?.Length, missingMethod.Message));
+                logger.LogError(missingMethod, string.Format("ClassName:{0},FunctionName:{1},Language:{2},AppName:{3},ScriptHash:{4},ParameterCount:{5},ErrorMsg: {6}", dynamicScript.ClassFullName, dynamicScript.FunctionName, "CSharp", _scriptEngineCSharpConfig.AppName, scriptHash, dynamicScript.Parameters?.Length, missingMethod.Message));
 
                 throw;
             }
@@ -104,19 +103,20 @@ namespace Bamboo.ScriptEngine.CSharp
             }
         }
 
-        private void BuildDynamicScript(DynamicScript dynamicScript)
+        private string BuildDynamicScript(DynamicScript dynamicScript)
         {
             var errorMessage = string.Empty;
+            var scriptHash = GetScriptKeyHash(dynamicScript.Script);
 
             try
             {
-                if (_scriptTypeDict.ContainsKey(_scriptHash))
-                    return;
+                if (_scriptTypeDict.ContainsKey(scriptHash))
+                    return scriptHash;
 
                 lock (_lock)
                 {
-                    if (_scriptTypeDict.ContainsKey(_scriptHash))
-                        return;
+                    if (_scriptTypeDict.ContainsKey(scriptHash))
+                        return scriptHash;
 
                     var asm = CreateAsmExecutor(dynamicScript.Script, out errorMessage);
                     if (asm != null)
@@ -128,9 +128,10 @@ namespace Bamboo.ScriptEngine.CSharp
                             logger.LogError($"Build Script Error ! Script Info:{JsonConvert.SerializeObject(dynamicScript)}");
                             throw new ScriptEngineException(errorMessage);
                         }
-                        _scriptTypeDict.Add(_scriptHash, type);
 
-                        return;
+                        _scriptTypeDict.Add(scriptHash, type);
+
+                        return scriptHash;
                     }
                 }
 
@@ -146,7 +147,7 @@ namespace Bamboo.ScriptEngine.CSharp
 
         private string GetScriptKeyHash(string script)
         {
-            return _scriptHash = string.Format(Consts.AssemblyScriptKey, DynamicScriptLanguage.CSharp, _scriptEngineCSharpConfig.AppName, MD5Helper.GetMd5Hash(script));
+            return string.Format(Consts.AssemblyScriptKey, DynamicScriptLanguage.CSharp, _scriptEngineCSharpConfig.AppName, MD5Helper.GetMd5Hash(script));
         }
 
         #region Build and Create Assembly
@@ -160,7 +161,9 @@ namespace Bamboo.ScriptEngine.CSharp
         {
             errorMsg = null;
 
-            var assemblyName = _scriptHash;
+            var scriptHash = GetScriptKeyHash(script);
+
+            var assemblyName = scriptHash;
 
             var references = referenceManager.GetMetaDataReferences()[_scriptEngineCSharpConfig.AppName];
 
@@ -194,17 +197,19 @@ namespace Bamboo.ScriptEngine.CSharp
                         WriteDynamicScriptCs(Path.Combine(EnsureOutputPath(), assemblyName + ".cs"), script);
 
                     errorMsg = msgs.ToString();
-                    logger.LogError(string.Format("{0}：{1}：{2}：{3}", "CSharp", _scriptEngineCSharpConfig.AppName, errorMsg, _scriptHash));
+                    logger.LogError(string.Format("{0}：{1}：{2}：{3}", "CSharp", _scriptEngineCSharpConfig.AppName, errorMsg, scriptHash));
                 }
             }
 
-            logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_scriptEngineCSharpConfig.AppName},{_scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{referenceManager.GetMetaDataReferences()[_scriptEngineCSharpConfig.AppName]?.Count}");
+            logger.LogInformation($"CreateAsmExecutor -> _context: CSharp, {_scriptEngineCSharpConfig.AppName},{scriptHash} _scriptTypeDict:{_scriptTypeDict?.Count} _metadataReferences:{referenceManager.GetMetaDataReferences()[_scriptEngineCSharpConfig.AppName]?.Count}");
 
             return assembly;
         }
         private SyntaxTree GetSyntaxTree(string script)
         {
-            return CSharpSyntaxTree.ParseText(script, path: _scriptHash + ".cs", encoding: Encoding.UTF8);
+            var scriptHash = GetScriptKeyHash(script);
+
+            return CSharpSyntaxTree.ParseText(script, path: scriptHash + ".cs", encoding: Encoding.UTF8);
         }
         private void OutputDynamicScriptAllFile(string script, string assemblyName, byte[] assemblyBytes, byte[] pdbBytes)
         {
@@ -254,10 +259,10 @@ namespace Bamboo.ScriptEngine.CSharp
             if (dynamicScript.FunctionName.IsNullOrEmpty())
                 throw new ScriptEngineException($"function name can not be null.");
 
-            if (_scriptHash.IsNullOrEmpty() || !_scriptTypeDict.ContainsKey(_scriptHash))
-                throw new ScriptEngineException($"type not found.");
+            var scriptHash = GetScriptKeyHash(dynamicScript.Script);
 
-            var type = _scriptTypeDict[_scriptHash];
+            if (scriptHash.IsNullOrEmpty() || !_scriptTypeDict.TryGetValue(scriptHash, out Type type))
+                throw new ScriptEngineException($"type not found.");
 
             var methodInfo = type.Method(dynamicScript.FunctionName);
 
