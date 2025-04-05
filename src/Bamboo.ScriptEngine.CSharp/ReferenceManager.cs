@@ -208,7 +208,7 @@ namespace Bamboo.ScriptEngine.CSharp
             foreach (var current in _scriptEngineCSharpConfig.GetInstallPackages())
 #else
             //并行下载
-            ScriptEngineCSharpConfigHelper.GetInstallPackages().AsParallel().ForAll(current =>
+            _scriptEngineCSharpConfig.GetInstallPackages().AsParallel().ForAll(current =>
 #endif
             {
                 SourceCacheContext cache = new();
