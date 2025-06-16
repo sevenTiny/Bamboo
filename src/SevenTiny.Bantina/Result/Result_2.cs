@@ -70,7 +70,7 @@ namespace SevenTiny.Bantina
             if (!result.IsSuccess)
                 return result;
 
-            if (FormatValidationExtension.IsNullOrEmpty(argument))
+            if (ParameterValidationHelper.IsNullOrEmpty(argument))
                 return Result<T1, T2>.Error(errorMessage ?? $"Parameter cannot be null or empty. Parameter name: {argumentName}");
 
             return result;

@@ -13,7 +13,19 @@ namespace SevenTiny.Bantina.Validation
         /// <param name="message"></param>
         public static void ArgumentNotNullOrEmpty(object arg, string argName, string message = null)
         {
-            if (FormatValidationExtension.IsNullOrEmpty(arg))
+            if (ParameterValidationHelper.IsNullOrEmpty(arg))
+                throw new ArgumentNullException(argName, message ?? "Parameter cannot be null or empty.");
+        }
+
+        /// <summary>
+        /// vefify argumetn is not null or whitespace
+        /// </summary>
+        /// <param name="arg"></param>
+        /// <param name="argName"></param>
+        /// <param name="message"></param>
+        public static void ArgumentNotNullOrWhiteSpace(string arg, string argName, string message = null)
+        {
+            if (ParameterValidationHelper.IsNullOrWhiteSpace(arg))
                 throw new ArgumentNullException(argName, message ?? "Parameter cannot be null or empty.");
         }
 

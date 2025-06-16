@@ -12,7 +12,7 @@ namespace Test.SevenTiny.Bantina
         [InlineData("a")]
         public void Alnum(string data)
         {
-            Assert.False(data.IsAlnum(2, 5));
+            Assert.False(ParameterValidationHelper.IsAlnum(data, 2, 5));
         }
     }
 }

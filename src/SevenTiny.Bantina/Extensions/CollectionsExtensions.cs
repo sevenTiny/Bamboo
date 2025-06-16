@@ -103,7 +103,7 @@ namespace SevenTiny.Bantina.Extensions
         /// <param name="dictionary"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> sourse, TKey key, TValue ifNotGetSetValue = default(TValue))
+        public static TValue SafeGet<TKey, TValue>(this IDictionary<TKey, TValue> sourse, TKey key, TValue ifNotGetSetValue = default)
         {
             return sourse.TryGetValue(key, out TValue value) ? value : ifNotGetSetValue;
         }
