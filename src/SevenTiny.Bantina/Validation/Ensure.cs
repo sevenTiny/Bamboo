@@ -26,7 +26,7 @@ namespace SevenTiny.Bantina.Validation
         public static void ArgumentNotNullOrWhiteSpace(string arg, string argName, string message = null)
         {
             if (ParameterValidationHelper.IsNullOrWhiteSpace(arg))
-                throw new ArgumentNullException(argName, message ?? "Parameter cannot be null or empty.");
+                throw new ArgumentNullException(argName, message ?? "Parameter cannot be null or white space.");
         }
 
         /// <summary>
