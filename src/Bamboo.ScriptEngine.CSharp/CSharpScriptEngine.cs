@@ -48,9 +48,9 @@ namespace Bamboo.ScriptEngine.CSharp
 
         private void ArgumentsCheck(DynamicScript dynamicScript)
         {
-            dynamicScript.Script.CheckNullOrEmpty("script can not be null.");
-            dynamicScript.ClassFullName.CheckNullOrEmpty("classFullName cannot be null.");
-            dynamicScript.FunctionName.CheckNullOrEmpty("FunctionName can not be null.");
+            Ensure.ArgumentNotNullOrWhiteSpace(dynamicScript.Script, nameof(dynamicScript.Script), "Script can not be null.");
+            Ensure.ArgumentNotNullOrWhiteSpace(dynamicScript.ClassFullName, nameof(dynamicScript.ClassFullName), "ClassFullName cannot be null.");
+            Ensure.ArgumentNotNullOrWhiteSpace(dynamicScript.FunctionName, nameof(dynamicScript.FunctionName), "FunctionName can not be null.");
 
             if (dynamicScript.Language != DynamicScriptLanguage.CSharp)
                 throw new ArgumentOutOfRangeException("dynamicScript language is not csharp, please check code or language argument.");
@@ -256,12 +256,12 @@ namespace Bamboo.ScriptEngine.CSharp
         #region Call script function
         private ExecutionResult<T> CallFunction<T>(DynamicScript dynamicScript)
         {
-            if (dynamicScript.FunctionName.IsNullOrEmpty())
+            if (string.IsNullOrEmpty(dynamicScript.FunctionName))
                 throw new ScriptEngineException($"function name can not be null.");
 
             var scriptHash = GetScriptKeyHash(dynamicScript.Script);
 
-            if (scriptHash.IsNullOrEmpty() || !_scriptTypeDict.TryGetValue(scriptHash, out Type type))
+            if (string.IsNullOrEmpty(scriptHash) || !_scriptTypeDict.TryGetValue(scriptHash, out Type type))
                 throw new ScriptEngineException($"type not found.");
 
             var methodInfo = type.Method(dynamicScript.FunctionName);
