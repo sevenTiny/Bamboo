@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<Copyright>7tiny</Copyright>
 		<Company>www.7tiny.com</Company>
 		<PackageLicenseUrl>https://github.com/sevenTiny/Bamboo/blob/master/LICENSE</PackageLicenseUrl>
