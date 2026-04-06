@@ -1,4 +1,5 @@
 ﻿using Bamboo.ScriptEngine;
+using Bamboo.ScriptEngine.Core;
 using Bamboo.ScriptEngine.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -10,9 +11,9 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class CSharpDynamicScriptEngineTest
     {
-        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
-
-        [Trait("desc", "多次执行")]
+        /// <summary>
+        /// 多次执行
+        /// </summary>
         [Fact]
         public void MultiExecute()
         {
@@ -57,10 +58,14 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             Assert.Equal(10000, sum);
         }
 
-        [Trait("desc", "执行同名不同类的不同方法")]
+        /// <summary>
+        /// 执行同名不同类的不同方法
+        /// </summary>
         [Fact]
         public void RepeatClassExecute()
         {
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
             DynamicScript script = new DynamicScript();
             script.Language = DynamicScriptLanguage.CSharp;
 
@@ -82,6 +87,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.Parameters = new object[] { 111 };
 
             var result1 = scriptEngineProvider.Execute<int>(script);
+            Assert.Equal(111, result1.Data);
 
             //编译B执行B
             script.Script =
@@ -101,6 +107,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.Parameters = new object[] { 99999999 };
 
             var result2 = scriptEngineProvider.Execute<int>(script);
+            Assert.Equal(99999999, result2.Data);
 
             //再执行A，这次是从B的脚本对应的Hash值去找Test类型，里面并没有A，所以报错没有找到方法A
             //也就是说，用B的脚本去调用A是错误的用法，即便类的名称是一样的，但其实不是一个类
@@ -108,10 +115,12 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 333 };
 
-            var result3 = scriptEngineProvider.Execute<int>(script);
+            Assert.Throws<ScriptEngineException>(() => scriptEngineProvider.Execute<int>(script));
         }
 
-        [Trait("desc", "死循环测试")]
+        /// <summary>
+        /// 死循环测试
+        /// </summary>
         [Fact]
         public void DeadCycile()
         {
@@ -134,14 +143,17 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 111 };
             script.IsExecutionInSandbox = false;     //因为有死循环，所以非信任脚本测试，测试是否会超时
-            script.ExecutionInSandboxMillisecondsTimeout = 1000;
+            script.ExecutionInSandboxMillisecondsTimeout = 500;
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
 
-            Assert.Equal("execution timed out!", result.Message);
+            Assert.Throws<ScriptEngineException>(() => scriptEngineProvider.Execute<int>(script));
         }
 
-        [Trait("desc", "引用类型参数测试")]
+        /// <summary>
+        /// 引用类型参数测试
+        /// </summary>
         [Fact]
         public void ReferenceArguments()
         {
@@ -165,6 +177,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.FunctionName = "GetA";
             script.Parameters = new object[] { new List<int> { 1, 2 } };
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<object>(script);
 
             DynamicScript script2 = new DynamicScript();
@@ -192,16 +205,16 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             Assert.Equal(3, (script.Parameters[0] as List<int>)[0]);
         }
 
-        [Trait("desc", "执行受信任的脚本 execute trasted code")]
+        /// <summary>
+        /// 抛出异常测试
+        /// </summary>
         [Fact]
         public void ThrowExceptionTest()
         {
-            try
-            {
-                DynamicScript script = new DynamicScript();
-                script.Language = DynamicScriptLanguage.CSharp;
-                script.Script =
-                @"
+            DynamicScript script = new DynamicScript();
+            script.Language = DynamicScriptLanguage.CSharp;
+            script.Script =
+            @"
                 using System;
 
                 public class Test
@@ -214,17 +227,14 @@ namespace Test.Bamboo.ScriptEngine.CSharp
                     }
                 }
                 ";
-                script.ClassFullName = "Test";
-                script.FunctionName = "GetA";
-                script.Parameters = new object[] { 111 };
-                script.IsExecutionInSandbox = false;
+            script.ClassFullName = "Test";
+            script.FunctionName = "GetA";
+            script.Parameters = new object[] { 111 };
+            script.IsExecutionInSandbox = false;
 
-                var result = scriptEngineProvider.Execute<int>(script);
-            }
-            catch (Exception ex)
-            {
-                Assert.Equal(typeof(ArgumentNullException), ex.GetType());
-            }
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
+            Assert.Throws<ArgumentNullException>(() => scriptEngineProvider.Execute<int>(script));
         }
     }
 }

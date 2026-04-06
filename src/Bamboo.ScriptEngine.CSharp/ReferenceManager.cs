@@ -176,7 +176,7 @@ namespace Bamboo.ScriptEngine.CSharp
                 else if (Directory.Exists(dllPath))
                 {
                     //拿到目录下全部dll
-                    var dlls = Directory.GetFiles(dllPath, "*.dll", SearchOption.AllDirectories) ?? new string[0];
+                    var dlls = Directory.GetFiles(dllPath, "*.dll", SearchOption.TopDirectoryOnly) ?? [];
 
                     foreach (var item in dlls)
                     {

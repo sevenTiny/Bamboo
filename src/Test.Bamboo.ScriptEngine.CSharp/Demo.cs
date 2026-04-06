@@ -1,15 +1,17 @@
 ﻿using Bamboo.ScriptEngine;
+using Bamboo.ScriptEngine.Core;
 using Bamboo.ScriptEngine.CSharp;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
     public class Demo
     {
-        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
-
-        [Trait("desc", "执行受信任的脚本 execute trasted code")]
+        /// <summary>
+        /// 执行受信任的脚本 execute trasted code
+        /// </summary>
         [Fact]
         public void Execute()
         {
@@ -32,12 +34,15 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.Parameters = new object[] { 111 };
             script.IsExecutionInSandbox = false;
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
 
             Assert.Equal(111, result.Data);
         }
 
-        [Trait("desc", "执行不受信任的脚本 execute untrasted code")]
+        /// <summary>
+        /// 执行不受信任的脚本 execute untrasted code
+        /// </summary>
         [Fact]
         public void ExecuteUntrastedCode()
         {
@@ -66,9 +71,73 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.IsExecutionInSandbox = true;                    //沙箱环境执行
             script.ExecutionInSandboxMillisecondsTimeout = 100;     //沙箱环境执行超时时间
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+
+            Assert.Throws<ScriptEngineException>(() => scriptEngineProvider.Execute<int>(script));
+        }
+
+        /// <summary>
+        /// 执行静态方法脚本
+        /// </summary>
+        [Fact]
+        public void ExecuteStaticMethod()
+        {
+            DynamicScript script = new DynamicScript();
+            script.Language = DynamicScriptLanguage.CSharp;
+            script.Script =
+            @"
+            using System;
+
+            public class Test
+            {
+                public static int GetA(int a)
+                {
+                    return a;
+                }
+            }
+            ";
+            script.ClassFullName = "Test";
+            script.FunctionName = "GetA";
+            script.Parameters = new object[] { 111 };
+            script.IsExecutionInSandbox = false;
+
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
 
-            Assert.Equal("execution timed out!", result.Message);
+            Assert.Equal(111, result.Data);
+        }
+
+        /// <summary>
+        /// 执行静态方法脚本
+        /// </summary>
+        [Fact]
+        public async Task ExecuteAsyncMethod()
+        {
+            DynamicScript script = new DynamicScript();
+            script.Language = DynamicScriptLanguage.CSharp;
+            script.Script =
+            @"
+            using System;
+            using System.Threading.Tasks;
+
+            public class Test
+            {
+                public static async Task<int> GetAAsync(int a)
+                {
+                    await Task.Delay(100);
+                    return a;
+                }
+            }
+            ";
+            script.ClassFullName = "Test";
+            script.FunctionName = "GetAAsync";
+            script.Parameters = new object[] { 111 };
+            script.IsExecutionInSandbox = false;
+
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
+            var result = await scriptEngineProvider.ExecuteAsync<int>(script);
+
+            Assert.Equal(111, result.Data);
         }
     }
 }
