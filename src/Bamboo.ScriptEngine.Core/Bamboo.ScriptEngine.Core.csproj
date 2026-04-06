@@ -10,6 +10,7 @@
 		<PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
 		<RepositoryUrl>https://github.com/sevenTiny/Bamboo</RepositoryUrl>
 		<RepositoryType>dotnet</RepositoryType>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 </Project>
