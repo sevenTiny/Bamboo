@@ -28,7 +28,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.ClassFullName = "Test";
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
             var scriptEngine = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngine.Execute<int>(script);

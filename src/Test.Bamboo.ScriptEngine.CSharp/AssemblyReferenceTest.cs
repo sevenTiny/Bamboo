@@ -5,11 +5,11 @@ using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
-    public class PackageReferenceTest
+    public class AssemblyReferenceTest
     {
-        private IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
-
-        [Trait("desc", "下载第三方包")]
+        /// <summary>
+        /// Thirdparty package
+        /// </summary>
         [Fact]
         public void DownloadPackage()
         {
@@ -31,14 +31,16 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.ClassFullName = "Test";
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<string>(script);
 
             Assert.Equal("111", result.Data);
         }
 
-        [Trait("desc", "手动注册依赖程序集")]
+        /// <summary>
+        /// Related dlls reference
+        /// </summary>
         [Fact]
         public void DependentAssembly()
         {
@@ -62,8 +64,8 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.ClassFullName = "Test";
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
+            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
 
             Assert.Equal(111, result.Data);

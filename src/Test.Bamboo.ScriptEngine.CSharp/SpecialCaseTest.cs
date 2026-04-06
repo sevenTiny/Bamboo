@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
-    public class CSharpDynamicScriptEngineTest
+    public class SpecialCaseTest
     {
         /// <summary>
         /// 多次执行
@@ -119,39 +119,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         }
 
         /// <summary>
-        /// 死循环测试
-        /// </summary>
-        [Fact]
-        public void DeadCycile()
-        {
-            DynamicScript script = new DynamicScript();
-            script.Language = DynamicScriptLanguage.CSharp;
-            script.Script =
-            @"
-            using System;
-
-            public class Test
-            {
-                public int GetA(int a)
-                {
-                    for(;;){}
-                    return a;
-                }
-            }
-            ";
-            script.ClassFullName = "Test";
-            script.FunctionName = "GetA";
-            script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;     //因为有死循环，所以非信任脚本测试，测试是否会超时
-            script.ExecutionInSandboxMillisecondsTimeout = 500;
-
-            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
-            var result = scriptEngineProvider.Execute<int>(script);
-
-            Assert.Throws<ScriptEngineException>(() => scriptEngineProvider.Execute<int>(script));
-        }
-
-        /// <summary>
         /// 引用类型参数测试
         /// </summary>
         [Fact]
@@ -230,7 +197,6 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             script.ClassFullName = "Test";
             script.FunctionName = "GetA";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
             IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
 

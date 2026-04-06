@@ -1,8 +1,6 @@
-﻿using Bamboo.ScriptEngine.Core;
-using SevenTiny.Bantina.Validation;
+﻿using SevenTiny.Bantina.Validation;
 using System;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bamboo.ScriptEngine.CSharp.SandBox
@@ -20,23 +18,6 @@ namespace Bamboo.ScriptEngine.CSharp.SandBox
             return GetExecutionResultFromPossiblyTaskSync<T>(result);
         }
 
-        public static ExecutionResult<T> ExecuteUntrustedCode<T>(Type type, MethodInfo methodInfo, int millisecondsTimeout, object[] parameters)
-        {
-            var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
-
-            var task = Task.Run(() => ExecuteTrustedCode<T>(type, methodInfo, parameters), token);
-
-            if (!task.Wait(millisecondsTimeout, token))
-            {
-                tokenSource.Cancel();
-                string errorMessage = string.Format("[Assembly:{0},Method:{1},Timeout:{2}, execution timed out.", type.Assembly.FullName, methodInfo.Name, millisecondsTimeout);
-                throw new ScriptEngineException(errorMessage);
-            }
-
-            return task.Result;
-        }
-
         public static async Task<ExecutionResult<T>> ExecuteTrustedCodeAsync<T>(Type type, MethodInfo methodInfo, object[] parameters)
         {
             var parms = methodInfo.GetParameters();
@@ -45,27 +26,6 @@ namespace Bamboo.ScriptEngine.CSharp.SandBox
             var result = InvokeMethod(type, methodInfo, safeParameters);
 
             return await GetExecutionResultFromPossiblyTaskAsync<T>(result).ConfigureAwait(false);
-        }
-
-        public static async Task<ExecutionResult<T>> ExecuteUntrustedCodeAsync<T>(Type type, MethodInfo methodInfo, int millisecondsTimeout, object[] parameters)
-        {
-            var cts = new CancellationTokenSource();
-            var token = cts.Token;
-
-            var runningTask = ExecuteTrustedCodeAsync<T>(type, methodInfo, parameters);
-
-            var delayTask = Task.Delay(millisecondsTimeout, token);
-
-            var finished = await Task.WhenAny(runningTask, delayTask).ConfigureAwait(false);
-
-            if (finished == delayTask)
-            {
-                cts.Cancel();
-                string errorMessage = string.Format("[Assembly:{0},Method:{1},Timeout:{2}, execution timed out.", type.Assembly.FullName, methodInfo.Name, millisecondsTimeout);
-                throw new ScriptEngineException(errorMessage);
-            }
-
-            return await runningTask.ConfigureAwait(false);
         }
 
         private static object[] SafeTypeConvertParameters(string method, ParameterInfo[] parameterInfos, object[] parameters)

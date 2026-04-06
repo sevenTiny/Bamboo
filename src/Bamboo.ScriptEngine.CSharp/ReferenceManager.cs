@@ -23,7 +23,7 @@ namespace Bamboo.ScriptEngine.CSharp
     {
         private readonly ILogger _logger;
         private readonly ScriptEngineCSharpConfig _scriptEngineCSharpConfig;
-        private static readonly ConcurrentDictionary<string, List<MetadataReference>> _metadataReferences = new();
+        private static List<MetadataReference> _metadataReferences = [];
         /// <summary>
         /// 手动注册dll加载地址（有些配置文件不好描述的，可以根据程序运行时动态获取程序集地址）
         /// </summary>
@@ -68,7 +68,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
         }
 
-        public IDictionary<string, List<MetadataReference>> GetMetaDataReferences()
+        public List<MetadataReference> GetMetaDataReferences()
         {
             return _metadataReferences;
         }
@@ -98,9 +98,10 @@ namespace Bamboo.ScriptEngine.CSharp
                 );
 
             //添加到引用
-            var metaDataReferenceList = dllNameLocationsDic.Select(item => (MetadataReference)MetadataReference.CreateFromFile(item.Value)).ToList();
-
-            _metadataReferences.TryAdd(_scriptEngineCSharpConfig.AppName, metaDataReferenceList);
+            foreach (var item in dllNameLocationsDic)
+            {
+                _metadataReferences.Add(MetadataReference.CreateFromFile(item.Value));
+            }
 
             _logger.LogInformation($"bamboo script engine csharp compnent -> dll load finished! load details：{JsonConvert.SerializeObject(loadLocations)}");
         }

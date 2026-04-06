@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Bamboo.ScriptEngine.CSharp\Bamboo.ScriptEngine.CSharp.csproj" />
+    <ProjectReference Include="..\Bamboo.ScriptEngine.SandboxRunner\Bamboo.ScriptEngine.SandboxRunner.csproj" />
   </ItemGroup>
 
 </Project>

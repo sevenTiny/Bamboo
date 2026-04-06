@@ -1,5 +1,4 @@
 ﻿using Bamboo.ScriptEngine;
-using Bamboo.ScriptEngine.Core;
 using Bamboo.ScriptEngine.CSharp;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
@@ -7,10 +6,10 @@ using Xunit;
 
 namespace Test.Bamboo.ScriptEngine.CSharp
 {
-    public class Demo
+    public class DemoTest
     {
         /// <summary>
-        /// 执行受信任的脚本 execute trasted code
+        /// Execute Sample Script
         /// </summary>
         [Fact]
         public void Execute()
@@ -23,16 +22,15 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             public class Test
             {
-                public int GetA(int a)
+                public int GetValue(int a)
                 {
                     return a;
                 }
             }
             ";
             script.ClassFullName = "Test";
-            script.FunctionName = "GetA";
+            script.FunctionName = "GetValue";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
             IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
@@ -41,43 +39,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         }
 
         /// <summary>
-        /// 执行不受信任的脚本 execute untrasted code
-        /// </summary>
-        [Fact]
-        public void ExecuteUntrastedCode()
-        {
-            DynamicScript script = new DynamicScript();
-            script.Language = DynamicScriptLanguage.CSharp;
-            script.Script =
-            @"
-            using System;
-
-            public class Test
-            {
-                public int GetC(int a)
-                {
-                    int c = 0;
-                    for(; ; )
-                    {
-                           c += 1;
-                    }
-                    return c;
-                }
-            }
-            ";
-            script.ClassFullName = "Test";
-            script.FunctionName = "GetC";
-            script.Parameters = new object[] { 1 };
-            script.IsExecutionInSandbox = true;                    //沙箱环境执行
-            script.ExecutionInSandboxMillisecondsTimeout = 100;     //沙箱环境执行超时时间
-
-            IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
-
-            Assert.Throws<ScriptEngineException>(() => scriptEngineProvider.Execute<int>(script));
-        }
-
-        /// <summary>
-        /// 执行静态方法脚本
+        /// Execute Sample Script
         /// </summary>
         [Fact]
         public void ExecuteStaticMethod()
@@ -90,16 +52,15 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             public class Test
             {
-                public static int GetA(int a)
+                public static int GetValue(int a)
                 {
                     return a;
                 }
             }
             ";
             script.ClassFullName = "Test";
-            script.FunctionName = "GetA";
+            script.FunctionName = "GetValue";
             script.Parameters = new object[] { 111 };
-            script.IsExecutionInSandbox = false;
 
             IScriptEngine scriptEngineProvider = ServiceProviderBuilder.Build().GetRequiredService<ICSharpScriptEngine>();
             var result = scriptEngineProvider.Execute<int>(script);
@@ -108,7 +69,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
         }
 
         /// <summary>
-        /// 执行静态方法脚本
+        /// Execute Sample Script with Async Method
         /// </summary>
         [Fact]
         public async Task ExecuteAsyncMethod()
@@ -122,7 +83,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
 
             public class Test
             {
-                public static async Task<int> GetAAsync(int a)
+                public static async Task<int> GetValueAsync(int a)
                 {
                     await Task.Delay(100);
                     return a;
@@ -130,7 +91,7 @@ namespace Test.Bamboo.ScriptEngine.CSharp
             }
             ";
             script.ClassFullName = "Test";
-            script.FunctionName = "GetAAsync";
+            script.FunctionName = "GetValueAsync";
             script.Parameters = new object[] { 111 };
             script.IsExecutionInSandbox = false;
 
