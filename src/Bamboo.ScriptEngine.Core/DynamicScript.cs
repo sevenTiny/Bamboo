@@ -38,8 +38,8 @@
         /// </summary>
         public bool IsExecutionInSandbox { get; set; } = false;
         /// <summary>
-        /// 脚本执行的超时时间（-1表示不限制，默认-1）
+        /// 沙箱脚本执行的超时时间（沙箱模式必须设置）
         /// </summary>
-        public int SandboxExecutionTimeoutMilliseconds { get; set; } = -1;
+        public int SandboxExecutionTimeoutMilliseconds { get; set; }
     }
 }
