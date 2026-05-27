@@ -79,7 +79,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Script objectId:{0},appName:{1},functionName:{2},errorMsg:{3}", null, _scriptEngineCSharpConfig.AppName, dynamicScript.FunctionName, ex.Message));
+                _logger.LogDebug(ex, string.Format("Script Key:{0},appName:{1},functionName:{2},errorMsg:{3}", scriptHash, _scriptEngineCSharpConfig.AppName, dynamicScript.FunctionName, ex.Message));
                 throw;
             }
         }
@@ -132,7 +132,7 @@ namespace Bamboo.ScriptEngine.CSharp
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, string.Format("Script objectId:{0},appName:{1},functionName:{2},errorMsg:{3}", null, _scriptEngineCSharpConfig.AppName, dynamicScript.FunctionName, ex.Message));
+                _logger.LogDebug(ex, string.Format("Script Key:{0},appName:{1},functionName:{2},errorMsg:{3}", scriptHash, _scriptEngineCSharpConfig.AppName, dynamicScript.FunctionName, ex.Message));
                 throw;
             }
         }
