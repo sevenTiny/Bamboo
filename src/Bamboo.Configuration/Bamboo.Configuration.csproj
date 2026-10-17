@@ -16,10 +16,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Bamboo.Logging" Version="1.0.10" />
-		<PackageReference Include="LibGit2Sharp" Version="0.30.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="LibGit2Sharp" Version="0.32.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Xml" Version="10.0.13" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.13" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 	</ItemGroup>
 </Project>

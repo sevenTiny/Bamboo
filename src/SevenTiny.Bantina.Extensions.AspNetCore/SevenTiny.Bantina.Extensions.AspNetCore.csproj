@@ -1,19 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+	  <TargetFramework>net8.0</TargetFramework>
 	  <Copyright>7tiny</Copyright>
 	  <Company>www.7tiny.com</Company>
 	  <PackageLicenseUrl>https://github.com/sevenTiny/Bamboo/blob/master/LICENSE</PackageLicenseUrl>
 	  <PackageProjectUrl>https://github.com/sevenTiny/Bamboo</PackageProjectUrl>
 	  <PackageIconUrl>https://raw.githubusercontent.com/sevenTiny/src/master/images/7tiny.ico</PackageIconUrl>
 	  <RepositoryUrl>https://github.com/sevenTiny/Bamboo</RepositoryUrl>
+	  <RepositoryType>.net core</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="SevenTiny.Bantina" Version="1.0.62" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.3.13" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="SevenTiny.Bantina" Version="1.0.79" />
   </ItemGroup>
 
 </Project>
