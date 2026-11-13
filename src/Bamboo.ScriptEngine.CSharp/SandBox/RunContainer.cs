@@ -1,6 +1,7 @@
 ﻿using SevenTiny.Bantina.Validation;
 using System;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace Bamboo.ScriptEngine.CSharp.SandBox
@@ -66,7 +67,11 @@ namespace Bamboo.ScriptEngine.CSharp.SandBox
             }
             catch (TargetInvocationException tie) when (tie.InnerException != null)
             {
-                throw tie.InnerException;
+                // re-throw with ExceptionDispatchInfo to preserve the original stack trace,
+                // otherwise the script frames would be dropped by `throw tie.InnerException;`
+                // and error line numbers resolved from the script PDB would be lost
+                ExceptionDispatchInfo.Capture(tie.InnerException).Throw();
+                return default; // unreachable: Throw() always throws
             }
         }
 
