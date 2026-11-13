@@ -4,7 +4,7 @@
  * Author: 7tiny
  * Address: Earth
  * Create: 2018-02-15 17:40:42
- * Modify: 2025年6月16日 22点39分
+ * Modify: 2026年11月13日
  * E-mail: dong@7tiny.com | sevenTiny@foxmail.com 
  * GitHub: https://github.com/sevenTiny 
  * Personal web site: http://www.7tiny.com 
@@ -65,11 +65,13 @@ namespace SevenTiny.Bantina.Validation
         }
         public static bool IsMobilePhone(string data)
         {
-            return Regex.IsMatch(data, @"^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$");
+            // All current Chinese mainland mobile segments start with 1[3-9]
+            return Regex.IsMatch(data, @"^1[3-9]\d{9}$");
         }
         public static bool IsTelPhone(string data)
         {
-            return Regex.IsMatch(data, @"^(\(\d{3,4}-)|\d{3.4}-)?\d{7,8}$");
+            // Supports: 010-12345678, 0755-1234567, (010)12345678, and bare 7-8 digit numbers
+            return Regex.IsMatch(data, @"^(\(\d{3,4}\)|\d{3,4}-)?\d{7,8}$");
         }
         public static bool IsURL(string data)
         {
@@ -81,7 +83,8 @@ namespace SevenTiny.Bantina.Validation
         }
         public static bool IsID_Card(string data)
         {
-            return Regex.IsMatch(data, @"^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$");
+            // 15 digits, or 18 digits with the last one possibly being X/x
+            return Regex.IsMatch(data, @"^(\d{15}|\d{17}[\dXx])$");
         }
         //(字母开头，允许5-16字节，允许字母数字下划线)
         public static bool IsAccountName(string data)
@@ -111,19 +114,20 @@ namespace SevenTiny.Bantina.Validation
         }
         public static bool IsDataFormat(string data)
         {
-            return Regex.IsMatch(data, @"^\d{4}-\d{1,2}-\d{1,2}");
+            return Regex.IsMatch(data, @"^\d{4}-\d{1,2}-\d{1,2}$");
         }
         public static bool IsChineseCharactor(string data)
         {
-            return Regex.IsMatch(data, @"[\u4e00-\u9fa5]");
+            // Full match: the entire value must be Chinese characters
+            return Regex.IsMatch(data, @"^[\u4e00-\u9fa5]+$");
         }
         public static bool IsQQ_Number(string data)
         {
-            return Regex.IsMatch(data, @"[1-9][0-9]{4,}");
+            return Regex.IsMatch(data, @"^[1-9][0-9]{4,}$");
         }
         public static bool IsPostalCode(string data)
         {
-            return Regex.IsMatch(data, @"[1-9]\d{5}(?!\d)");
+            return Regex.IsMatch(data, @"^[1-9]\d{5}(?!\d)$");
         }
     }
 }
